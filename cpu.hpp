@@ -31,12 +31,12 @@ class CPU {
     uint8_t pc; // Program Counter
 
     // #### FUNCTION DECLARATIONS ####
+    // Jai
+
+    // Archit
+
+    // Ella
+
+    // Rishi
+    
 };
-
-// Jai
-
-// Archit
-
-// Ella
-
-// Rishi
