@@ -3,6 +3,16 @@
  * All operation emulation functions should be defined here.
  */
 
+ // DECODE
+ // Jai
+
+ // Archit
+
+ // Ella
+
+ // Rishi
+
+ // EXECUTE
  // Jai
 
  // Archit
