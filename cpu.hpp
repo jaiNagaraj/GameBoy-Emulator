@@ -14,6 +14,12 @@ const int FLAGS_REGISTER = 5;
 const int H_REGISTER = 6;
 const int L_REGISTER = 7;
 
+// flag bit positions
+const int Z_FLAG_BIT = 7;
+const int N_FLAG_BIT = 6;
+const int H_FLAG_BIT = 5;
+const int C_FLAG_BIT = 4;
+
 enum INSTRUCTION {
     // Jai
 
@@ -76,11 +82,21 @@ enum INSTRUCTION {
 };
 
 class CPU {
+private:
     uint8_t regs[8]; // 0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: H, 7: L
     uint8_t sp; // Stack Pointer
     uint8_t pc; // Program Counter
 
     // #### FUNCTION DECLARATIONS ####
+    //Helper functions
+    // set a specific flag bit
+    void set_flag(int flag_bit, bool value);
+    // get a specific flag bit
+    bool get_flag(int flag_bit);
+    uint16_t get_hl();
+
+public:
+    // Decode & execute declarations
     // Jai
 
     // Archit
