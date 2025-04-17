@@ -18,7 +18,33 @@ enum INSTRUCTION {
     // Jai
 
     // Archit
-
+    ADD_46,
+    ADD_47,
+    ADC_48,
+    ADC_49,
+    ADC_50,
+    SUB_50,
+    SUB_51,
+    SUB_52,
+    SUB_53,
+    SBC_54,
+    SBC_55,
+    SBC_56,
+    CP_57,
+    CP_58,
+    CP_59,
+    INC_60,
+    INC_61,
+    DEC_62,
+    DEC_63,
+    AND_64,
+    AND_65,
+    AND_66,
+    OR_67,
+    OR_68,
+    OR_69,
+    XOR_70,
+    XOR_71,
     // Ella
 
     // Rishi
@@ -58,7 +84,61 @@ class CPU {
     // Jai
 
     // Archit
+    bool decode_ADD_46(uint8_t opcode);
+    bool decode_ADD_47(uint8_t opcode);
+    bool decode_ADC_48(uint8_t opcode);
+    bool decode_ADC_49(uint8_t opcode);
+    bool decode_ADC_50(uint8_t opcode);
+    bool decode_SUB_50(uint8_t opcode);
+    bool decode_SUB_51(uint8_t opcode);
+    bool decode_SUB_52(uint8_t opcode);
+    bool decode_SUB_53(uint8_t opcode);
+    bool decode_SBC_54(uint8_t opcode);
+    bool decode_SBC_55(uint8_t opcode);
+    bool decode_SBC_56(uint8_t opcode);
+    bool decode_CP_57(uint8_t opcode);
+    bool decode_CP_58(uint8_t opcode);
+    bool decode_CP_59(uint8_t opcode);
+    bool decode_INC_60(uint8_t opcode);
+    bool decode_INC_61(uint8_t opcode);
+    bool decode_DEC_62(uint8_t opcode);
+    bool decode_DEC_63(uint8_t opcode);
+    bool decode_AND_64(uint8_t opcode);
+    bool decode_AND_65(uint8_t opcode);
+    bool decode_AND_66(uint8_t opcode);
+    bool decode_OR_67(uint8_t opcode);
+    bool decode_OR_68(uint8_t opcode);
+    bool decode_OR_69(uint8_t opcode);
+    bool decode_XOR_70(uint8_t opcode);
+    bool decode_XOR_71(uint8_t opcode);
 
+    void execute_ADD_46(uint8_t opcode);
+    void execute_ADD_47(uint8_t opcode);
+    void execute_ADC_48(uint8_t opcode);
+    void execute_ADC_49(uint8_t opcode);
+    void execute_ADC_50(uint8_t opcode);
+    void execute_SUB_50(uint8_t opcode);
+    void execute_SUB_51(uint8_t opcode);
+    void execute_SUB_52(uint8_t opcode);
+    void execute_SUB_53(uint8_t opcode);
+    void execute_SBC_54(uint8_t opcode);
+    void execute_SBC_55(uint8_t opcode);
+    void execute_SBC_56(uint8_t opcode);
+    void execute_CP_57(uint8_t opcode);
+    void execute_CP_58(uint8_t opcode);
+    void execute_CP_59(uint8_t opcode);
+    void execute_INC_60(uint8_t opcode);
+    void execute_INC_61(uint8_t opcode);
+    void execute_DEC_62(uint8_t opcode);
+    void execute_DEC_63(uint8_t opcode);
+    void execute_AND_64(uint8_t opcode);
+    void execute_AND_65(uint8_t opcode);
+    void execute_AND_66(uint8_t opcode);
+    void execute_OR_67(uint8_t opcode);
+    void execute_OR_68(uint8_t opcode);
+    void execute_OR_69(uint8_t opcode);
+    void execute_XOR_70(uint8_t opcode);
+    void execute_XOR_71(uint8_t opcode);
     // Ella
 
     // Rishi
