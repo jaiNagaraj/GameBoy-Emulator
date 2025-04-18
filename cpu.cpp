@@ -34,11 +34,11 @@ uint16_t CPU::get_hl() {
     return (static_cast<uint16_t>(regs[H_REGISTER]) << 8) | regs[L_REGISTER];
 }
 
- // DECODE
- // Jai
+// DECODE
+// Jai
 
- // Archit
- bool CPU::decode_ADD_46(uint8_t opcode) {
+// Archit
+bool CPU::decode_ADD_46(uint8_t opcode) {
     // ADD A, (HL) - Opcode 0b10000110/0x86
     return opcode == 0x86;
 }
@@ -48,50 +48,167 @@ bool CPU::decode_ADD_47(uint8_t opcode) {
     return opcode == 0xC6;
 }
 
- // Ella
+// Ella
 
- // Rishi
- bool CPU::decode_SWAP_98(uint8_t opcode) {
-    bool outcome = (opcode && 0b11111000) == 0b00110000;
-
-    return outcome;
-}
-
-bool CPU::decode_SWAP_99(uint8_t opcode) {
-    bool outcome = opcode == 0x36;
+// Rishi
+bool CPU::decode_SWAP_98(uint32_t instruction) {
+    bool outcome = (instruction & 0b11111000) == 0b00110000;
 
     return outcome;
 }
 
-bool CPU::decode_SRL_100(uint8_t opcode) {
-    bool outcome = (opcode && 0b11111000) == 0b00111000;
+bool CPU::decode_SWAP_99(uint32_t instruction) {
+    bool outcome = instruction == 0x36;
 
     return outcome;
 }
 
-bool CPU::decode_SRL_101(uint8_t opcode) {
-    bool outcome = opcode == 0x3E;
+bool CPU::decode_SRL_100(uint32_t instruction) {
+    bool outcome = (instruction & 0b11111000) == 0b00111000;
 
     return outcome;
 }
 
-bool CPU::decode_BIT_102(uint8_t opcode) {
-    bool outcome = (opcode && 0b11000000) == 0b01000000;
+bool CPU::decode_SRL_101(uint32_t instruction) {
+    bool outcome = instruction == 0x3E;
 
     return outcome;
 }
 
-bool CPU::decode_BIT_103(uint8_t opcode) {
-    bool outcome = (opcode && 0b11000111) == 0b01000110;
+bool CPU::decode_BIT_102(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000000) == 0b01000000;
 
     return outcome;
 }
 
- // EXECUTE
- // Jai
+bool CPU::decode_BIT_103(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000111) == 0b01000110;
 
- // Archit
- void CPU::execute_ADD_46(uint8_t opcode) {
+    return outcome;
+}
+
+bool CPU::decode_RES_104(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000000) == 0b10000000;
+
+    return outcome;
+}
+
+bool CPU::decode_RES_105(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000111) == 0b10000110;
+
+    return outcome;
+}
+
+bool CPU::decode_SET_106(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000000) == 0b11000000;
+
+    return outcome;
+}
+
+bool CPU::decode_SET_107(uint32_t instruction) {
+    bool outcome = (instruction & 0b11000111) == 0b11000110;
+
+    return outcome;
+}
+
+bool CPU::decode_JP_109(uint32_t instruction) {
+    bool outcome = instruction == 0xC3;
+
+    return outcome;
+}
+
+bool CPU::decode_JP_110(uint32_t instruction) {
+    bool outcome = instruction == 0xE9;
+
+    return outcome;
+}
+
+bool CPU::decode_JP_111(uint32_t instruction) {
+    bool outcome = (instruction & 0b11100111) == 11000010;
+
+    return outcome;
+}
+
+bool CPU::decode_JR_113(uint32_t instruction) {
+    bool outcome = instruction == 0x18;
+
+    return outcome;
+}
+
+bool CPU::decode_JR_114(uint32_t instruction) {
+    bool outcome = (instruction & 0b11100111) == 0b00100000;
+
+    return outcome;
+}
+
+bool CPU::decode_CALL_116(uint32_t instruction) {
+    bool outcome = instruction == 0xCD;
+
+    return outcome;
+}
+
+bool CPU::decode_CALL_117(uint32_t instruction) {
+    bool outcome = (instruction & 0b11100111) == 0b11000100;
+
+    return outcome;
+}
+
+bool CPU::decode_RET_119(uint32_t instruction) {
+    bool outcome = instruction == 0xC9;
+
+    return outcome;
+}
+
+bool CPU::decode_RET_120(uint32_t instruction) {
+    bool outcome = (instruction & 0b11100111) == 0b11000000;
+
+    return outcome;
+}
+
+bool CPU::decode_RETI_121(uint32_t instruction) {
+    bool outcome = instruction == 0xD9;
+
+    return outcome;
+}
+
+bool CPU::decode_RST_122(uint32_t instruction) {
+    bool outcome = (instruction & 11000111) == 0b11000111;
+
+    return outcome;
+}
+
+// DNE in gekkio documentation
+/*
+bool CPU::decode_HALT_123(uint32_t instruction) {
+    bool outcome = [instruction];
+
+    return outcome;
+}
+
+bool CPU::decode_STOP_123(uint32_t instruction) {
+    bool outcome = [instruction];
+
+    return outcome;
+}
+*/
+
+bool CPU::decode_DI_123(uint32_t instruction) {
+    bool outcome = instruction == 0xF3;
+
+    return outcome;
+}
+
+bool CPU::decode_EI_124(uint32_t instruction) {
+    bool outcome = instruction == 0xFB;
+
+    return outcome;
+}
+
+// EXECUTE
+// Jai
+
+// Archit
+void CPU::execute_ADD_46(uint8_t opcode) {
     // ADD A, (HL) - Opcode 0b10000110/0x86
     uint16_t addr = get_hl();
     // How to read from memory?
@@ -131,6 +248,6 @@ void CPU::execute_ADD_47(uint8_t opcode) {
     pc++;
 }
 
- // Ella
+// Ella
 
- // Rishi
+// Rishi
