@@ -55,6 +55,9 @@ bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
     bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
                    ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00110000); // opcode
 
+    if (outcome)
+        CPU::execute_SWAP_98(instruction);
+
     return outcome;
 }
 
@@ -261,3 +264,31 @@ void CPU::execute_ADD_47(uint8_t opcode) {
 // Ella
 
 // Rishi
+void CPU::execute_SWAP_98(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 8) & 0xFF;
+    uint8_t reg = opcode & 0b00000111;
+
+    uint8_t cur_data;
+    // Retrieve value
+    if (reg != 6) {
+        cur_data = regs[reg];
+    } else {
+        cur_data = get_hl(); 
+    }
+    // Swap nibbles
+    uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
+    // Store value
+    if (reg != 6) {
+        regs[reg] = new_data;
+    } else {
+        //mem[0xHL] = new_data;
+    }
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, new_data == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, false);
+
+    pc += 2; // 2-byte instruction
+}

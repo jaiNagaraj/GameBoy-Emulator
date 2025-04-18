@@ -5,14 +5,14 @@
 
 #pragma once
 #include <stdint.h>
-const int A_REGISTER = 0;
-const int B_REGISTER = 1;
-const int C_REGISTER = 2;
-const int D_REGISTER = 3;
-const int E_REGISTER = 4;
-const int FLAGS_REGISTER = 5;
-const int H_REGISTER = 6;
-const int L_REGISTER = 7;
+const int A_REGISTER = 7;
+const int B_REGISTER = 0;
+const int C_REGISTER = 1;
+const int D_REGISTER = 2;
+const int E_REGISTER = 3;
+const int FLAGS_REGISTER = 6;
+const int H_REGISTER = 4;
+const int L_REGISTER = 5;
 
 // flag bit positions
 const int Z_FLAG_BIT = 7;
@@ -83,9 +83,9 @@ enum INSTRUCTION {
 
 class CPU {
 private:
-    uint8_t regs[8]; // 0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: H, 7: L
-    uint8_t sp; // Stack Pointer
-    uint8_t pc; // Program Counter
+    uint8_t regs[8]; // 0: B, 1: C, 2: D, 3: E, 4: H, 5: L, 6: F, 7: A
+    uint16_t sp; // Stack Pointer
+    uint16_t pc; // Program Counter
 
     // #### FUNCTION DECLARATIONS ####
     //Helper functions
