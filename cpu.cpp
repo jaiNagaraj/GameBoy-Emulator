@@ -51,128 +51,138 @@ bool CPU::decode_ADD_47(uint8_t opcode) {
 // Ella
 
 // Rishi
-bool CPU::decode_SWAP_98(uint32_t instruction) {
-    bool outcome = (instruction & 0b11111000) == 0b00110000;
+bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00110000); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_SWAP_99(uint32_t instruction) {
-    bool outcome = instruction == 0x36;
+bool CPU::decode_SWAP_99(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   (((instruction >> 8) & 0xFF) == 0x36); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_SRL_100(uint32_t instruction) {
-    bool outcome = (instruction & 0b11111000) == 0b00111000;
+bool CPU::decode_SRL_100(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00111000); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_SRL_101(uint32_t instruction) {
-    bool outcome = instruction == 0x3E;
+bool CPU::decode_SRL_101(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   (((instruction >> 8) & 0xFF) == 0x3E); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_BIT_102(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000000) == 0b01000000;
+bool CPU::decode_BIT_102(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b01000000); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_BIT_103(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000111) == 0b01000110;
+bool CPU::decode_BIT_103(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b01000110); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RES_104(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000000) == 0b10000000;
+bool CPU::decode_RES_104(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b10000000); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RES_105(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000111) == 0b10000110;
+bool CPU::decode_RES_105(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b10000110); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_SET_106(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000000) == 0b11000000;
+bool CPU::decode_SET_106(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b11000000); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_SET_107(uint32_t instruction) {
-    bool outcome = (instruction & 0b11000111) == 0b11000110;
+bool CPU::decode_SET_107(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b11000110); // opcode
 
     return outcome;
 }
 
-bool CPU::decode_JP_109(uint32_t instruction) {
-    bool outcome = instruction == 0xC3;
+bool CPU::decode_JP_109(uint32_t instruction) { // 3-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xC3; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_JP_110(uint32_t instruction) {
-    bool outcome = instruction == 0xE9;
+bool CPU::decode_JP_110(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xE9; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_JP_111(uint32_t instruction) {
-    bool outcome = (instruction & 0b11100111) == 11000010;
+bool CPU::decode_JP_111(uint32_t instruction) { // 3-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 11000010; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_JR_113(uint32_t instruction) {
-    bool outcome = instruction == 0x18;
+bool CPU::decode_JR_113(uint32_t instruction) { // 2-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0x18; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_JR_114(uint32_t instruction) {
-    bool outcome = (instruction & 0b11100111) == 0b00100000;
+bool CPU::decode_JR_114(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b00100000; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_CALL_116(uint32_t instruction) {
-    bool outcome = instruction == 0xCD;
+bool CPU::decode_CALL_116(uint32_t instruction) { // 3-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xCD; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_CALL_117(uint32_t instruction) {
-    bool outcome = (instruction & 0b11100111) == 0b11000100;
+bool CPU::decode_CALL_117(uint32_t instruction) { // 3-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b11000100; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RET_119(uint32_t instruction) {
-    bool outcome = instruction == 0xC9;
+bool CPU::decode_RET_119(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xC9; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RET_120(uint32_t instruction) {
-    bool outcome = (instruction & 0b11100111) == 0b11000000;
+bool CPU::decode_RET_120(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b11000000; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RETI_121(uint32_t instruction) {
-    bool outcome = instruction == 0xD9;
+bool CPU::decode_RETI_121(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xD9; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_RST_122(uint32_t instruction) {
-    bool outcome = (instruction & 11000111) == 0b11000111;
+bool CPU::decode_RST_122(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 11000111) == 0b11000111; // opcode
 
     return outcome;
 }
@@ -192,14 +202,14 @@ bool CPU::decode_STOP_123(uint32_t instruction) {
 }
 */
 
-bool CPU::decode_DI_123(uint32_t instruction) {
-    bool outcome = instruction == 0xF3;
+bool CPU::decode_DI_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xF3; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_EI_124(uint32_t instruction) {
-    bool outcome = instruction == 0xFB;
+bool CPU::decode_EI_124(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xFB; // opcode
 
     return outcome;
 }
