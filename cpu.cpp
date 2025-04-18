@@ -3,9 +3,19 @@
  * All operation emulation functions should be defined here.
  */
 
- #pragma once
- #include <stdint.h>
- #include "cpu.hpp"
+#pragma once
+#include "cpu.hpp"
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+CPU::CPU() {
+    // Register initialization
+    for (size_t i = 0; i < 8; i++)
+        regs[i] = 0;
+    sp = 0;
+    pc = 0;
+}
 
 // Helper function to set/clear a specific flag bit
 void CPU::set_flag(int flag_bit, bool value) {
@@ -24,11 +34,11 @@ uint16_t CPU::get_hl() {
     return (static_cast<uint16_t>(regs[H_REGISTER]) << 8) | regs[L_REGISTER];
 }
 
- // DECODE
- // Jai
+// DECODE
+// Jai
 
- // Archit
- bool CPU::decode_ADD_46(uint8_t opcode) {
+// Archit
+bool CPU::decode_ADD_46(uint8_t opcode) {
     // ADD A, (HL) - Opcode 0b10000110/0x86
     return opcode == 0x86;
 }
@@ -38,15 +48,177 @@ bool CPU::decode_ADD_47(uint8_t opcode) {
     return opcode == 0xC6;
 }
 
- // Ella
+// Ella
 
- // Rishi
+// Rishi
+bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00110000); // opcode
 
- // EXECUTE
- // Jai
+    return outcome;
+}
 
- // Archit
- void CPU::execute_ADD_46(uint8_t opcode) {
+bool CPU::decode_SWAP_99(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   (((instruction >> 8) & 0xFF) == 0x36); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_SRL_100(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00111000); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_SRL_101(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   (((instruction >> 8) & 0xFF) == 0x3E); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_BIT_102(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b01000000); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_BIT_103(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b01000110); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RES_104(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b10000000); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RES_105(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b10000110); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_SET_106(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000000) == 0b11000000); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_SET_107(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+                   ((((instruction >> 8) & 0xFF) & 0b11000111) == 0b11000110); // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_JP_109(uint32_t instruction) { // 3-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xC3; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_JP_110(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xE9; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_JP_111(uint32_t instruction) { // 3-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 11000010; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_JR_113(uint32_t instruction) { // 2-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0x18; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_JR_114(uint32_t instruction) { // 2-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b00100000; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_CALL_116(uint32_t instruction) { // 3-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xCD; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_CALL_117(uint32_t instruction) { // 3-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b11000100; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RET_119(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xC9; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RET_120(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b11000000; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RETI_121(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xD9; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_RST_122(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) & 11000111) == 0b11000111; // opcode
+
+    return outcome;
+}
+
+// DNE in gekkio documentation
+/*
+bool CPU::decode_HALT_123(uint32_t instruction) {
+    bool outcome = [instruction];
+
+    return outcome;
+}
+
+bool CPU::decode_STOP_123(uint32_t instruction) {
+    bool outcome = [instruction];
+
+    return outcome;
+}
+*/
+
+bool CPU::decode_DI_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xF3; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_EI_124(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0xFB; // opcode
+
+    return outcome;
+}
+
+// EXECUTE
+// Jai
+
+// Archit
+void CPU::execute_ADD_46(uint8_t opcode) {
     // ADD A, (HL) - Opcode 0b10000110/0x86
     uint16_t addr = get_hl();
     // How to read from memory?
@@ -86,6 +258,6 @@ void CPU::execute_ADD_47(uint8_t opcode) {
     pc++;
 }
 
- // Ella
+// Ella
 
- // Rishi
+// Rishi
