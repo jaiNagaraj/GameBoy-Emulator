@@ -278,21 +278,12 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
     uint8_t opcode = (instruction >> 8) & 0xFF;
     uint8_t reg = opcode & 0b00000111;
 
-    uint8_t cur_data;
     // Retrieve value
-    if (reg != 6) {
-        cur_data = regs[reg];
-    } else {
-        cur_data = (*ram).read_mem(get_hl());
-    }
+    uint8_t cur_data = regs[reg];
     // Swap nibbles
     uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
     // Store value
-    if (reg != 6) {
-        regs[reg] = new_data;
-    } else {
-        (*ram).write_mem(get_hl(), new_data);
-    }
+    regs[reg] = new_data;
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -324,21 +315,12 @@ void CPU::execute_SRL_100(uint32_t instruction) {
     uint8_t opcode = (instruction >> 8) & 0xFF;
     uint8_t reg = opcode & 0b00000111;
 
-    uint8_t cur_data;
     // Retrieve value
-    if (reg != 6) {
-        cur_data = regs[reg];
-    } else {
-        cur_data = (*ram).read_mem(get_hl());
-    }
+    uint8_t cur_data = regs[reg];
     // Shift right
     uint8_t new_data = cur_data >> 1;
     // Store value
-    if (reg != 6) {
-        regs[reg] = new_data;
-    } else {
-        (*ram).write_mem(get_hl(), new_data);
-    }
+    regs[reg] = new_data;
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -371,13 +353,8 @@ void CPU::execute_BIT_102(uint32_t instruction) {
     uint8_t reg = opcode & 0b00000111;
     uint8_t bit = ((opcode >> 3) & 0b00000111);
 
-    uint8_t cur_data;
     // Retrieve value
-    if (reg != 6) {
-        cur_data = regs[reg];
-    } else {
-        cur_data = (*ram).read_mem(get_hl());
-    }
+    uint8_t cur_data = regs[reg];
     // Check bit
     bool val = (cur_data >> bit) & 1;
 
