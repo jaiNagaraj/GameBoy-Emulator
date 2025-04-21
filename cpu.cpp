@@ -62,7 +62,7 @@ void CPU::set_hl(uint16_t val) {
     regs[L_REGISTER] = static_cast<uint8_t>(val & 0xFF);
 }
 
-void CPU::set_hl(uint16_t val) {
+void CPU::set_bc(uint16_t val) {
     regs[B_REGISTER] = static_cast<uint8_t>((val >> 8) & 0xFF);
     regs[C_REGISTER] = static_cast<uint8_t>(val & 0xFF);
 }
