@@ -143,15 +143,16 @@ private:
 
     // #### FUNCTION DECLARATIONS ####
     // Helper functions
-    // Set a specific flag bit
-    void set_flag(int flag_bit, bool value);
     // Get a specific flag bit
     bool get_flag(int flag_bit);
+    // Set a specific flag bit
+    void set_flag(int flag_bit, bool value);
+    // Get a 16-bit register value
     uint16_t get_hl();
     uint16_t get_bc();
     uint16_t get_de();
     uint16_t get_af();
-
+    // Set a 16-bit register value
     void set_hl(uint16_t val);
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
@@ -270,6 +271,7 @@ public:
     void execute_OR_69( uint32_t instruction);
     void execute_XOR_70( uint32_t instruction);
     void execute_XOR_71( uint32_t instruction);
+    
     // Ella
     bool decode_XOR_72(uint32_t instruction);
     bool decode_CCF_73(uint32_t instruction);
@@ -349,6 +351,7 @@ public:
     bool decode_STOP_123(uint32_t instruction);*/
     bool decode_DI_123(uint32_t instruction);
     bool decode_EI_124(uint32_t instruction);
+    bool decode_NOP_125(uint32_t instruction);
 
     void execute_SWAP_98(uint32_t instruction);
     void execute_SWAP_99(uint32_t instruction);
@@ -375,4 +378,5 @@ public:
     void execute_STOP_123(uint32_t instruction);*/
     void execute_DI_123(uint32_t instruction);
     void execute_EI_124(uint32_t instruction);
+    void execute_NOP_125(uint32_t instruction);
 };

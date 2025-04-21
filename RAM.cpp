@@ -78,3 +78,11 @@ uint8_t RAM::read_mem(uint16_t addr) {
 void RAM::write_mem(uint16_t addr, uint8_t data) {
     RAM::mem[addr] = data;
 }
+
+void RAM::push_stack(uint16_t data) {
+    // TODO
+}
+
+uint8_t RAM::pop_stack() {
+    // TODO
+}

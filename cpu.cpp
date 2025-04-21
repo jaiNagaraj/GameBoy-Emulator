@@ -550,9 +550,6 @@ bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
                    ((((instruction >> 8) & 0xFF) & 0b11111000) == 0b00110000) &&
                    (((instruction >> 8) & 0xFF) != 0x36); // opcode
 
-    if (outcome)
-        CPU::execute_SWAP_98(instruction);
-
     return outcome;
 }
 
@@ -712,6 +709,12 @@ bool CPU::decode_DI_123(uint32_t instruction) { // 1-byte instruction
 
 bool CPU::decode_EI_124(uint32_t instruction) { // 1-byte instruction
     bool outcome = ((instruction >> 16) & 0xFF) == 0xFB; // opcode
+
+    return outcome;
+}
+
+bool CPU::decode_NOP_125(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0x00; // opcode
 
     return outcome;
 }
@@ -2500,5 +2503,9 @@ void CPU::execute_DI_123(uint32_t instruction) {
 void CPU::execute_EI_124(uint32_t instruction) {
     ime = true; // Enable interrupts
 
+    pc += 1; // 1-byte instruction
+}
+
+void CPU::execute_NOP_125(uint32_t instruction) {
     pc += 1; // 1-byte instruction
 }

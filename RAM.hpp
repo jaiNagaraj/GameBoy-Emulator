@@ -19,4 +19,8 @@ public:
     // Memory operations
     uint8_t read_mem(uint16_t addr);
     void write_mem(uint16_t addr, uint8_t data);
+
+    // Stack operations
+    void push_stack(uint16_t data);
+    uint8_t pop_stack();
 };
