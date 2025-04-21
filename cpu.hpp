@@ -82,6 +82,7 @@ enum INSTRUCTION {
     OR_69,
     XOR_70,
     XOR_71,
+
     // Ella
 
     // Rishi
@@ -250,6 +251,7 @@ public:
     void execute_OR_69(uint8_t opcode);
     void execute_XOR_70(uint8_t opcode);
     void execute_XOR_71(uint8_t opcode);
+    
     // Ella
 
     // Rishi
