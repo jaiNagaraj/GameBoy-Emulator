@@ -727,6 +727,7 @@ void CPU::execute_LD_20(uint32_t instruction) {
     uint8_t reg1 = (operation & 0b00111000) >> 3;
     uint8_t reg2 = operation & 0b00000111;
     regs[reg1] = regs[reg2];
+    pc++;
 }
 
 void CPU::execute_LD_21(uint32_t instruction) {
@@ -736,6 +737,7 @@ void CPU::execute_LD_21(uint32_t instruction) {
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
 
     regs[reg] = n;
+    pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_22(uint32_t instruction) {
@@ -746,6 +748,7 @@ void CPU::execute_LD_22(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[reg] = data;
+    pc++;
 }
 
 void CPU::execute_LD_23(uint32_t instruction) {
@@ -756,6 +759,7 @@ void CPU::execute_LD_23(uint32_t instruction) {
     uint8_t data = regs[reg]; 
 
    ram->write_mem(addr, data);
+   pc++;
 }
 
 void CPU::execute_LD_24(uint32_t instruction) {
@@ -765,6 +769,7 @@ void CPU::execute_LD_24(uint32_t instruction) {
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
 
     ram->write_mem(addr, n);
+    pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_25(uint32_t instruction) {
@@ -773,6 +778,7 @@ void CPU::execute_LD_25(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
+    pc++;
 }
 
 void CPU::execute_LD_26(uint32_t instruction) {
@@ -781,6 +787,7 @@ void CPU::execute_LD_26(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
+    pc++;
 }
 
 void CPU::execute_LD_27(uint32_t instruction) {
@@ -789,6 +796,7 @@ void CPU::execute_LD_27(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     ram->write_mem(addr, data);
+    pc++;
 }
 
 void CPU::execute_LD_28(uint32_t instruction) {
@@ -797,6 +805,7 @@ void CPU::execute_LD_28(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     ram->write_mem(addr, data);
+    pc++;
 }
 
 void CPU::execute_LD_29(uint32_t instruction) {
@@ -809,6 +818,7 @@ void CPU::execute_LD_29(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
+    pc += 3; // one for instruction, two for imm
 }
 
 void CPU::execute_LD_30(uint32_t instruction) {
@@ -821,6 +831,7 @@ void CPU::execute_LD_30(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     ram->write_mem(addr, data);
+    pc += 3; // one for instruction, two for imm
 }
 
 void CPU::execute_LD_31(uint32_t instruction) {
@@ -831,6 +842,7 @@ void CPU::execute_LD_31(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
+    pc++;
 }
 
 void CPU::execute_LD_32(uint32_t instruction) {
@@ -841,6 +853,7 @@ void CPU::execute_LD_32(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     ram->write_mem(addr, data);
+    pc++;
 }
 
 void CPU::execute_LD_33(uint32_t instruction) {
@@ -851,6 +864,7 @@ void CPU::execute_LD_33(uint32_t instruction) {
     uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
+    pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_34(uint32_t instruction) {
@@ -861,6 +875,7 @@ void CPU::execute_LD_34(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     ram->write_mem(addr, data);
+    pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_35(uint32_t instruction) {
@@ -872,6 +887,7 @@ void CPU::execute_LD_35(uint32_t instruction) {
 
     // Decrement HL after reading
     set_hl(addr - 1);
+    pc++;
 }
 
 void CPU::execute_LD_36(uint32_t instruction) {
@@ -883,6 +899,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
 
     // Decrement HL after writing
     set_hl(addr - 1);
+    pc++;
 }
 
 void CPU::execute_LD_37(uint32_t instruction) {
@@ -894,6 +911,7 @@ void CPU::execute_LD_37(uint32_t instruction) {
 
     // Increment HL after reading
     set_hl(addr + 1);
+    pc++;
 }
 
 void CPU::execute_LD_38(uint32_t instruction) {
@@ -905,6 +923,7 @@ void CPU::execute_LD_38(uint32_t instruction) {
 
     // Increment HL after writing
     set_hl(addr + 1);
+    pc++;
 }
 
 void CPU::execute_LD_39(uint32_t instruction) {
@@ -923,6 +942,7 @@ void CPU::execute_LD_39(uint32_t instruction) {
     } else if (reg == 3) {
         sp = nn; // LD SP, nn
     }
+    pc += 3; // one for instruction, two for imm
 }
 
 void CPU::execute_LD_40(uint32_t instruction) {
@@ -935,11 +955,13 @@ void CPU::execute_LD_40(uint32_t instruction) {
 
     ram->write_mem(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
     ram->write_mem(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
+    pc += 3; // one for instruction, two for imm
 }
 
 void CPU::execute_LD_41(uint32_t instruction) {
     // LD SP, HL
     sp = get_hl();
+    pc++;
 }
 
 void CPU::execute_PUSH_42(uint32_t instruction) {
@@ -961,6 +983,7 @@ void CPU::execute_PUSH_42(uint32_t instruction) {
     ram->write_mem(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
     sp--;
     ram->write_mem(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
+    pc++;
 }
 
 void CPU::execute_POP_43(uint32_t instruction) {
@@ -983,6 +1006,7 @@ void CPU::execute_POP_43(uint32_t instruction) {
     } else {
         set_af(data);
     }
+    pc++;
 }
 
 void CPU::execute_LD_44(uint32_t instruction) {
@@ -996,6 +1020,7 @@ void CPU::execute_LD_44(uint32_t instruction) {
     set_flag(N_FLAG_BIT, false);
     set_flag(H_FLAG_BIT, ((sp & 0x0F) + (e & 0x0F)) > 0x0F); // Half Carry: Check carry from bit 3 to bit 4
     set_flag(C_FLAG_BIT, ((sp & 0xFF) + e) > 0xFF); // Carry: Check carry from bit 7
+    pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_ADD_45(uint32_t instruction) {
@@ -1020,6 +1045,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
 
     // Store result back in A register
     regs[A_REGISTER] = result8;
+    pc++;
 }
 
 
