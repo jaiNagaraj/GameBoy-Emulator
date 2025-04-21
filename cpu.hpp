@@ -351,6 +351,7 @@ public:
     bool decode_STOP_123(uint32_t instruction);*/
     bool decode_DI_123(uint32_t instruction);
     bool decode_EI_124(uint32_t instruction);
+    bool decode_NOP_125(uint32_t instruction);
 
     void execute_SWAP_98(uint32_t instruction);
     void execute_SWAP_99(uint32_t instruction);
@@ -377,4 +378,5 @@ public:
     void execute_STOP_123(uint32_t instruction);*/
     void execute_DI_123(uint32_t instruction);
     void execute_EI_124(uint32_t instruction);
+    void execute_NOP_125(uint32_t instruction);
 };
