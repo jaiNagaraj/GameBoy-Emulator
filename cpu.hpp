@@ -5,6 +5,11 @@
 
 #pragma once
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "RAM.hpp"
+
 const int A_REGISTER = 7;
 const int B_REGISTER = 0;
 const int C_REGISTER = 1;
@@ -83,15 +88,16 @@ enum INSTRUCTION {
 
 class CPU {
 private:
+    RAM *ram;
     uint8_t regs[8]; // 0: B, 1: C, 2: D, 3: E, 4: H, 5: L, 6: F, 7: A
-    uint16_t sp; // Stack Pointer
     uint16_t pc; // Program Counter
+    uint16_t sp; // Stack Pointer
 
     // #### FUNCTION DECLARATIONS ####
-    //Helper functions
-    // set a specific flag bit
+    // Helper functions
+    // Set a specific flag bit
     void set_flag(int flag_bit, bool value);
-    // get a specific flag bit
+    // Get a specific flag bit
     bool get_flag(int flag_bit);
     uint16_t get_hl();
 

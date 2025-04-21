@@ -3,18 +3,23 @@
  * All operation emulation functions should be defined here.
  */
 
-#pragma once
 #include "cpu.hpp"
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 CPU::CPU() {
+    ram = new RAM();
+
+    pc = 0x0100;
+    sp = 0xFFFE;
+
     // Register initialization
-    for (size_t i = 0; i < 8; i++)
-        regs[i] = 0;
-    sp = 0;
-    pc = 0;
+    regs[A_REGISTER] = 0x01;
+    regs[FLAGS_REGISTER] = 0xB0; // Flag initialization
+    regs[B_REGISTER] = 0x00;
+    regs[C_REGISTER] = 0x13;
+    regs[D_REGISTER] = 0x00;
+    regs[E_REGISTER] = 0xD8;
+    regs[H_REGISTER] = 0x01;
+    regs[L_REGISTER] = 0x4D;
 }
 
 // Helper function to set/clear a specific flag bit
@@ -273,7 +278,7 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
     if (reg != 6) {
         cur_data = regs[reg];
     } else {
-        cur_data = get_hl(); 
+        cur_data = (*ram).read_mem(get_hl());
     }
     // Swap nibbles
     uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
@@ -281,7 +286,7 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
     if (reg != 6) {
         regs[reg] = new_data;
     } else {
-        //mem[0xHL] = new_data;
+        (*ram).write_mem(get_hl(), new_data);
     }
 
     // Set flags
