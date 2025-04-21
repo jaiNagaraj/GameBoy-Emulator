@@ -463,7 +463,7 @@ void CPU::execute_LD_22(uint32_t instruction) {
     uint8_t operation = static_cast<uint8_t>((instruction >> 16) & 0xFF);
     uint8_t reg = (operation & 0b00111000) >> 3;
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[reg] = data;
 }
@@ -475,7 +475,7 @@ void CPU::execute_LD_23(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[reg]; 
 
-   write_memory(addr, data);
+   ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_24(uint32_t instruction) {
@@ -484,13 +484,13 @@ void CPU::execute_LD_24(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
 
-    write_memory(addr, n);
+    ram->write_mem(addr, n);
 }
 
 void CPU::execute_LD_25(uint32_t instruction) {
     // LD A, (BC)
     uint16_t addr = get_bc(); // Get the BC register value
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 }
@@ -498,7 +498,7 @@ void CPU::execute_LD_25(uint32_t instruction) {
 void CPU::execute_LD_26(uint32_t instruction) {
     // LD A, (DE)
     uint16_t addr = get_de(); // Get the DE register value
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 }
@@ -508,7 +508,7 @@ void CPU::execute_LD_27(uint32_t instruction) {
     uint16_t addr = get_bc(); // Get the BC register value
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_28(uint32_t instruction) {
@@ -516,7 +516,7 @@ void CPU::execute_LD_28(uint32_t instruction) {
     uint16_t addr = get_de(); // Get the DE register value
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_29(uint32_t instruction) {
@@ -526,7 +526,7 @@ void CPU::execute_LD_29(uint32_t instruction) {
     uint16_t addr = msb;
     addr <<= 8;
     addr |= lsb; // Combine LSB and MSB to form the address
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 }
@@ -540,7 +540,7 @@ void CPU::execute_LD_30(uint32_t instruction) {
     addr |= lsb; // Combine LSB and MSB to form the address
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_31(uint32_t instruction) {
@@ -548,7 +548,7 @@ void CPU::execute_LD_31(uint32_t instruction) {
     uint8_t c_val = regs[C_REGISTER]; // Get the C register value
     uint16_t addr = 0xFF00 | c_val; // Address is 0xFF00 + C
 
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 }
@@ -560,7 +560,7 @@ void CPU::execute_LD_32(uint32_t instruction) {
 
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_33(uint32_t instruction) {
@@ -568,7 +568,7 @@ void CPU::execute_LD_33(uint32_t instruction) {
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
     uint16_t addr = 0xFF00 | n; // Address is 0xFF00 + n
 
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 }
@@ -580,13 +580,13 @@ void CPU::execute_LD_34(uint32_t instruction) {
 
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 }
 
 void CPU::execute_LD_35(uint32_t instruction) {
     // LD A, (HL-)
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 
@@ -599,7 +599,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 
     // Decrement HL after writing
     set_hl(addr - 1);
@@ -608,7 +608,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
 void CPU::execute_LD_37(uint32_t instruction) {
     // LD A, (HL+)
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = read_memory(addr); 
+    uint8_t data = ram->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 
@@ -621,7 +621,7 @@ void CPU::execute_LD_38(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
 
-    write_memory(addr, data);
+    ram->write_mem(addr, data);
 
     // Increment HL after writing
     set_hl(addr + 1);
@@ -653,8 +653,8 @@ void CPU::execute_LD_40(uint32_t instruction) {
     addr <<= 8;
     addr |= lsb; // Combine LSB and MSB to form the address
 
-    write_memory(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
-    write_memory(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
+    ram->write_mem(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
+    ram->write_mem(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
 }
 
 void CPU::execute_LD_41(uint32_t instruction) {
@@ -678,9 +678,9 @@ void CPU::execute_PUSH_42(uint32_t instruction) {
 
     // Push the value of rr onto the stack
     sp--;
-    write_memory(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
+    ram->write_mem(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
     sp--;
-    write_memory(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
+    ram->write_mem(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
 }
 
 void CPU::execute_POP_43(uint32_t instruction) {
@@ -689,8 +689,8 @@ void CPU::execute_POP_43(uint32_t instruction) {
     uint16_t data;
 
     // Pop the value from the stack into rr
-    uint8_t lsb = read_memory(sp++); // Get lsb from stack, increment SP
-    uint8_t msb = read_memory(sp++); // Get msb from stack, increment SP
+    uint8_t lsb = ram->read_mem(sp++); // Get lsb from stack, increment SP
+    uint8_t msb = ram->read_mem(sp++); // Get msb from stack, increment SP
 
     data = (static_cast<uint16_t>(msb) << 8) | lsb; // Combine MSB and LSB
 
@@ -747,7 +747,7 @@ void CPU::execute_ADD_46(uint8_t opcode) {
     // ADD A, (HL) - Opcode 0b10000110/0x86
     uint16_t addr = get_hl();
     // How to read from memory?
-    uint8_t data = 0; // read_memory(addr); 
+    uint8_t data = 0; // ram->read_mem(addr); 
     
     uint8_t a_val = regs[A_REGISTER];
 
@@ -773,7 +773,7 @@ void CPU::execute_ADD_47(uint8_t opcode) {
     // ADD N: Add (immediate) - Opcode 0b11000110/0xC6
     uint16_t addr = get_hl();
     // How to read from memory?
-    uint8_t n = 0; // read_memory(addr); 
+    uint8_t n = 0; // ram->read_mem(addr); 
     
     uint8_t result8;
     uint8_t ca;

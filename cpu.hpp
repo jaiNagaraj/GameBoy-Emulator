@@ -27,6 +27,32 @@ const int C_FLAG_BIT = 4;
 
 enum INSTRUCTION {
     // Jai
+    LD_20,
+    LD_21,
+    LD_22,
+    LD_23,
+    LD_24,
+    LD_25,
+    LD_26,
+    LD_27,
+    LD_28,
+    LD_29,
+    LD_30,
+    LD_31,
+    LD_32,
+    LD_33,
+    LD_34,
+    LD_35,
+    LD_36,
+    LD_37,
+    LD_38,
+    LD_39,
+    LD_40,
+    LD_41,
+    PUSH_42,
+    POP_43,
+    LD_44,
+    ADD_45,
 
     // Archit
     ADD_46,
