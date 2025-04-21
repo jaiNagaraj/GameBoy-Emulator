@@ -290,10 +290,115 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
     }
 
     // Set flags
-    set_flag(Z_FLAG_BIT, new_data == 0);
+    set_flag(Z_FLAG_BIT, !new_data);
     set_flag(N_FLAG_BIT, false);
     set_flag(H_FLAG_BIT, false);
     set_flag(C_FLAG_BIT, false);
 
     pc += 2; // 2-byte instruction
 }
+
+void CPU::execute_SWAP_99(uint32_t instruction) {
+    // Retrieve value
+    uint8_t cur_data = (*ram).read_mem(get_hl());
+    // Swap nibbles
+    uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
+    // Store value
+    (*ram).write_mem(get_hl(), new_data);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, !new_data);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, false);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRL_100(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 8) & 0xFF;
+    uint8_t reg = opcode & 0b00000111;
+
+    uint8_t cur_data;
+    // Retrieve value
+    if (reg != 6) {
+        cur_data = regs[reg];
+    } else {
+        cur_data = (*ram).read_mem(get_hl());
+    }
+    // Shift right
+    uint8_t new_data = cur_data >> 1;
+    // Store value
+    if (reg != 6) {
+        regs[reg] = new_data;
+    } else {
+        (*ram).write_mem(get_hl(), new_data);
+    }
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, !new_data);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, cur_data & 1);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRL_101(uint32_t instruction) {
+    // Retrieve value
+    uint8_t cur_data = (*ram).read_mem(get_hl());
+    // Shift right
+    uint8_t new_data = cur_data >> 1;
+    // Store value
+    (*ram).write_mem(get_hl(), new_data);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, !new_data);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, cur_data & 1);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_BIT_102(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 8) & 0xFF;
+    uint8_t reg = opcode & 0b00000111;
+    uint8_t bit = ((opcode >> 3) & 0b00000111);
+
+    uint8_t cur_data;
+    // Retrieve value
+    if (reg != 6) {
+        cur_data = regs[reg];
+    } else {
+        cur_data = (*ram).read_mem(get_hl());
+    }
+    // Check bit
+    bool val = (cur_data >> bit) & 1;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, !val);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, true);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_BIT_103(uint32_t instruction) {
+    uint8_t opcode = (instruction >> 8) & 0xFF;
+    uint8_t bit = ((opcode >> 3) & 0b00000111);
+    
+    // Retrieve value
+    uint8_t cur_data = (*ram).read_mem(get_hl());
+    // Check bit
+    bool val = (cur_data >> bit) & 1;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, !val);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, true);
+
+    pc += 2; // 2-byte instruction
+}
+
+
