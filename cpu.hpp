@@ -94,10 +94,71 @@ private:
     // get a specific flag bit
     bool get_flag(int flag_bit);
     uint16_t get_hl();
+    uint16_t get_bc();
+    uint16_t get_de();
+    uint16_t get_af();
+
+    void set_hl(uint16_t val);
+    void set_bc(uint16_t val);
+    void set_de(uint16_t val);
+    void set_af(uint16_t val);
 
 public:
     // Decode & execute declarations
     // Jai
+    bool decode_LD_20(uint32_t instruction);
+    bool decode_LD_21(uint32_t instruction);
+    bool decode_LD_22(uint32_t instruction);
+    bool decode_LD_23(uint32_t instruction);
+    bool decode_LD_24(uint32_t instruction);
+    bool decode_LD_25(uint32_t instruction);
+    bool decode_LD_26(uint32_t instruction);
+    bool decode_LD_27(uint32_t instruction);
+    bool decode_LD_28(uint32_t instruction);
+    bool decode_LD_29(uint32_t instruction);
+    bool decode_LD_30(uint32_t instruction);
+    bool decode_LD_31(uint32_t instruction);
+    bool decode_LD_32(uint32_t instruction);
+    bool decode_LD_33(uint32_t instruction);
+    bool decode_LD_34(uint32_t instruction);
+    bool decode_LD_35(uint32_t instruction);
+    bool decode_LD_36(uint32_t instruction);
+    bool decode_LD_37(uint32_t instruction);
+    bool decode_LD_38(uint32_t instruction);
+    bool decode_LD_39(uint32_t instruction);
+    bool decode_LD_40(uint32_t instruction);
+    bool decode_LD_41(uint32_t instruction);
+    bool decode_PUSH_42(uint32_t instruction);
+    bool decode_POP_43(uint32_t instruction);
+    bool decode_LD_44(uint32_t instruction);
+    bool decode_ADD_45(uint32_t instruction);
+
+    void execute_LD_20(uint32_t instruction);
+    void execute_LD_21(uint32_t instruction);
+    void execute_LD_22(uint32_t instruction);
+    void execute_LD_23(uint32_t instruction);
+    void execute_LD_24(uint32_t instruction);
+    void execute_LD_25(uint32_t instruction);
+    void execute_LD_26(uint32_t instruction);
+    void execute_LD_27(uint32_t instruction);
+    void execute_LD_28(uint32_t instruction);
+    void execute_LD_29(uint32_t instruction);
+    void execute_LD_30(uint32_t instruction);
+    void execute_LD_31(uint32_t instruction);
+    void execute_LD_32(uint32_t instruction);
+    void execute_LD_33(uint32_t instruction);
+    void execute_LD_34(uint32_t instruction);
+    void execute_LD_35(uint32_t instruction);
+    void execute_LD_36(uint32_t instruction);
+    void execute_LD_37(uint32_t instruction);
+    void execute_LD_38(uint32_t instruction);
+    void execute_LD_39(uint32_t instruction);
+    void execute_LD_40(uint32_t instruction);
+    void execute_LD_41(uint32_t instruction);
+    void execute_PUSH_42(uint32_t instruction);
+    void execute_POP_43(uint32_t instruction);
+    void execute_LD_44(uint32_t instruction);
+    void execute_ADD_45(uint32_t instruction);
 
     // Archit
     bool decode_ADD_46(uint8_t opcode);
