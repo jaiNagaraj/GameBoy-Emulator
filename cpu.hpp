@@ -122,15 +122,16 @@ private:
 
     // #### FUNCTION DECLARATIONS ####
     // Helper functions
-    // Set a specific flag bit
-    void set_flag(int flag_bit, bool value);
     // Get a specific flag bit
     bool get_flag(int flag_bit);
+    // Set a specific flag bit
+    void set_flag(int flag_bit, bool value);
+    // Get a 16-bit register value
     uint16_t get_hl();
     uint16_t get_bc();
     uint16_t get_de();
     uint16_t get_af();
-
+    // Set a 16-bit register value
     void set_hl(uint16_t val);
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
