@@ -1,8 +1,3 @@
-/**
- * Header file for cpu.cpp - declare all operation execution functions in the CPU class.
- * It also contains the structures within the cpu (ex. registers, flags, etc)
- */
-
 #pragma once
 #include <stdint.h>
 #include <stdlib.h>
