@@ -1,8 +1,3 @@
-/**
- * Header file for cpu.cpp - declare all operation execution functions in the CPU class.
- * It also contains the structures within the cpu (ex. registers, flags, etc)
- */
-
 #pragma once
 #include <stdint.h>
 #include <stdlib.h>
@@ -84,6 +79,31 @@ enum INSTRUCTION {
     XOR_71,
 
     // Ella
+    XOR_72,
+    CCF_73,
+    SCF_74,
+    DAA_75,
+    CPL_76,
+    INC_77,
+    DEC_78,
+    ADD_79,
+    ADD_80,
+    RLCA_82,
+    RRCA_83,
+    RLA_84,
+    RRA_85,
+    RLC_86,
+    RLC_87,
+    RRC_88,
+    RRC_89,
+    RL_90,
+    RL_91,
+    RR_92,
+    RR_93,
+    SLA_94,
+    SLA_95,
+    SRA_96,
+    SRA_97,
 
     // Rishi
     SWAP_98,
@@ -196,63 +216,114 @@ public:
     void execute_ADD_45(uint32_t instruction);
 
     // Archit
-    bool decode_ADD_46(uint8_t opcode);
-    bool decode_ADD_47(uint8_t opcode);
-    bool decode_ADC_48(uint8_t opcode);
-    bool decode_ADC_49(uint8_t opcode);
-    bool decode_ADC_50(uint8_t opcode);
-    bool decode_SUB_50(uint8_t opcode);
-    bool decode_SUB_51(uint8_t opcode);
-    bool decode_SUB_52(uint8_t opcode);
-    bool decode_SUB_53(uint8_t opcode);
-    bool decode_SBC_54(uint8_t opcode);
-    bool decode_SBC_55(uint8_t opcode);
-    bool decode_SBC_56(uint8_t opcode);
-    bool decode_CP_57(uint8_t opcode);
-    bool decode_CP_58(uint8_t opcode);
-    bool decode_CP_59(uint8_t opcode);
-    bool decode_INC_60(uint8_t opcode);
-    bool decode_INC_61(uint8_t opcode);
-    bool decode_DEC_62(uint8_t opcode);
-    bool decode_DEC_63(uint8_t opcode);
-    bool decode_AND_64(uint8_t opcode);
-    bool decode_AND_65(uint8_t opcode);
-    bool decode_AND_66(uint8_t opcode);
-    bool decode_OR_67(uint8_t opcode);
-    bool decode_OR_68(uint8_t opcode);
-    bool decode_OR_69(uint8_t opcode);
-    bool decode_XOR_70(uint8_t opcode);
-    bool decode_XOR_71(uint8_t opcode);
+    bool decode_ADD_46( uint32_t instruction);
+    bool decode_ADD_47( uint32_t instruction);
+    bool decode_ADC_48( uint32_t instruction);
+    bool decode_ADC_49( uint32_t instruction);
+    bool decode_ADC_50( uint32_t instruction);
+    bool decode_SUB_50( uint32_t instruction);
+    bool decode_SUB_51( uint32_t instruction);
+    bool decode_SUB_52( uint32_t instruction);
+    bool decode_SUB_53( uint32_t instruction);
+    bool decode_SBC_54( uint32_t instruction);
+    bool decode_SBC_55( uint32_t instruction);
+    bool decode_SBC_56( uint32_t instruction);
+    bool decode_CP_57( uint32_t instruction);
+    bool decode_CP_58( uint32_t instruction);
+    bool decode_CP_59( uint32_t instruction);
+    bool decode_INC_60( uint32_t instruction);
+    bool decode_INC_61( uint32_t instruction);
+    bool decode_DEC_62( uint32_t instruction);
+    bool decode_DEC_63( uint32_t instruction);
+    bool decode_AND_64( uint32_t instruction);
+    bool decode_AND_65( uint32_t instruction);
+    bool decode_AND_66( uint32_t instruction);
+    bool decode_OR_67( uint32_t instruction);
+    bool decode_OR_68( uint32_t instruction);
+    bool decode_OR_69( uint32_t instruction);
+    bool decode_XOR_70( uint32_t instruction);
+    bool decode_XOR_71( uint32_t instruction);
 
-    void execute_ADD_46(uint8_t opcode);
-    void execute_ADD_47(uint8_t opcode);
-    void execute_ADC_48(uint8_t opcode);
-    void execute_ADC_49(uint8_t opcode);
-    void execute_ADC_50(uint8_t opcode);
-    void execute_SUB_50(uint8_t opcode);
-    void execute_SUB_51(uint8_t opcode);
-    void execute_SUB_52(uint8_t opcode);
-    void execute_SUB_53(uint8_t opcode);
-    void execute_SBC_54(uint8_t opcode);
-    void execute_SBC_55(uint8_t opcode);
-    void execute_SBC_56(uint8_t opcode);
-    void execute_CP_57(uint8_t opcode);
-    void execute_CP_58(uint8_t opcode);
-    void execute_CP_59(uint8_t opcode);
-    void execute_INC_60(uint8_t opcode);
-    void execute_INC_61(uint8_t opcode);
-    void execute_DEC_62(uint8_t opcode);
-    void execute_DEC_63(uint8_t opcode);
-    void execute_AND_64(uint8_t opcode);
-    void execute_AND_65(uint8_t opcode);
-    void execute_AND_66(uint8_t opcode);
-    void execute_OR_67(uint8_t opcode);
-    void execute_OR_68(uint8_t opcode);
-    void execute_OR_69(uint8_t opcode);
-    void execute_XOR_70(uint8_t opcode);
-    void execute_XOR_71(uint8_t opcode);
+    void execute_ADD_46( uint32_t instruction);
+    void execute_ADD_47( uint32_t instruction);
+    void execute_ADC_48( uint32_t instruction);
+    void execute_ADC_49( uint32_t instruction);
+    void execute_ADC_50( uint32_t instruction);
+    void execute_SUB_50( uint32_t instruction);
+    void execute_SUB_51( uint32_t instruction);
+    void execute_SUB_52( uint32_t instruction);
+    void execute_SUB_53( uint32_t instruction);
+    void execute_SBC_54( uint32_t instruction);
+    void execute_SBC_55( uint32_t instruction);
+    void execute_SBC_56( uint32_t instruction);
+    void execute_CP_57( uint32_t instruction);
+    void execute_CP_58( uint32_t instruction);
+    void execute_CP_59( uint32_t instruction);
+    void execute_INC_60( uint32_t instruction);
+    void execute_INC_61( uint32_t instruction);
+    void execute_DEC_62( uint32_t instruction);
+    void execute_DEC_63( uint32_t instruction);
+    void execute_AND_64( uint32_t instruction);
+    void execute_AND_65( uint32_t instruction);
+    void execute_AND_66( uint32_t instruction);
+    void execute_OR_67( uint32_t instruction);
+    void execute_OR_68( uint32_t instruction);
+    void execute_OR_69( uint32_t instruction);
+    void execute_XOR_70( uint32_t instruction);
+    void execute_XOR_71( uint32_t instruction);
     
     // Ella
+    bool decode_XOR_72(uint32_t instruction);
+    bool decode_CCF_73(uint32_t instruction);
+    bool decode_SCF_74(uint32_t instruction);
+    bool decode_DAA_75(uint32_t instruction);
+    bool decode_CPL_76(uint32_t instruction);
+    bool decode_INC_77(uint32_t instruction);
+    bool decode_DEC_78(uint32_t instruction);
+    bool decode_ADD_79(uint32_t instruction);
+    bool decode_ADD_80(uint32_t instruction);
+    bool decode_RLCA_82(uint32_t instruction);
+    bool decode_RRCA_83(uint32_t instruction);
+    bool decode_RLA_84(uint32_t instruction);
+    bool decode_RRA_85(uint32_t instruction);
+    bool decode_RLC_86(uint32_t instruction);
+    bool decode_RLC_87(uint32_t instruction);
+    bool decode_RRC_88(uint32_t instruction);
+    bool decode_RRC_89(uint32_t instruction);
+    bool decode_RL_90(uint32_t instruction);
+    bool decode_RL_91(uint32_t instruction);
+    bool decode_RR_92(uint32_t instruction);
+    bool decode_RR_93(uint32_t instruction);
+    bool decode_SLA_94(uint32_t instruction);
+    bool decode_SLA_95(uint32_t instruction);
+    bool decode_SRA_96(uint32_t instruction);
+    bool decode_SRA_97(uint32_t instruction);
+
+    void execute_XOR_72(uint32_t instruction);
+    void execute_CCF_73(uint32_t instruction);
+    void execute_SCF_74(uint32_t instruction);
+    void execute_DAA_75(uint32_t instruction);
+    void execute_CPL_76(uint32_t instruction);
+    void execute_INC_77(uint32_t instruction);
+    void execute_DEC_78(uint32_t instruction);
+    void execute_ADD_79(uint32_t instruction);
+    void execute_ADD_80(uint32_t instruction);
+    void execute_RLCA_82(uint32_t instruction);
+    void execute_RRCA_83(uint32_t instruction);
+    void execute_RLA_84(uint32_t instruction);
+    void execute_RRA_85(uint32_t instruction);
+    void execute_RLC_86(uint32_t instruction);
+    void execute_RLC_87(uint32_t instruction);
+    void execute_RRC_88(uint32_t instruction);
+    void execute_RRC_89(uint32_t instruction);
+    void execute_RL_90(uint32_t instruction);
+    void execute_RL_91(uint32_t instruction);
+    void execute_RR_92(uint32_t instruction);
+    void execute_RR_93(uint32_t instruction);
+    void execute_SLA_94(uint32_t instruction);
+    void execute_SLA_95(uint32_t instruction);
+    void execute_SRA_96(uint32_t instruction);
+    void execute_SRA_97(uint32_t instruction);
 
     // Rishi
     bool decode_SWAP_98(uint32_t instruction);

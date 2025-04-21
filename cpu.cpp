@@ -1,8 +1,3 @@
-/**
- * This file deals with the operation of the GameBoy CPU. 
- * All operation emulation functions should be defined here.
- */
-
 #include "cpu.hpp"
 #include <stdint.h>
 #include <stdlib.h>
@@ -260,19 +255,294 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
 
     return outcome;
 }
-
+ 
 // Archit
-bool CPU::decode_ADD_46(uint8_t opcode) {
-    // ADD A, (HL) - Opcode 0b10000110/0x86
-    return opcode == 0x86;
-}
-
-bool CPU::decode_ADD_47(uint8_t opcode) {
-    // ADD N: Add (immediate) - Opcode 0b11000110/0xC6
-    return opcode == 0xC6;
-}
+ bool CPU::decode_ADD_46(uint32_t instruction) {
+     // ADD A, (HL) - Opcode 0b10000110/0x86
+     bool outcome = ((instruction >> 16) & 0xFF) == 0b10000110;
+     return outcome;
+ }
+ 
+ bool CPU::decode_ADD_47(uint32_t instruction) {
+     // ADD N: Add (immediate) - Opcode 0b11000110/0xC6
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xC6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_ADC_48(uint32_t instruction) {
+     // ADC A, r (register) - Opcodes 0x88-0x8D, 0x8F
+     // Pattern 0b10001xxx, excluding 0x8E
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0x88 && opcode <= 0x8F && opcode != 0x8E);
+     return outcome;
+ }
+ 
+ bool CPU::decode_ADC_49(uint32_t instruction) {
+     // ADC A, (HL) - Opcode 0x8E (0b10001110)
+     bool outcome = (instruction >> 16) & 0xFF == 0x8E;
+     return outcome;
+ }
+ 
+ bool CPU::decode_ADC_50(uint32_t instruction) {
+     // ADC A, n (immediate) - Opcode 0xCE (0b11001110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xCE;
+     return outcome;
+ }
+ 
+ bool CPU::decode_SUB_51(uint32_t instruction) {
+     // SUB A, r (register) - Opcodes 0x90-0x95, 0x97
+     // Pattern 0b10010xxx, excluding 0x96
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0x90 && opcode <= 0x97 && opcode != 0x96);
+     return outcome;
+ }
+ 
+ bool CPU::decode_SUB_52(uint32_t instruction) {
+     // SUB A, (HL) - Opcode 0x96 (0b10010110)
+     bool outcome = (instruction >> 16) & 0xFF == 0x96;
+     return outcome;
+ }
+ 
+ bool CPU::decode_SUB_53(uint32_t instruction) {
+     // SUB A, n (immediate) - Opcode 0xD6 (0b11010110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xD6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_SBC_54(uint32_t instruction) {
+     // SBC A, r (register) - Opcodes 0x98-0x9D, 0x9F
+     // Pattern 0b10011xxx, excluding 0x9E
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0x98 && opcode <= 0x9F && opcode != 0x9E);
+     return outcome;
+ }
+ 
+ bool CPU::decode_SBC_55(uint32_t instruction) {
+     // SBC A, (HL) - Opcode 0x9E (0b10011110)
+     bool outcome = (instruction >> 16) & 0xFF == 0x9E; // opcode
+     return outcome;
+ }
+ 
+ bool CPU::decode_SBC_56(uint32_t instruction) {
+     // SBC A, n (immediate) - Opcode 0xDE (0b11011110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xDE;
+     return outcome;
+ }
+ 
+ bool CPU::decode_CP_57(uint32_t instruction) {
+     // CP A, r (register) - Opcodes 0xB8-0xBD, 0xBF
+     // Pattern 0b10111xxx, excluding 0xBE
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome (opcode >= 0xB8 && opcode <= 0xBF && opcode != 0xBE);
+     return outcome;
+ }
+ 
+ bool CPU::decode_CP_58(uint32_t instruction) {
+     // CP A, (HL) - Opcode 0xBE (0b10111110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xBE;
+     return outcome;
+ }
+ 
+ bool CPU::decode_CP_59(uint32_t instruction) {
+     // CP A, n (immediate) - Opcode 0xFE (0b11111110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xFE;
+     return outcome;
+ }
+ 
+ bool CPU::decode_INC_60(uint32_t instruction) {
+     // INC r (register) - Opcodes 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x3C
+     // Pattern 0b00xxx100 (excludes 0x34 INC (HL))
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = ((opcode & 0x07) == 0x04) && (opcode != 0x34);
+     return outcome;
+ }
+ 
+ bool CPU::decode_INC_61(uint32_t instruction) {
+     // INC (HL) - Opcode 0x34 (0b00110100)
+     bool outcome = (instruction >> 16) & 0xFF == 0x34;
+     return outcome;
+ }
+ 
+ bool CPU::decode_DEC_62(uint32_t instruction) {
+     // DEC r (register) - Opcodes 0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x3D
+     // Pattern 0b00xxx101 (excludes 0x35 DEC (HL))
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = ((opcode & 0x07) == 0x05) && (opcode != 0x35);
+     return outcome;
+ }
+ 
+ bool CPU::decode_DEC_63(uint32_t instruction) {
+     // DEC (HL) - Opcode 0x35 (0b00110101)
+     bool outcome = (instruction >> 16) & 0xFF == 0x35;
+     return outcome;
+ }
+ 
+ bool CPU::decode_AND_64(uint32_t instruction) {
+     // AND A, r (register) - Opcodes 0xA0-0xA5, 0xA7
+     // Pattern 0b10100xxx, excluding 0xA6
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0xA0 && opcode <= 0xA7 && opcode != 0xA6);
+     return outcome;
+ }
+ 
+ bool CPU::decode_AND_65(uint32_t instruction) {
+     // AND A, (HL) - Opcode 0xA6 (0b10100110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xA6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_AND_66(uint32_t instruction) {
+     // AND A, n (immediate) - Opcode 0xE6 (0b11100110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xE6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_OR_67(uint32_t instruction) {
+     // OR A, r (register) - Opcodes 0xB0-0xB5, 0xB7
+     // Pattern 0b10110xxx, excluding 0xB6
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0xB0 && opcode <= 0xB7 && opcode != 0xB6);
+     return outcome;
+ }
+ 
+ bool CPU::decode_OR_68(uint32_t instruction) {
+     // OR A, (HL) - Opcode 0xB6 (0b10110110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xB6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_OR_69(uint32_t instruction) {
+     // OR A, n (immediate) - Opcode 0xF6 (0b11110110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xF6;
+     return outcome;
+ }
+ 
+ bool CPU::decode_XOR_70(uint32_t instruction) {
+     // XOR A, r (register) - Opcodes 0xA8-0xAD, 0xAF
+     // Pattern 0b10101xxx, excluding 0xAE
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     bool outcome = (opcode >= 0xA8 && opcode <= 0xAF && opcode != 0xAE);
+     return outcome;
+ }
+ 
+ bool CPU::decode_XOR_71(uint32_t instruction) {
+     // XOR A, (HL) - Opcode 0xAE (0b10101110)
+     bool outcome = (instruction >> 16) & 0xFF == 0xAE;
+     return outcome;
+ }
 
 // Ella
+bool CPU::decode_XOR_72(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0xEE;
+}
+
+bool CPU::decode_CCF_73(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x3F;
+}
+
+bool CPU::decode_SCF_74(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x37;
+}
+
+bool CPU::decode_DAA_75(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x27;
+}
+
+bool CPU::decode_CPL_76(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x2F;
+}
+
+bool CPU::decode_INC_77(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'0011;
+}
+
+bool CPU::decode_DEC_78(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'1011;
+}
+
+bool CPU::decode_ADD_79(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'1001;
+}
+
+bool CPU::decode_ADD_80(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0xE8;
+}
+
+bool CPU::decode_RLCA_82(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x07;
+}
+
+bool CPU::decode_RRCA_83(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x0F;
+}
+
+bool CPU::decode_RLA_84(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x17;
+}
+
+bool CPU::decode_RRA_85(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x1F;
+}
+
+bool CPU::decode_RLC_86(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000); // opcode
+}
+
+bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x06); // opcode
+}
+
+bool CPU::decode_RRC_88(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000); // opcode
+}
+
+bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x0E); // opcode
+}
+
+bool CPU::decode_RL_90(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000); // opcode
+}
+
+bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x16); // opcode
+}
+
+bool CPU::decode_RR_92(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000); // opcode
+}
+
+bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x1E); // opcode
+}
+
+bool CPU::decode_SLA_94(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000); // opcode
+}
+
+bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x26); // opcode
+}
+
+bool CPU::decode_SRA_96(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000); // opcode
+}
+
+bool CPU::decode_SRA_97(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x2E); // opcode
+}
 
 // Rishi
 bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
@@ -749,48 +1019,1043 @@ void CPU::execute_ADD_45(uint32_t instruction) {
     regs[A_REGISTER] = result8;
 }
 
+
 // Archit
-void CPU::execute_ADD_46(uint8_t opcode) {
-    // ADD A, (HL) - Opcode 0b10000110/0x86
-    uint16_t addr = get_hl();
-    // How to read from memory?
-    uint8_t data = 0; // ram->read_mem(addr); 
-    
-    uint8_t a_val = regs[A_REGISTER];
-
-    // Do the addition
-    uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(data);
-    uint8_t result8 = static_cast<uint8_t>(result16);
-
-    // Calculate and set flags
-    set_flag(Z_FLAG_BIT, result8 == 0);
-    set_flag(N_FLAG_BIT, false);
-    // Half Carry: Check carry from bit 3 to bit 4
-    set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (data & 0x0F)) > 0x0F);
-    // Carry: Check carry from bit 7
-    set_flag(C_FLAG_BIT, result16 > 0xFF);
-
-    // Store result back in A register
-    regs[A_REGISTER] = result8;
-
-    pc++;
-}
-
-void CPU::execute_ADD_47(uint8_t opcode) {
-    // ADD N: Add (immediate) - Opcode 0b11000110/0xC6
-    uint16_t addr = get_hl();
-    // How to read from memory?
-    uint8_t n = 0; // ram->read_mem(addr); 
-    
-    uint8_t result8;
-    uint8_t ca;
-
-
-
-    pc++;
-}
+ void CPU::execute_ADD_46(uint32_t instruction) {
+     // ADD A, (HL) - Opcode 0b10000110/0x86
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr); 
+     
+     uint8_t a_val = regs[A_REGISTER];
+ 
+     uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(data);
+     uint8_t result8 = static_cast<uint8_t>(result16);
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (data & 0x0F)) > 0x0F);
+     set_flag(C_FLAG_BIT, result16 > 0xFF);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_ADD_47(uint32_t instruction) {
+     // ADD A, n (immediate) - Opcode 0xC6, 2-byte instruction
+     pc++;
+ 
+     // Read immediate value 'n' from memory at the new PC location.
+     uint8_t n = ram->read_mem(pc);
+ 
+     pc++;
+     uint8_t a_val = regs[A_REGISTER];
+ 
+     uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(n);
+     uint8_t result8 = static_cast<uint8_t>(result16);
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0); // Z = 1 if result is 0
+     set_flag(N_FLAG_BIT, false);       // N = 0 for ADD
+     set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (n & 0x0F)) > 0x0F); // H = 1 if carry from bit 3
+     set_flag(C_FLAG_BIT, result16 > 0xFF); // C = 1 if carry from bit 7
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_ADC_48(uint32_t instruction) {
+     // ADC A, r (register) - Opcodes 0x88-0x8D, 0x8F
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07; // Lower 3 bits map to registers B,C,D,E,H,L,(HL),A
+     uint8_t r_val = 0;
+     // Map index to register value (B=0, C=1, D=2, E=3, H=4, L=5, A=7), (HL) is handled by ADC A, (HL)
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(r_val) + static_cast<uint16_t>(carry);
+     uint8_t result8 = static_cast<uint8_t>(result16);
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (r_val & 0x0F) + carry) > 0x0F);
+     set_flag(C_FLAG_BIT, result16 > 0xFF);
+ 
+     regs[A_REGISTER] = result8;
+     pc++; 
+ }
+ 
+ void CPU::execute_ADC_49(uint32_t instruction) {
+     // ADC A, (HL) - Opcode 0x8E, 1-byte instruction.
+ 
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr);
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(data) + static_cast<uint16_t>(carry);
+     uint8_t result8 = static_cast<uint8_t>(result16);
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (data & 0x0F) + carry) > 0x0F);
+     set_flag(C_FLAG_BIT, result16 > 0xFF);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_ADC_50(uint32_t instruction) {
+     // ADC A, n (immediate) - Opcode 0xCE, 2-byte instruction (pc points to the 0xCE opcode itself on entry)(?)
+ 
+     //Increment PC to point past the opcode (0xCE).
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(n) + static_cast<uint16_t>(carry);
+     uint8_t result8 = static_cast<uint8_t>(result16);
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((a_val & 0x0F) + (n & 0x0F) + carry) > 0x0F);
+     set_flag(C_FLAG_BIT, result16 > 0xFF);
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_SUB_51(uint32_t instruction) {
+     // SUB A, r (register) - Opcodes 0x90-0x95, 0x97, 1-byte instruction.
+ 
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07;
+     uint8_t r_val = 0;
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val - r_val;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (r_val & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < r_val);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_SUB_52(uint32_t instruction) {
+     // SUB A, (HL) - Opcode 0x96, 1-byte instruction.
+     uint16_t addr = get_hl();
+ 
+     uint8_t data = ram->read_mem(addr);
+     uint8_t a_val = regs[A_REGISTER];
+ 
+     uint8_t result8 = a_val - data;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (data & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < data);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_SUB_53(uint32_t instruction) {
+     // SUB A, n (immediate) - Opcode 0xD6, 2-byte instruction
+ 
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val - n;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (n & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < n);
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_SBC_54(uint32_t instruction) {
+     // SBC A, r (register) - Opcodes 0x98-0x9D, 0x9F, 1-byte instruction
+ 
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07; // Lower 3 bits map to registers B,C,D,E,H,L,(HL),A
+     uint8_t r_val = 0;
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t temp_sub = static_cast<uint16_t>(r_val) + static_cast<uint16_t>(carry); // Combine subtrahends
+     uint8_t result8 = a_val - static_cast<uint8_t>(temp_sub); // Perform subtraction
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (r_val & 0x0F) + carry);
+     set_flag(C_FLAG_BIT, static_cast<uint16_t>(a_val) < temp_sub);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_SBC_55(uint32_t instruction) {
+     // SBC A, (HL) - Opcode 0x9E, 1-byte instruction
+ 
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr);
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t temp_sub = static_cast<uint16_t>(data) + static_cast<uint16_t>(carry); // Combine subtrahends
+     uint8_t result8 = a_val - static_cast<uint8_t>(temp_sub); // Perform subtraction
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (data & 0x0F) + carry);
+     set_flag(C_FLAG_BIT, static_cast<uint16_t>(a_val) < temp_sub);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_SBC_56(uint32_t instruction) {
+     // SBC A, n (immediate) - Opcode 0xDE, 2-byte instruction
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
+ 
+     uint16_t temp_sub = static_cast<uint16_t>(n) + static_cast<uint16_t>(carry); // Combine subtrahends
+     uint8_t result8 = a_val - static_cast<uint8_t>(temp_sub); // Perform subtraction
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (n & 0x0F) + carry);
+     set_flag(C_FLAG_BIT, static_cast<uint16_t>(a_val) < temp_sub);
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_CP_57(uint32_t instruction) {
+     // CP A, r (register) - Opcodes 0xB8-0xBD, 0xBF, 1-byte instruction
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07;
+     uint8_t r_val = 0;
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val - r_val; // Temporary result for Z flag
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (r_val & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < r_val);
+ 
+     pc++;
+ }
+ 
+ void CPU::execute_CP_58(uint32_t instruction) {
+     // CP A, (HL) - Opcode 0xBE, 1-byte instruction.
+ 
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr);
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val - data; // Temporary result for Z flag
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (data & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < data);
+ 
+     pc++;
+ }
+ 
+ void CPU::execute_CP_59(uint32_t instruction) {
+     // CP A, n (immediate) - Opcode 0xFE, 2-byte instruction
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val - n;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (a_val & 0x0F) < (n & 0x0F));
+     set_flag(C_FLAG_BIT, a_val < n);
+ }
+ 
+ void CPU::execute_INC_60(uint32_t instruction) {
+     // INC r (register) - Opcodes 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x3C, 1-byte instruction.
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int target_reg_index = (opcode >> 3) & 0x07;
+     uint8_t old_val = regs[target_reg_index];
+     uint8_t new_val = old_val + 1;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, new_val == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((old_val & 0x0F) + 1) > 0x0F);
+     // no change to C flag
+ 
+     regs[target_reg_index] = new_val;
+     pc++;
+ }
+ 
+ void CPU::execute_INC_61(uint32_t instruction) {
+     // INC (HL) - Opcode 0x34, 1-byte instruction
+ 
+     uint16_t addr = get_hl();
+     uint8_t old_val = ram->read_mem(addr);
+     uint8_t new_val = old_val + 1;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, new_val == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, ((old_val & 0x0F) + 1) > 0x0F);
+     // no change to C flag
+ 
+     ram->write_mem(addr, new_val);
+     pc++;
+ }
+ 
+ void CPU::execute_DEC_62(uint32_t instruction) {
+     // DEC r (register) - Opcodes 0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x3D, 1-byte instruction
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int target_reg_index = (opcode >> 3) & 0x07;
+     uint8_t old_val = regs[target_reg_index];
+     uint8_t new_val = old_val - 1;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, new_val == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (old_val & 0x0F) == 0x00);
+ 
+     regs[target_reg_index] = new_val;
+     pc++;
+ }
+ 
+ void CPU::execute_DEC_63(uint32_t instruction) {
+     // DEC (HL) - Opcode 0x35, 1-byte instruction
+ 
+     uint16_t addr = get_hl();
+     uint8_t old_val = ram->read_mem(addr);
+     uint8_t new_val = old_val - 1;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, new_val == 0);
+     set_flag(N_FLAG_BIT, true);
+     set_flag(H_FLAG_BIT, (old_val & 0x0F) == 0x00);
+ 
+     ram->write_mem(addr, new_val);
+     pc++;
+ }
+ 
+ void CPU::execute_AND_64(uint32_t instruction) {
+     // AND A, r (register) - Opcodes 0xA0-0xA5, 0xA7, 1-byte instruction
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07;
+     uint8_t r_val = 0;
+ 
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val & r_val;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, true);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_AND_65(uint32_t instruction) {
+     // AND A, (HL) - Opcode 0xA6,  1-byte instruction
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr);
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val & data;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, true);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_AND_66(uint32_t instruction) {
+     // AND A, n (immediate) - Opcode 0xE6, 2-byte instruction
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val & n;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, true);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_OR_67(uint32_t instruction) {
+     // OR A, r (register) - Opcodes 0xB0-0xB5, 0xB7, 1-byte instruction
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+     int source_reg_index = opcode & 0x07;
+     uint8_t r_val = 0;
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val | r_val;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, false);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_OR_68(uint32_t instruction) {
+     // OR A, (HL) - Opcode 0xB6, 1-byte instruction
+     uint16_t addr = get_hl();
+ 
+     uint8_t data = ram->read_mem(addr);
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val | data;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, false);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_OR_69(uint32_t instruction) {
+     // OR A, n (immediate) - Opcode 0xF6, 2-byte instruction.
+     pc++;
+     uint8_t n = ram->read_mem(pc);
+     pc++;
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val | n;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, false);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+ }
+ 
+ void CPU::execute_XOR_70(uint32_t instruction) {
+     // XOR A, r (register) - Opcodes 0xA8-0xAD, 0xAF, 1-byte instruction.
+     uint8_t opcode = (instruction >> 16) & 0xFF;
+ 
+     int source_reg_index = opcode & 0x07;
+     uint8_t r_val = 0;
+     switch(source_reg_index) {
+         case B_REGISTER: r_val = regs[B_REGISTER]; break; // 0
+         case C_REGISTER: r_val = regs[C_REGISTER]; break; // 1
+         case D_REGISTER: r_val = regs[D_REGISTER]; break; // 2
+         case E_REGISTER: r_val = regs[E_REGISTER]; break; // 3
+         case H_REGISTER: r_val = regs[H_REGISTER]; break; // 4
+         case L_REGISTER: r_val = regs[L_REGISTER]; break; // 5
+         // case 6 is (HL)
+         case A_REGISTER: r_val = regs[A_REGISTER]; break; // 7
+     }
+ 
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val ^ r_val;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, false);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
+ 
+ void CPU::execute_XOR_71(uint32_t instruction) {
+     // XOR A, (HL) - Opcode 0xAE, 1-byte instruction.
+     // Assumption: pc points to the opcode itself on entry.
+ 
+     uint16_t addr = get_hl();
+     uint8_t data = ram->read_mem(addr);
+     uint8_t a_val = regs[A_REGISTER];
+     uint8_t result8 = a_val ^ data;
+ 
+     // Set flags
+     set_flag(Z_FLAG_BIT, result8 == 0);
+     set_flag(N_FLAG_BIT, false);
+     set_flag(H_FLAG_BIT, false);
+     set_flag(C_FLAG_BIT, false);
+ 
+     regs[A_REGISTER] = result8;
+     pc++;
+ }
 
 // Ella
+void CPU::execute_XOR_72(uint32_t instruction) {
+    uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF);
+
+    regs[A_REGISTER] ^= n;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, regs[A_REGISTER] == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, false);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_CCF_73(uint32_t instruction) {
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, !get_flag(C_FLAG_BIT));
+
+    pc++;
+}
+
+void CPU::execute_SCF_74(uint32_t instruction) {
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, true);
+
+    pc++;
+}
+
+void CPU::execute_DAA_75(uint32_t instruction) {
+    uint8_t adjustment = 0;
+
+    if (get_flag(N_FLAG_BIT)) {
+
+        // Subtraction mode
+        if (get_flag(H_FLAG_BIT)) {
+            adjustment += 0x6;
+        }
+        if (get_flag(C_FLAG_BIT)) {
+            adjustment += 0x60;
+        }
+
+        regs[A_REGISTER] -= adjustment;
+    } else {
+        // Addition mode
+        if (get_flag(H_FLAG_BIT) || (regs[A_REGISTER] & 0xF) > 0x9) {
+            adjustment += 0x6;
+        }
+        if (get_flag(C_FLAG_BIT) || regs[A_REGISTER] > 0x99) {
+            adjustment += 0x60;
+        }
+        
+        // Special case, set carry flag here
+        set_flag(C_FLAG_BIT, get_flag(C_FLAG_BIT) || (regs[A_REGISTER] > 0x99));
+
+        regs[A_REGISTER] += adjustment;
+    }
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, regs[A_REGISTER] == 0);
+    set_flag(H_FLAG_BIT, false);
+
+    pc++;
+}
+
+void CPU::execute_CPL_76(uint32_t instruction) {
+    regs[A_REGISTER] = ~regs[A_REGISTER];
+
+    set_flag(N_FLAG_BIT, true);
+    set_flag(H_FLAG_BIT, true);
+
+    pc++;
+}
+
+void CPU::execute_INC_77(uint32_t instruction) {
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // INC BC
+            set_bc(get_bc() + 1);
+            break;
+        case 0b01: // INC DE
+            set_de(get_de() + 1);
+            break;
+        case 0b10: // INC HL
+            set_hl(get_hl() + 1);
+            break;
+        case 0b11: // INC SP
+            sp++;
+            break;
+    }
+
+    pc++;
+}
+
+void CPU::execute_DEC_78(uint32_t instruction) {
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // DEC BC
+            set_bc(get_bc() - 1);
+            break;
+        case 0b01: // DEC DE
+            set_de(get_de() - 1);
+            break;
+        case 0b10: // DEC HL
+            set_hl(get_hl() - 1);
+            break;
+        case 0b11: // DEC SP
+            sp--;
+            break;
+    }
+
+    pc++;
+}
+
+void CPU::execute_ADD_79(uint32_t instruction) { // ADD HL, rr
+    uint16_t hl = get_hl();
+    uint16_t rr;
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // ADD HL, BC
+            rr = get_bc();
+            break;
+        case 0b01: // ADD HL, DE
+            rr = get_de();
+            break;
+        case 0b10: // ADD HL, HL
+            rr = get_hl();
+            break;
+        case 0b11: // ADD HL, SP
+            rr = sp;
+            break;
+    }
+
+    uint32_t result = static_cast<uint32_t>(hl) + static_cast<uint32_t>(rr); // larger result to calculate flags
+    set_hl(static_cast<uint16_t>(result));
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, (hl & 0xFFF) + (rr & 0xFFF) > 0xFFF); // Half carry: Check carry from bit 11
+    set_flag(C_FLAG_BIT, result > 0xFFFF); // Carry: Check carry from bit 15
+
+    pc++;
+}
+
+void CPU::execute_ADD_80(uint32_t instruction) { // ADD SP, e
+    uint8_t e = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get immediate value
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, ((sp & 0xF) + (e & 0xF)) > 0xF); // Half carry: Check carry from bit 3
+    set_flag(C_FLAG_BIT, ((sp & 0xFF) + e) > 0xFF); // Carry: Check carry from bit 7
+
+    // Add immediate value to SP
+    sp += static_cast<int8_t>(e); // Sign-extend
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RLCA_82(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = a_val & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    a_val = (a_val << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RRCA_83(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = a_val & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    a_val = (a_val >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RLA_84(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, a_val & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    a_val = (a_val << 1) | carry;
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RRA_85(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, a_val & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    a_val = (a_val >> 1) | (carry << 7);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RLC_86(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    reg = (reg << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[regNum] = reg;
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RLC_87(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    hl = (hl << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    ram->write_mem(addr, hl);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RRC_88(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    reg = (reg >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[regNum] = reg;
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RRC_89(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    hl = (hl >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    ram->write_mem(addr, hl);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RL_90(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, reg & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    reg = (reg << 1) | carry;
+
+    regs[regNum] = reg;
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, reg == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RL_91(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, hl & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    hl = (hl << 1) | carry;
+
+    ram->write_mem(addr, hl);
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, hl == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RR_92(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, reg & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    reg = (reg >> 1) | (carry << 7);
+
+    regs[regNum] = reg;
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, reg == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RR_93(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, hl & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    hl = (hl >> 1) | (carry << 7);
+
+    ram->write_mem(addr, hl);
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, hl == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SLA_94(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x80; // Check if the highest bit is set
+
+    // Shift left
+    reg <<= 1;
+
+    regs[regNum] = reg;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SLA_95(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x80; // Check if the highest bit is set
+
+    // Shift left
+    hl <<= 1;
+
+    ram->write_mem(addr, hl);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRA_96(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x01; // Check if the lowest bit is set
+
+    // Shift right (bit 7 remains unchanged)
+    reg = (reg & 0x80) | (reg >> 1);
+
+    regs[regNum] = reg;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRA_97(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x01; // Check if the lowest bit is set
+
+    // Shift right (bit 7 remains unchanged)
+    hl = (hl & 0x80) | (hl >> 1);
+
+    ram->write_mem(addr, hl);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
 
 // Rishi
 void CPU::execute_SWAP_98(uint32_t instruction) {
