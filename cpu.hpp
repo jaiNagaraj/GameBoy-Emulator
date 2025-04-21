@@ -92,6 +92,7 @@ private:
     uint8_t regs[8]; // 0: B, 1: C, 2: D, 3: E, 4: H, 5: L, 6: F, 7: A
     uint16_t pc; // Program Counter
     uint16_t sp; // Stack Pointer
+    bool ime; // Interrupt Master Enable
 
     // #### FUNCTION DECLARATIONS ####
     // Helper functions
