@@ -989,7 +989,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // ADC A, (HL) - Opcode 0x8E, 1-byte instruction.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
  
@@ -1011,7 +1011,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
      //Increment PC to point past the opcode (0xCE).
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1063,7 +1063,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SUB A, (HL) - Opcode 0x96, 1-byte instruction.
      uint16_t addr = get_hl();
  
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
  
      uint8_t result8 = a_val - data;
@@ -1082,7 +1082,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SUB A, n (immediate) - Opcode 0xD6, 2-byte instruction
  
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1134,7 +1134,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SBC A, (HL) - Opcode 0x9E, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
  
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
@@ -1155,7 +1155,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_SBC_56(uint32_t instruction) {
      // SBC A, n (immediate) - Opcode 0xDE, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1205,7 +1205,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // CP A, (HL) - Opcode 0xBE, 1-byte instruction.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
  
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val - data; // Temporary result for Z flag
@@ -1222,7 +1222,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_CP_59(uint32_t instruction) {
      // CP A, n (immediate) - Opcode 0xFE, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1256,7 +1256,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // INC (HL) - Opcode 0x34, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t old_val = ram->read_memory(addr);
+     uint8_t old_val = ram->read_mem(addr);
      uint8_t new_val = old_val + 1;
  
      // Set flags
@@ -1265,7 +1265,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(H_FLAG_BIT, ((old_val & 0x0F) + 1) > 0x0F);
      // no change to C flag
  
-     ram->write_memory(addr, new_val);
+     ram->write_mem(addr, new_val);
      pc++;
  }
  
@@ -1289,7 +1289,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // DEC (HL) - Opcode 0x35, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t old_val = ram->read_memory(addr);
+     uint8_t old_val = ram->read_mem(addr);
      uint8_t new_val = old_val - 1;
  
      // Set flags
@@ -1297,7 +1297,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(N_FLAG_BIT, true);
      set_flag(H_FLAG_BIT, (old_val & 0x0F) == 0x00);
  
-     ram->write_memory(addr, new_val);
+     ram->write_mem(addr, new_val);
      pc++;
  }
  
@@ -1334,7 +1334,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_AND_65(uint32_t instruction) {
      // AND A, (HL) - Opcode 0xA6,  1-byte instruction
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val & data;
  
@@ -1351,7 +1351,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_AND_66(uint32_t instruction) {
      // AND A, n (immediate) - Opcode 0xE6, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1399,7 +1399,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // OR A, (HL) - Opcode 0xB6, 1-byte instruction
      uint16_t addr = get_hl();
  
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val | data;
  
@@ -1416,7 +1416,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_OR_69(uint32_t instruction) {
      // OR A, n (immediate) - Opcode 0xF6, 2-byte instruction.
      pc++;
-     uint8_t n = ram->read_memory(pc);
+     uint8_t n = ram->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1466,7 +1466,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // Assumption: pc points to the opcode itself on entry.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_memory(addr);
+     uint8_t data = ram->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val ^ data;
  
