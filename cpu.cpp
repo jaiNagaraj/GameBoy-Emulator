@@ -432,6 +432,117 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  }
 
 // Ella
+bool CPU::decode_XOR_72(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0xEE;
+}
+
+bool CPU::decode_CCF_73(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x3F;
+}
+
+bool CPU::decode_SCF_74(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x37;
+}
+
+bool CPU::decode_DAA_75(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x27;
+}
+
+bool CPU::decode_CPL_76(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x2F;
+}
+
+bool CPU::decode_INC_77(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'0011;
+}
+
+bool CPU::decode_DEC_78(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'1011;
+}
+
+bool CPU::decode_ADD_79(uint32_t instruction) {
+    return ((instruction >> 16) & 0b1100'1111) == 0b0000'1001;
+}
+
+bool CPU::decode_ADD_80(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0xE8;
+}
+
+bool CPU::decode_RLCA_82(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x07;
+}
+
+bool CPU::decode_RRCA_83(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x0F;
+}
+
+bool CPU::decode_RLA_84(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x17;
+}
+
+bool CPU::decode_RRA_85(uint32_t instruction) {
+    return ((instruction >> 16) & 0xFF) == 0x1F;
+}
+
+bool CPU::decode_RLC_86(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000); // opcode
+}
+
+bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x06); // opcode
+}
+
+bool CPU::decode_RRC_88(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000); // opcode
+}
+
+bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x0E); // opcode
+}
+
+bool CPU::decode_RL_90(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000); // opcode
+}
+
+bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x16); // opcode
+}
+
+bool CPU::decode_RR_92(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000); // opcode
+}
+
+bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x1E); // opcode
+}
+
+bool CPU::decode_SLA_94(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000); // opcode
+}
+
+bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x26); // opcode
+}
+
+bool CPU::decode_SRA_96(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000); // opcode
+}
+
+bool CPU::decode_SRA_97(uint32_t instruction) { // 2-byte instruction
+    return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
+           (((instruction >> 8) & 0xFF) == 0x2E); // opcode
+}
 
 // Rishi
 bool CPU::decode_SWAP_98(uint32_t instruction) { // 2-byte instruction
@@ -1481,6 +1592,470 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  }
 
 // Ella
+void CPU::execute_XOR_72(uint32_t instruction) {
+    uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF);
+
+    regs[A_REGISTER] ^= n;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, regs[A_REGISTER] == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, false);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_CCF_73(uint32_t instruction) {
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, !get_flag(C_FLAG_BIT));
+
+    pc++;
+}
+
+void CPU::execute_SCF_74(uint32_t instruction) {
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, true);
+
+    pc++;
+}
+
+void CPU::execute_DAA_75(uint32_t instruction) {
+    uint8_t adjustment = 0;
+
+    if (get_flag(N_FLAG_BIT)) {
+
+        // Subtraction mode
+        if (get_flag(H_FLAG_BIT)) {
+            adjustment += 0x6;
+        }
+        if (get_flag(C_FLAG_BIT)) {
+            adjustment += 0x60;
+        }
+
+        regs[A_REGISTER] -= adjustment;
+    } else {
+        // Addition mode
+        if (get_flag(H_FLAG_BIT) || (regs[A_REGISTER] & 0xF) > 0x9) {
+            adjustment += 0x6;
+        }
+        if (get_flag(C_FLAG_BIT) || regs[A_REGISTER] > 0x99) {
+            adjustment += 0x60;
+        }
+        
+        // Special case, set carry flag here
+        set_flag(C_FLAG_BIT, get_flag(C_FLAG_BIT) || (regs[A_REGISTER] > 0x99));
+
+        regs[A_REGISTER] += adjustment;
+    }
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, regs[A_REGISTER] == 0);
+    set_flag(H_FLAG_BIT, false);
+
+    pc++;
+}
+
+void CPU::execute_CPL_76(uint32_t instruction) {
+    regs[A_REGISTER] = ~regs[A_REGISTER];
+
+    set_flag(N_FLAG_BIT, true);
+    set_flag(H_FLAG_BIT, true);
+
+    pc++;
+}
+
+void CPU::execute_INC_77(uint32_t instruction) {
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // INC BC
+            set_bc(get_bc() + 1);
+            break;
+        case 0b01: // INC DE
+            set_de(get_de() + 1);
+            break;
+        case 0b10: // INC HL
+            set_hl(get_hl() + 1);
+            break;
+        case 0b11: // INC SP
+            sp++;
+            break;
+    }
+
+    pc++;
+}
+
+void CPU::execute_DEC_78(uint32_t instruction) {
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // DEC BC
+            set_bc(get_bc() - 1);
+            break;
+        case 0b01: // DEC DE
+            set_de(get_de() - 1);
+            break;
+        case 0b10: // DEC HL
+            set_hl(get_hl() - 1);
+            break;
+        case 0b11: // DEC SP
+            sp--;
+            break;
+    }
+
+    pc++;
+}
+
+void CPU::execute_ADD_79(uint32_t instruction) { // ADD HL, rr
+    uint16_t hl = get_hl();
+    uint16_t rr;
+    switch ((instruction >> 20) & 0b11) {
+        case 0b00: // ADD HL, BC
+            rr = get_bc();
+            break;
+        case 0b01: // ADD HL, DE
+            rr = get_de();
+            break;
+        case 0b10: // ADD HL, HL
+            rr = get_hl();
+            break;
+        case 0b11: // ADD HL, SP
+            rr = sp;
+            break;
+    }
+
+    uint32_t result = static_cast<uint32_t>(hl) + static_cast<uint32_t>(rr); // larger result to calculate flags
+    set_hl(static_cast<uint16_t>(result));
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, (hl & 0xFFF) + (rr & 0xFFF) > 0xFFF); // Half carry: Check carry from bit 11
+    set_flag(C_FLAG_BIT, result > 0xFFFF); // Carry: Check carry from bit 15
+
+    pc++;
+}
+
+void CPU::execute_ADD_80(uint32_t instruction) { // ADD SP, e
+    uint8_t e = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get immediate value
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, ((sp & 0xF) + (e & 0xF)) > 0xF); // Half carry: Check carry from bit 3
+    set_flag(C_FLAG_BIT, ((sp & 0xFF) + e) > 0xFF); // Carry: Check carry from bit 7
+
+    // Add immediate value to SP
+    sp += static_cast<int8_t>(e); // Sign-extend
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RLCA_82(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = a_val & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    a_val = (a_val << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RRCA_83(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = a_val & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    a_val = (a_val >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RLA_84(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, a_val & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    a_val = (a_val << 1) | carry;
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RRA_85(uint32_t instruction) {
+    uint8_t a_val = regs[A_REGISTER];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, false);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, a_val & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    a_val = (a_val >> 1) | (carry << 7);
+
+    regs[A_REGISTER] = a_val;
+
+    pc++;
+}
+
+void CPU::execute_RLC_86(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    reg = (reg << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[regNum] = reg;
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RLC_87(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x80; // Check if the highest bit is set
+
+    // Rotate left
+    hl = (hl << 1) | carry;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    ram->write_mem(addr, hl);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RRC_88(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    reg = (reg >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    regs[regNum] = reg;
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RRC_89(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x01; // Check if the lowest bit is set
+
+    // Rotate right
+    hl = (hl >> 1) | (carry << 7);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    ram->write_mem(addr, hl);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RL_90(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, reg & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    reg = (reg << 1) | carry;
+
+    regs[regNum] = reg;
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, reg == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RL_91(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, hl & 0x80); // Set carry if the highest bit is set
+
+    // Rotate left through carry
+    hl = (hl << 1) | carry;
+
+    ram->write_mem(addr, hl);
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, hl == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RR_92(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, reg & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    reg = (reg >> 1) | (carry << 7);
+
+    regs[regNum] = reg;
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, reg == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_RR_93(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
+
+    // Set flags
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, hl & 0x01); // Set carry if the lowest bit is set
+
+    // Rotate right through carry
+    hl = (hl >> 1) | (carry << 7);
+
+    ram->write_mem(addr, hl);
+
+    // Must set after register updated
+    set_flag(Z_FLAG_BIT, hl == 0);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SLA_94(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x80; // Check if the highest bit is set
+
+    // Shift left
+    reg <<= 1;
+
+    regs[regNum] = reg;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SLA_95(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x80; // Check if the highest bit is set
+
+    // Shift left
+    hl <<= 1;
+
+    ram->write_mem(addr, hl);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRA_96(uint32_t instruction) {
+    uint8_t regNum = (instruction >> 8) & 0b111;
+    uint8_t reg = regs[regNum];
+    bool carry = reg & 0x01; // Check if the lowest bit is set
+
+    // Shift right (bit 7 remains unchanged)
+    reg = (reg & 0x80) | (reg >> 1);
+
+    regs[regNum] = reg;
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, reg == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
+
+void CPU::execute_SRA_97(uint32_t instruction) {
+    uint16_t addr = get_hl();
+    uint8_t hl = ram->read_mem(addr);
+    bool carry = hl & 0x01; // Check if the lowest bit is set
+
+    // Shift right (bit 7 remains unchanged)
+    hl = (hl & 0x80) | (hl >> 1);
+
+    ram->write_mem(addr, hl);
+
+    // Set flags
+    set_flag(Z_FLAG_BIT, hl == 0);
+    set_flag(N_FLAG_BIT, false);
+    set_flag(H_FLAG_BIT, false);
+    set_flag(C_FLAG_BIT, carry);
+
+    pc += 2; // 2-byte instruction
+}
 
 // Rishi
 void CPU::execute_SWAP_98(uint32_t instruction) {
