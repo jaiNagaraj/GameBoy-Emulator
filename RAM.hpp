@@ -5,6 +5,8 @@
 
 #pragma once
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 class RAM {
 private:
