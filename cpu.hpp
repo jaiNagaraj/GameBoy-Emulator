@@ -82,7 +82,33 @@ enum INSTRUCTION {
     OR_69,
     XOR_70,
     XOR_71,
+
     // Ella
+    XOR_72,
+    CCF_73,
+    SCF_74,
+    DAA_75,
+    CPL_76,
+    INC_77,
+    DEC_78,
+    ADD_79,
+    ADD_80,
+    RLCA_82,
+    RRCA_83,
+    RLA_84,
+    RRA_85,
+    RLC_86,
+    RLC_87,
+    RRC_88,
+    RRC_89,
+    RL_90,
+    RL_91,
+    RR_92,
+    RR_93,
+    SLA_94,
+    SLA_95,
+    SRA_96,
+    SRA_97,
 
     // Rishi
     SWAP_98,
@@ -250,6 +276,57 @@ public:
     void execute_XOR_70(uint8_t opcode);
     void execute_XOR_71(uint8_t opcode);
     // Ella
+    bool decode_XOR_72(uint32_t instruction);
+    bool decode_CCF_73(uint32_t instruction);
+    bool decode_SCF_74(uint32_t instruction);
+    bool decode_DAA_75(uint32_t instruction);
+    bool decode_CPL_76(uint32_t instruction);
+    bool decode_INC_77(uint32_t instruction);
+    bool decode_DEC_78(uint32_t instruction);
+    bool decode_ADD_79(uint32_t instruction);
+    bool decode_ADD_80(uint32_t instruction);
+    bool decode_RLCA_82(uint32_t instruction);
+    bool decode_RRCA_83(uint32_t instruction);
+    bool decode_RLA_84(uint32_t instruction);
+    bool decode_RRA_85(uint32_t instruction);
+    bool decode_RLC_86(uint32_t instruction);
+    bool decode_RLC_87(uint32_t instruction);
+    bool decode_RRC_88(uint32_t instruction);
+    bool decode_RRC_89(uint32_t instruction);
+    bool decode_RL_90(uint32_t instruction);
+    bool decode_RL_91(uint32_t instruction);
+    bool decode_RR_92(uint32_t instruction);
+    bool decode_RR_93(uint32_t instruction);
+    bool decode_SLA_94(uint32_t instruction);
+    bool decode_SLA_95(uint32_t instruction);
+    bool decode_SRA_96(uint32_t instruction);
+    bool decode_SRA_97(uint32_t instruction);
+
+    void execute_XOR_72(uint32_t instruction);
+    void execute_CCF_73(uint32_t instruction);
+    void execute_SCF_74(uint32_t instruction);
+    void execute_DAA_75(uint32_t instruction);
+    void execute_CPL_76(uint32_t instruction);
+    void execute_INC_77(uint32_t instruction);
+    void execute_DEC_78(uint32_t instruction);
+    void execute_ADD_79(uint32_t instruction);
+    void execute_ADD_80(uint32_t instruction);
+    void execute_RLCA_82(uint32_t instruction);
+    void execute_RRCA_83(uint32_t instruction);
+    void execute_RLA_84(uint32_t instruction);
+    void execute_RRA_85(uint32_t instruction);
+    void execute_RLC_86(uint32_t instruction);
+    void execute_RLC_87(uint32_t instruction);
+    void execute_RRC_88(uint32_t instruction);
+    void execute_RRC_89(uint32_t instruction);
+    void execute_RL_90(uint32_t instruction);
+    void execute_RL_91(uint32_t instruction);
+    void execute_RR_92(uint32_t instruction);
+    void execute_RR_93(uint32_t instruction);
+    void execute_SLA_94(uint32_t instruction);
+    void execute_SLA_95(uint32_t instruction);
+    void execute_SRA_96(uint32_t instruction);
+    void execute_SRA_97(uint32_t instruction);
 
     // Rishi
     bool decode_SWAP_98(uint32_t instruction);
