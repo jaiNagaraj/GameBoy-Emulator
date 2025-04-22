@@ -159,6 +159,8 @@ private:
     void set_af(uint16_t val);
 
 public:
+    CPU();
+    uint32_t fetch_instruction();
     // Decode & execute declarations
     // Jai
     bool decode_LD_20(uint32_t instruction);
