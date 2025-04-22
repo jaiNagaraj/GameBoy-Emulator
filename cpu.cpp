@@ -1043,12 +1043,8 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_ADD_47(uint32_t instruction) {
      // ADD A, n (immediate) - Opcode 0xC6, 2-byte instruction
-     pc++;
  
-     // Read immediate value 'n' from memory at the new PC location.
-     uint8_t n = ram->read_mem(pc);
- 
-     pc++;
+     uint8_t n = (instruction >> 8) & 0xFF;
      uint8_t a_val = regs[A_REGISTER];
  
      uint16_t result16 = static_cast<uint16_t>(a_val) + static_cast<uint16_t>(n);
@@ -1061,6 +1057,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, result16 > 0xFF); // C = 1 if carry from bit 7
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_ADC_48(uint32_t instruction) {
@@ -1120,11 +1117,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_ADC_50(uint32_t instruction) {
      // ADC A, n (immediate) - Opcode 0xCE, 2-byte instruction (pc points to the 0xCE opcode itself on entry)(?)
  
-     //Increment PC to point past the opcode (0xCE).
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
  
@@ -1138,6 +1131,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, result16 > 0xFF);
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_SUB_51(uint32_t instruction) {
@@ -1191,11 +1185,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_SUB_53(uint32_t instruction) {
      // SUB A, n (immediate) - Opcode 0xD6, 2-byte instruction
- 
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = (instruction >> 8) & 0xFF;
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val - n;
  
@@ -1206,6 +1196,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, a_val < n);
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_SBC_54(uint32_t instruction) {
@@ -1265,10 +1256,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_SBC_56(uint32_t instruction) {
      // SBC A, n (immediate) - Opcode 0xDE, 2-byte instruction
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = instruction >> 8 && 0xFF;
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
  
@@ -1282,6 +1270,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, static_cast<uint16_t>(a_val) < temp_sub);
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_CP_57(uint32_t instruction) {
@@ -1332,10 +1321,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_CP_59(uint32_t instruction) {
      // CP A, n (immediate) - Opcode 0xFE, 2-byte instruction
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = (static_cast<uint8_t>((instruction >> 8) & 0xFF));
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val - n;
  
@@ -1344,6 +1330,8 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(N_FLAG_BIT, true);
      set_flag(H_FLAG_BIT, (a_val & 0x0F) < (n & 0x0F));
      set_flag(C_FLAG_BIT, a_val < n);
+
+     pc += 2;
  }
  
  void CPU::execute_INC_60(uint32_t instruction) {
@@ -1461,10 +1449,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_AND_66(uint32_t instruction) {
      // AND A, n (immediate) - Opcode 0xE6, 2-byte instruction
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = (static_cast<uint8_t>((instruction >> 8) & 0xFF));
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val & n;
  
@@ -1475,6 +1460,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, false);
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_OR_67(uint32_t instruction) {
@@ -1526,10 +1512,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
  void CPU::execute_OR_69(uint32_t instruction) {
      // OR A, n (immediate) - Opcode 0xF6, 2-byte instruction.
-     pc++;
-     uint8_t n = ram->read_mem(pc);
-     pc++;
- 
+     uint8_t n = (static_cast<uint8_t>((instruction >> 8) & 0xFF));
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val | n;
  
@@ -1540,6 +1523,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(C_FLAG_BIT, false);
  
      regs[A_REGISTER] = result8;
+     pc += 2;
  }
  
  void CPU::execute_XOR_70(uint32_t instruction) {
