@@ -9,7 +9,7 @@ class GheithBoy {
     private:
         CPU* cpu;
         SDL_Window* window;
-        SDL_WindowSurface* window_surface;
+        SDL_Surface* window_surface;
         const int WINDOW_WIDTH = 160;
         const int WINDOW_HEIGHT = 144;
 };

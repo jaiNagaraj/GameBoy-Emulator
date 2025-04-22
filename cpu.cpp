@@ -279,13 +279,13 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_ADC_49(uint32_t instruction) {
      // ADC A, (HL) - Opcode 0x8E (0b10001110)
-     bool outcome = (instruction >> 16) & 0xFF == 0x8E;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0x8E;
      return outcome;
  }
  
  bool CPU::decode_ADC_50(uint32_t instruction) {
      // ADC A, n (immediate) - Opcode 0xCE (0b11001110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xCE;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xCE;
      return outcome;
  }
  
@@ -299,7 +299,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_SUB_52(uint32_t instruction) {
      // SUB A, (HL) - Opcode 0x96 (0b10010110)
-     bool outcome = (instruction >> 16) & 0xFF == 0x96;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0x96;
      return outcome;
  }
  
@@ -319,13 +319,13 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_SBC_55(uint32_t instruction) {
      // SBC A, (HL) - Opcode 0x9E (0b10011110)
-     bool outcome = (instruction >> 16) & 0xFF == 0x9E; // opcode
+     bool outcome = ((instruction >> 16) & 0xFF) == 0x9E; // opcode
      return outcome;
  }
  
  bool CPU::decode_SBC_56(uint32_t instruction) {
      // SBC A, n (immediate) - Opcode 0xDE (0b11011110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xDE;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xDE;
      return outcome;
  }
  
@@ -339,13 +339,13 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_CP_58(uint32_t instruction) {
      // CP A, (HL) - Opcode 0xBE (0b10111110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xBE;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xBE;
      return outcome;
  }
  
  bool CPU::decode_CP_59(uint32_t instruction) {
      // CP A, n (immediate) - Opcode 0xFE (0b11111110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xFE;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xFE;
      return outcome;
  }
  
@@ -359,7 +359,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_INC_61(uint32_t instruction) {
      // INC (HL) - Opcode 0x34 (0b00110100)
-     bool outcome = (instruction >> 16) & 0xFF == 0x34;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0x34;
      return outcome;
  }
  
@@ -387,7 +387,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_AND_65(uint32_t instruction) {
      // AND A, (HL) - Opcode 0xA6 (0b10100110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xA6;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xA6;
      return outcome;
  }
  
@@ -407,13 +407,13 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_OR_68(uint32_t instruction) {
      // OR A, (HL) - Opcode 0xB6 (0b10110110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xB6;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xB6;
      return outcome;
  }
  
  bool CPU::decode_OR_69(uint32_t instruction) {
      // OR A, n (immediate) - Opcode 0xF6 (0b11110110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xF6;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xF6;
      return outcome;
  }
  
@@ -427,7 +427,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_XOR_71(uint32_t instruction) {
      // XOR A, (HL) - Opcode 0xAE (0b10101110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xAE;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xAE;
      return outcome;
  }
 
