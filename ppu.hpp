@@ -2,8 +2,8 @@
 #include "RAM.hpp"
 
 class PPU {
-    const static int SCREEN_WIDTH = SCREEN_WIDTH;
-    const static int SCREEN_HEIGHT = SCREEN_HEIGHT;
+    const static int SCREEN_WIDTH = 160;
+    const static int SCREEN_HEIGHT = 144;
 
     class Tile {
         // This is an 8x8 pixel grid with four colors.
