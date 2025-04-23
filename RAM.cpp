@@ -29,7 +29,7 @@ uint16_t RAM::push_stack(uint16_t sp, uint16_t data) {
     return sp;
 }
 
-uint16_t RAM::pop_stack(uint16_t sp) {
+uint32_t RAM::pop_stack(uint16_t sp) {
     if (sp == 0xFFFE)
         // Halt program -> stack underflow
     
@@ -42,6 +42,7 @@ uint16_t RAM::pop_stack(uint16_t sp) {
     uint8_t msb = read_mem(sp); // Get msb from stack, increment SP
 
     uint16_t data = (static_cast<uint16_t>(msb) << 8) | lsb; // Combine MSB and LSB
+    uint32_t ret_val = static_cast<uint32_t>((static_cast<uint32_t>(sp) << 16) | data); // SP in upper 16 bits, data in lower 16 bits
 
-    return data;
+    return ret_val;
 }

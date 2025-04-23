@@ -49,6 +49,6 @@ uint16_t MMU::push_stack(uint16_t sp, uint16_t data) {
     (*ram).push_stack(sp, data);
 }
 
-uint16_t MMU::pop_stack(uint16_t sp) {
+uint32_t MMU::pop_stack(uint16_t sp) {
     return (*ram).pop_stack(sp);
 }
