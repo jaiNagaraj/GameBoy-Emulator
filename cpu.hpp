@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "RAM.hpp"
+#include "mmu.hpp"
 
 const int A_REGISTER = 7;
 const int B_REGISTER = 0;
@@ -135,7 +135,7 @@ enum INSTRUCTION {
 
 class CPU {
 private:
-    RAM *ram;
+    MMU *mmu;
     uint8_t regs[8]; // 0: B, 1: C, 2: D, 3: E, 4: H, 5: L, 6: F, 7: A
     uint16_t pc; // Program Counter
     uint16_t sp; // Stack Pointer
@@ -160,6 +160,8 @@ private:
 
 public:
     CPU();
+    void connect_mmu(MMU *mmu);
+
     uint32_t fetch_instruction();
     // Decode & execute declarations
     // Jai

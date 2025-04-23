@@ -5,8 +5,6 @@
 #include <iostream>
 
 CPU::CPU() {
-    ram = new RAM();
-
     pc = 0x0100;
     sp = 0xFFFE;
 
@@ -21,6 +19,10 @@ CPU::CPU() {
     regs[E_REGISTER] = 0xD8;
     regs[H_REGISTER] = 0x01;
     regs[L_REGISTER] = 0x4D;
+}
+
+void CPU::connect_mmu(MMU *mmu) {
+    this->mmu = mmu;
 }
 
 // Helper function to set/clear a specific flag bit
@@ -745,7 +747,7 @@ void CPU::execute_LD_22(uint32_t instruction) {
     uint8_t operation = static_cast<uint8_t>((instruction >> 16) & 0xFF);
     uint8_t reg = (operation & 0b00111000) >> 3;
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[reg] = data;
     pc++;
@@ -758,7 +760,7 @@ void CPU::execute_LD_23(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[reg]; 
 
-   ram->write_mem(addr, data);
+   mmu->write_mem(addr, data);
    pc++;
 }
 
@@ -768,14 +770,14 @@ void CPU::execute_LD_24(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
 
-    ram->write_mem(addr, n);
+    mmu->write_mem(addr, n);
     pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_25(uint32_t instruction) {
     // LD A, (BC)
     uint16_t addr = get_bc(); // Get the BC register value
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
     pc++;
@@ -784,7 +786,7 @@ void CPU::execute_LD_25(uint32_t instruction) {
 void CPU::execute_LD_26(uint32_t instruction) {
     // LD A, (DE)
     uint16_t addr = get_de(); // Get the DE register value
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
     pc++;
@@ -795,7 +797,7 @@ void CPU::execute_LD_27(uint32_t instruction) {
     uint16_t addr = get_bc(); // Get the BC register value
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
     pc++;
 }
 
@@ -804,7 +806,7 @@ void CPU::execute_LD_28(uint32_t instruction) {
     uint16_t addr = get_de(); // Get the DE register value
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
     pc++;
 }
 
@@ -815,7 +817,7 @@ void CPU::execute_LD_29(uint32_t instruction) {
     uint16_t addr = msb;
     addr <<= 8;
     addr |= lsb; // Combine LSB and MSB to form the address
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
     pc += 3; // one for instruction, two for imm
@@ -830,7 +832,7 @@ void CPU::execute_LD_30(uint32_t instruction) {
     addr |= lsb; // Combine LSB and MSB to form the address
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
     pc += 3; // one for instruction, two for imm
 }
 
@@ -839,7 +841,7 @@ void CPU::execute_LD_31(uint32_t instruction) {
     uint8_t c_val = regs[C_REGISTER]; // Get the C register value
     uint16_t addr = 0xFF00 | c_val; // Address is 0xFF00 + C
 
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
     pc++;
@@ -852,7 +854,7 @@ void CPU::execute_LD_32(uint32_t instruction) {
 
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
     pc++;
 }
 
@@ -861,7 +863,7 @@ void CPU::execute_LD_33(uint32_t instruction) {
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
     uint16_t addr = 0xFF00 | n; // Address is 0xFF00 + n
 
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
     pc += 2; // one for instruction, one for imm
@@ -874,14 +876,14 @@ void CPU::execute_LD_34(uint32_t instruction) {
 
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
     pc += 2; // one for instruction, one for imm
 }
 
 void CPU::execute_LD_35(uint32_t instruction) {
     // LD A, (HL-)
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 
@@ -895,7 +897,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
 
     // Decrement HL after writing
     set_hl(addr - 1);
@@ -905,7 +907,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
 void CPU::execute_LD_37(uint32_t instruction) {
     // LD A, (HL+)
     uint16_t addr = get_hl(); // Get the HL register value
-    uint8_t data = ram->read_mem(addr); 
+    uint8_t data = mmu->read_mem(addr); 
 
     regs[A_REGISTER] = data;
 
@@ -919,7 +921,7 @@ void CPU::execute_LD_38(uint32_t instruction) {
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
 
-    ram->write_mem(addr, data);
+    mmu->write_mem(addr, data);
 
     // Increment HL after writing
     set_hl(addr + 1);
@@ -953,8 +955,8 @@ void CPU::execute_LD_40(uint32_t instruction) {
     addr <<= 8;
     addr |= lsb; // Combine LSB and MSB to form the address
 
-    ram->write_mem(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
-    ram->write_mem(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
+    mmu->write_mem(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
+    mmu->write_mem(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
     pc += 3; // one for instruction, two for imm
 }
 
@@ -980,9 +982,9 @@ void CPU::execute_PUSH_42(uint32_t instruction) {
 
     // Push the value of rr onto the stack
     sp--;
-    ram->write_mem(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
+    mmu->write_mem(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
     sp--;
-    ram->write_mem(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
+    mmu->write_mem(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
     pc++;
 }
 
@@ -992,8 +994,8 @@ void CPU::execute_POP_43(uint32_t instruction) {
     uint16_t data;
 
     // Pop the value from the stack into rr
-    uint8_t lsb = ram->read_mem(sp++); // Get lsb from stack, increment SP
-    uint8_t msb = ram->read_mem(sp++); // Get msb from stack, increment SP
+    uint8_t lsb = mmu->read_mem(sp++); // Get lsb from stack, increment SP
+    uint8_t msb = mmu->read_mem(sp++); // Get msb from stack, increment SP
 
     data = (static_cast<uint16_t>(msb) << 8) | lsb; // Combine MSB and LSB
 
@@ -1053,7 +1055,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_ADD_46(uint32_t instruction) {
      // ADD A, (HL) - Opcode 0b10000110/0x86
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr); 
+     uint8_t data = mmu->read_mem(addr); 
      
      uint8_t a_val = regs[A_REGISTER];
  
@@ -1075,7 +1077,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      pc++;
  
      // Read immediate value 'n' from memory at the new PC location.
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
  
      pc++;
      uint8_t a_val = regs[A_REGISTER];
@@ -1129,7 +1131,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // ADC A, (HL) - Opcode 0x8E, 1-byte instruction.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
  
@@ -1151,7 +1153,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  
      //Increment PC to point past the opcode (0xCE).
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1203,7 +1205,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SUB A, (HL) - Opcode 0x96, 1-byte instruction.
      uint16_t addr = get_hl();
  
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
  
      uint8_t result8 = a_val - data;
@@ -1222,7 +1224,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SUB A, n (immediate) - Opcode 0xD6, 2-byte instruction
  
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1274,7 +1276,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // SBC A, (HL) - Opcode 0x9E, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
  
      uint8_t a_val = regs[A_REGISTER];
      uint8_t carry = get_flag(C_FLAG_BIT) ? 1 : 0;
@@ -1295,7 +1297,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_SBC_56(uint32_t instruction) {
      // SBC A, n (immediate) - Opcode 0xDE, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1345,7 +1347,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // CP A, (HL) - Opcode 0xBE, 1-byte instruction.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
  
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val - data; // Temporary result for Z flag
@@ -1362,7 +1364,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_CP_59(uint32_t instruction) {
      // CP A, n (immediate) - Opcode 0xFE, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1396,7 +1398,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // INC (HL) - Opcode 0x34, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t old_val = ram->read_mem(addr);
+     uint8_t old_val = mmu->read_mem(addr);
      uint8_t new_val = old_val + 1;
  
      // Set flags
@@ -1405,7 +1407,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(H_FLAG_BIT, ((old_val & 0x0F) + 1) > 0x0F);
      // no change to C flag
  
-     ram->write_mem(addr, new_val);
+     mmu->write_mem(addr, new_val);
      pc++;
  }
  
@@ -1429,7 +1431,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // DEC (HL) - Opcode 0x35, 1-byte instruction
  
      uint16_t addr = get_hl();
-     uint8_t old_val = ram->read_mem(addr);
+     uint8_t old_val = mmu->read_mem(addr);
      uint8_t new_val = old_val - 1;
  
      // Set flags
@@ -1437,7 +1439,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      set_flag(N_FLAG_BIT, true);
      set_flag(H_FLAG_BIT, (old_val & 0x0F) == 0x00);
  
-     ram->write_mem(addr, new_val);
+     mmu->write_mem(addr, new_val);
      pc++;
  }
  
@@ -1474,7 +1476,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_AND_65(uint32_t instruction) {
      // AND A, (HL) - Opcode 0xA6,  1-byte instruction
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val & data;
  
@@ -1491,7 +1493,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_AND_66(uint32_t instruction) {
      // AND A, n (immediate) - Opcode 0xE6, 2-byte instruction
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1539,7 +1541,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // OR A, (HL) - Opcode 0xB6, 1-byte instruction
      uint16_t addr = get_hl();
  
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val | data;
  
@@ -1556,7 +1558,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
  void CPU::execute_OR_69(uint32_t instruction) {
      // OR A, n (immediate) - Opcode 0xF6, 2-byte instruction.
      pc++;
-     uint8_t n = ram->read_mem(pc);
+     uint8_t n = mmu->read_mem(pc);
      pc++;
  
      uint8_t a_val = regs[A_REGISTER];
@@ -1606,7 +1608,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
      // Assumption: pc points to the opcode itself on entry.
  
      uint16_t addr = get_hl();
-     uint8_t data = ram->read_mem(addr);
+     uint8_t data = mmu->read_mem(addr);
      uint8_t a_val = regs[A_REGISTER];
      uint8_t result8 = a_val ^ data;
  
@@ -1871,7 +1873,7 @@ void CPU::execute_RLC_86(uint32_t instruction) {
 
 void CPU::execute_RLC_87(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = hl & 0x80; // Check if the highest bit is set
 
     // Rotate left
@@ -1883,7 +1885,7 @@ void CPU::execute_RLC_87(uint32_t instruction) {
     set_flag(H_FLAG_BIT, false);
     set_flag(C_FLAG_BIT, carry);
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     pc += 2; // 2-byte instruction
 }
@@ -1909,7 +1911,7 @@ void CPU::execute_RRC_88(uint32_t instruction) {
 
 void CPU::execute_RRC_89(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = hl & 0x01; // Check if the lowest bit is set
 
     // Rotate right
@@ -1921,7 +1923,7 @@ void CPU::execute_RRC_89(uint32_t instruction) {
     set_flag(H_FLAG_BIT, false);
     set_flag(C_FLAG_BIT, carry);
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     pc += 2; // 2-byte instruction
 }
@@ -1949,7 +1951,7 @@ void CPU::execute_RL_90(uint32_t instruction) {
 
 void CPU::execute_RL_91(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
 
     // Set flags
@@ -1960,7 +1962,7 @@ void CPU::execute_RL_91(uint32_t instruction) {
     // Rotate left through carry
     hl = (hl << 1) | carry;
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     // Must set after register updated
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -1991,7 +1993,7 @@ void CPU::execute_RR_92(uint32_t instruction) {
 
 void CPU::execute_RR_93(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = get_flag(C_FLAG_BIT); // Get the carry flag
 
     // Set flags
@@ -2002,7 +2004,7 @@ void CPU::execute_RR_93(uint32_t instruction) {
     // Rotate right through carry
     hl = (hl >> 1) | (carry << 7);
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     // Must set after register updated
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2031,13 +2033,13 @@ void CPU::execute_SLA_94(uint32_t instruction) {
 
 void CPU::execute_SLA_95(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = hl & 0x80; // Check if the highest bit is set
 
     // Shift left
     hl <<= 1;
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     // Set flags
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2069,13 +2071,13 @@ void CPU::execute_SRA_96(uint32_t instruction) {
 
 void CPU::execute_SRA_97(uint32_t instruction) {
     uint16_t addr = get_hl();
-    uint8_t hl = ram->read_mem(addr);
+    uint8_t hl = mmu->read_mem(addr);
     bool carry = hl & 0x01; // Check if the lowest bit is set
 
     // Shift right (bit 7 remains unchanged)
     hl = (hl & 0x80) | (hl >> 1);
 
-    ram->write_mem(addr, hl);
+    mmu->write_mem(addr, hl);
 
     // Set flags
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2109,11 +2111,11 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
 
 void CPU::execute_SWAP_99(uint32_t instruction) {
     // Retrieve value
-    uint8_t cur_data = (*ram).read_mem(get_hl());
+    uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Swap nibbles
     uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
     // Store value
-    (*ram).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(get_hl(), new_data);
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -2146,11 +2148,11 @@ void CPU::execute_SRL_100(uint32_t instruction) {
 
 void CPU::execute_SRL_101(uint32_t instruction) {
     // Retrieve value
-    uint8_t cur_data = (*ram).read_mem(get_hl());
+    uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Shift right
     uint8_t new_data = cur_data >> 1;
     // Store value
-    (*ram).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(get_hl(), new_data);
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -2184,7 +2186,7 @@ void CPU::execute_BIT_103(uint32_t instruction) {
     uint8_t bit = (opcode >> 3) & 0b00000111;
     
     // Retrieve value
-    uint8_t cur_data = (*ram).read_mem(get_hl());
+    uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Check bit
     bool val = (cur_data >> bit) & 1;
 
@@ -2216,11 +2218,11 @@ void CPU::execute_RES_105(uint32_t instruction) {
     uint8_t bit = (opcode >> 3) & 0b00000111;
 
     // Retrieve value
-    uint8_t cur_data = (*ram).read_mem(get_hl());
+    uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Clear bit
     uint8_t new_data = cur_data & ~(1 << bit);
     // Store value
-    (*ram).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(get_hl(), new_data);
 
     pc += 2; // 2-byte instruction
 }
@@ -2245,11 +2247,11 @@ void CPU::execute_SET_107(uint32_t instruction) {
     uint8_t bit = (opcode >> 3) & 0b00000111;
 
     // Retrieve value
-    uint8_t cur_data = (*ram).read_mem(get_hl());
+    uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Set bit
     uint8_t new_data = cur_data | (1 << bit);
     // Store value
-    (*ram).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(get_hl(), new_data);
 
     pc += 2; // 2-byte instruction
 }
@@ -2364,8 +2366,8 @@ void CPU::execute_CALL_116(uint32_t instruction) {
 
     // Push current PC onto stack
     sp -= 2;
-    (*ram).write_mem(sp, pc & 0xFF); // PC LSB
-    (*ram).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
+    (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
+    (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
     pc = call_addr;
 }
@@ -2402,8 +2404,8 @@ void CPU::execute_CALL_117(uint32_t instruction) {
 
         // Push current PC onto stack
         sp -= 2;
-        (*ram).write_mem(sp, pc & 0xFF); // PC LSB
-        (*ram).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
+        (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
+        (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
         pc = call_addr;
     } else {
@@ -2413,8 +2415,8 @@ void CPU::execute_CALL_117(uint32_t instruction) {
 
 void CPU::execute_RET_119(uint32_t instruction) {
     // Pop address from stack
-    uint8_t lsb = (*ram).read_mem(sp);
-    uint8_t msb = (*ram).read_mem(sp + 1);
+    uint8_t lsb = (*mmu).read_mem(sp);
+    uint8_t msb = (*mmu).read_mem(sp + 1);
     sp += 2;
 
     // Calculate return address
@@ -2448,8 +2450,8 @@ void CPU::execute_RET_120(uint32_t instruction) {
 
     if (condition_met) {
         // Pop address from stack
-        uint8_t lsb = (*ram).read_mem(sp);
-        uint8_t msb = (*ram).read_mem(sp + 1);
+        uint8_t lsb = (*mmu).read_mem(sp);
+        uint8_t msb = (*mmu).read_mem(sp + 1);
         sp += 2;
 
         // Calculate return address
@@ -2463,8 +2465,8 @@ void CPU::execute_RET_120(uint32_t instruction) {
 
 void CPU::execute_RETI_121(uint32_t instruction) {
     // Pop address from stack
-    uint8_t lsb = (*ram).read_mem(sp);
-    uint8_t msb = (*ram).read_mem(sp + 1);
+    uint8_t lsb = (*mmu).read_mem(sp);
+    uint8_t msb = (*mmu).read_mem(sp + 1);
     sp += 2;
 
     // Calculate return address
@@ -2481,8 +2483,8 @@ void CPU::execute_RST_122(uint32_t instruction) {
 
     // Push current PC onto stack
     sp -= 2;
-    (*ram).write_mem(sp, pc & 0xFF); // PC LSB
-    (*ram).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
+    (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
+    (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
     // Jump based on addr
     switch (addr) {
