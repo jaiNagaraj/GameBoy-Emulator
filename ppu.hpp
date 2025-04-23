@@ -2,6 +2,9 @@
 #include "RAM.hpp"
 
 class PPU {
+    const static int SCREEN_WIDTH = SCREEN_WIDTH;
+    const static int SCREEN_HEIGHT = SCREEN_HEIGHT;
+
     class Tile {
         // This is an 8x8 pixel grid with four colors.
 		// The colors are represented as 2 bits per pixel.
@@ -22,10 +25,10 @@ class PPU {
     uint8_t WX_reg;
     uint8_t WY_reg;
 
-    COLOR pixelData[160][144];
-	COLOR backgroundData[160][144];
-	COLOR windowData[160][144];
-	COLOR spriteData[160][144];
+    COLOR pixelData[SCREEN_HEIGHT][SCREEN_WIDTH];
+	COLOR backgroundData[SCREEN_HEIGHT][SCREEN_WIDTH];
+	COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
+	COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     PPU();
     PPU(RAM* ram);
