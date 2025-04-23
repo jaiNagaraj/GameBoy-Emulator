@@ -22,6 +22,24 @@ uint64_t** PPU::writePixels() {
 	updateBackground();
 	updateWindow();
 	updateSprites();
+
+	// now, mix the background and the window
+	for (int i = 0; i < SCREEN_HEIGHT; i++) {
+		for (int j = 0; j < SCREEN_WIDTH; j++) {
+			pixelData[i][j] = backgroundData[i][j];
+		}
+	}
+	// now overlay the window
+	for (int i = 0; i < SCREEN_HEIGHT; i++) {
+		for (int j = 0; j < SCREEN_WIDTH; j++) {
+			// account for WX, WY
+			int screenX = j + WX_reg - 7;
+			int screenY = i + WY_reg;
+			if (screenX >= 0 && screenX < SCREEN_WIDTH && screenY >= 0 && screenY < SCREEN_HEIGHT) {
+				pixelData[screenY][screenX] = windowData[i][j];
+			}
+		}
+	}
 }
 
 void PPU::updateRegs() {
@@ -67,13 +85,11 @@ void PPU::updateBackground() {
 		}
 	}
 
-	// now, apply scroll (TODO: VERIFY THIS PART)
-	for (int i = 0; i < 256; i++) {
-		for (int j = 0; j < 256; j++) {
-			int x = (i - SCX_reg) % 256;
-			int y = (j - SCY_reg) % 256;
-			if (x < 0) x += 256;
-			if (y < 0) y += 256;
+	// now, apply scroll
+	for (int i = 0; i < 160; i++) {
+		for (int j = 0; j < 144; j++) {
+			int x = (i + SCX_reg) % 256;
+			int y = (j + SCY_reg) % 256;
 			backgroundData[i][j] = full_map[x][y];
 		}
 	}
