@@ -9,7 +9,7 @@ MMAP::MMAP() {
     /*Loaded from ROM file*/
 
     // VRAM : 0x8000 - 0x9FFF
-    for (size_t i = 0xA000; i < 0xC000; i++)
+    for (size_t i = 0x8000; i < 0xA000; i++)
         MMAP::mem[i] = 0;
 
     // External RAM : 0xA000 - 0xBFFF

@@ -9,7 +9,7 @@
 #include "mmap.hpp"
 
 class MMU {
-private: 
+private:
     CPU *cpu;
     PPU *ppu;
     RAM *ram;
@@ -29,4 +29,5 @@ public:
     uint16_t push_stack(uint16_t sp, uint16_t data);
     uint16_t pop_stack(uint16_t sp);
 
+    MMAP* get_mmap();
 };
