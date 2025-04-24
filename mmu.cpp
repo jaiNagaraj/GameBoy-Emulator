@@ -4,12 +4,12 @@ MMU::MMU() {
 
 }
 
-void MMU::connect_cpu(CPU *cpu) {
-    this->cpu = cpu;
-}
-void MMU::connect_ppu(PPU *ppu) {
-    this->ppu = ppu;
-}
+//void MMU::connect_cpu(CPU *cpu) {
+//    this->cpu = cpu;
+//}
+//void MMU::connect_ppu(PPU *ppu) {
+    //this->ppu = ppu;
+//}
 void MMU::connect_ram(RAM *ram) {
     this->ram = ram;
 }

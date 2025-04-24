@@ -1,18 +1,21 @@
+#pragma once
 #include <stdint.h>
 #include "mmu.hpp"
 
+enum COLOR {
+    WHITE_OR_TRANSPARENT = 0,
+    LIGHT_GRAY = 1,
+    DARK_GRAY = 2,
+    BLACK = 3,
+    WINDOW_TRANSPARENT = 4,
+};
+
 class PPU {
+private:
     const static int SCREEN_WIDTH = 160;
     const static int SCREEN_HEIGHT = 144;
 
-    enum COLOR {
-        TRANSPARENT = 0,
-        WHITE = 1,
-        LIGHT_GRAY = 2,
-        DARK_GRAY = 3,
-    };
 
-    MMU* mmu;
     uint8_t LCDC_reg;
     uint8_t SCX_reg;
     uint8_t SCY_reg;
@@ -20,18 +23,21 @@ class PPU {
     uint8_t WY_reg;
     uint8_t OBP0_reg;
     uint8_t OBP1_reg;
+    uint8_t BGP_reg;
+    MMU* mmu;
 
     COLOR pixelData[SCREEN_HEIGHT][SCREEN_WIDTH];
 	COLOR backgroundData[SCREEN_HEIGHT][SCREEN_WIDTH];
 	COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
 	COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
+public:
+
     PPU();
     ~PPU();
     void connect_mmu(MMU* mmu);
 
-    uint64_t** writePixels();
-    void update_LCDC();
+    uint32_t** writePixels();
 	void updateRegs();
     void updateBackground();
     void updateWindow();
