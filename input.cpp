@@ -1,6 +1,5 @@
 #include "input.hpp"
 
-// call this from gb.cpp based on SDL_KEYDOWN/UP
 void Input::set_button_state(uint8_t button_index, bool pressed) {
     // This needs mapping from SDL keycodes to button indices
     // Example mapping:

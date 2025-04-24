@@ -17,6 +17,10 @@ void MMU::connect_mmap(MMAP *mmap) {
     this->mmap = mmap;
 }
 
+void MMU::connect_input(Input *input) {
+    this->input = input; 
+}
+
 uint8_t MMU::read_mem(uint16_t addr) {
     // --- VRAM Read ---
     if (addr >= 0x8000 && addr <= 0x9FFF) {
@@ -44,10 +48,8 @@ uint8_t MMU::read_mem(uint16_t addr) {
 
         switch (addr) {
             case 0xFF00: // JOYP - Joypad Input Register
-                // TODO: Implement Joypad handling - return value based on selected buttons/d-pad and bits 4/5
-                // For now, return value stored in MMAP, but likely needs update from Input component
-                // std::cout << "MMU Read: JOYP (0xFF00) - Needs Input Component" << std::endl;
-                return mmap->read_mem(addr) | 0xC0; // Top 2 bits seem fixed, bottom 4 depend on selection & input
+                // Read the selection bits from MMAP and pass to Input handler
+                return input->get_joyp_state(mmap->read_mem(addr));
 
             case 0xFF04: // DIV - Divider Register (Timer)
                 // TODO: Connect to Timer component if it tracks DIV internally

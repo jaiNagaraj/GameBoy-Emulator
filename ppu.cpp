@@ -50,11 +50,11 @@ uint64_t** PPU::writePixels() {
 
 void PPU::updateRegs() {
 	// update the registers for graphics
-	LCDC_reg = ram->read_mem(0xFF40);
-	SCY_reg = ram->read_mem(0xFF42);
-	SCX_reg = ram->read_mem(0xFF43);
-	WY_reg = ram->read_mem(0xFF4A);
-	WX_reg = ram->read_mem(0xFF4B);
+	LCDC_reg = read_mem(0xFF40);
+	SCY_reg = read_mem(0xFF42);
+	SCX_reg = read_mem(0xFF43);
+	WY_reg = read_mem(0xFF4A);
+	WX_reg = read_mem(0xFF4B);
 }
 
 void PPU::updateBackground() {
@@ -71,17 +71,17 @@ void PPU::updateBackground() {
 			// get tiles in this row
 			uint8_t tile_addr;
 			if (simple_addressing_mode) {
-				uint8_t tile_offset = ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
+				uint8_t tile_offset = read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			else {
-				int8_t tile_offset = static_cast<int8_t>(ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
+				int8_t tile_offset = static_cast<int8_t>(read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			// transform tile data into pixel data
 			for (int k = 0; k < TILE_HEIGHT; k++) {
-				uint8_t lsbs = ram->read_mem(tile_addr + k*2);
-				uint8_t msbs = ram->read_mem(tile_addr + k*2 + 1);
+				uint8_t lsbs = read_mem(tile_addr + k*2);
+				uint8_t msbs = read_mem(tile_addr + k*2 + 1);
 				for (int l = 0; l < TILE_WIDTH; l++) {
 					// get color from each bit pair and store in map
 					uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
@@ -102,7 +102,7 @@ void PPU::updateBackground() {
 	}
 }
   
-uint8_t PPU::read_memory(uint16_t addr) {
+uint8_t PPU::read_mem(uint16_t addr) {
     if (!mmu) {
         throw std::runtime_error("PPU Error: MMU not connected!");
     }
@@ -121,7 +121,7 @@ uint8_t PPU::read_memory(uint16_t addr) {
     }
 }
 
-void PPU::write_memory(uint16_t addr, uint8_t data) {
+void PPU::write_mem(uint16_t addr, uint8_t data) {
     if (!mmu) {
         throw std::runtime_error("PPU Error: MMU not connected!");
     }

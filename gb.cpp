@@ -50,7 +50,7 @@ bool GheithBoy::load_rom(MMAP* mmap, const std::string& rom_path) {
     rom_file.close();
 
     // Limit loading to 32KB for now
-    size_t load_size = std::min((size_t)size, (size_t)0x8000); // Load up to 32KB
+    size_t load_size = std::min((size_t)size, (size_t)0x8000);
     for (size_t i = 0; i < load_size; ++i) {
         mmap->write_mem(static_cast<uint16_t>(i), static_cast<uint8_t>(buffer[i]));
     }
@@ -140,6 +140,18 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 
     bool keep_window_open = true;
     while (keep_window_open) {
+        // Event handling
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) { // Process all pending events
+            if (event.type == SDL_QUIT) {
+                keep_window_open = false;
+            }
+            // handle input events
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+                handle_input(event);
+            }
+        }
+
         // fetch instruction
         uint32_t instruction = cpu->fetch_instruction();
 

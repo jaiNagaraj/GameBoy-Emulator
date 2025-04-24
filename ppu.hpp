@@ -41,6 +41,6 @@ class PPU {
     void updateWindow();
     void updateSprites();
 
-    uint8_t read_memory(uint16_t addr);
-    void write_memory(uint16_t addr, uint8_t data);
+    uint8_t read_mem(uint16_t addr);
+    void write_mem(uint16_t addr, uint8_t data);
 };
