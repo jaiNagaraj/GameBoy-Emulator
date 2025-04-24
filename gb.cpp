@@ -81,10 +81,10 @@ void GheithBoy::handle_input(const SDL_Event& event) {
     if (button_index != -1) {
         input->set_button_state(button_index, pressed);
         // Optional: Request Joypad interrupt if a button was pressed
-        // if (pressed && mmu) {
-        //    uint8_t if_reg = mmu->read_mem(0xFF0F);
-        //    mmu->write_mem(0xFF0F, if_reg | 0x10); // Set Joypad interrupt flag (bit 4)
-        // }
+        if (pressed && mmu) {
+           uint8_t if_reg = mmu->read_mem(0xFF0F);
+           mmu->write_mem(0xFF0F, if_reg | 0x10); // Set Joypad interrupt flag (bit 4)
+        }
     }
 }
 
@@ -336,12 +336,12 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         }
 
         // screen is updated, reflect that in SDL
+        // Call ppu step?
         ;
     }
-}
-
-void GheithBoy::load_rom(/* MMAP* mmap, const std::string& rom_path */) {
-    // TODO: Open the ROM file, read its contents, and write them
-    // into the mmap->mem array starting at address 0x0000.
-    std::cout << "ROM Loading not implemented yet." << std::endl;
+    // Destroyer
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }

@@ -157,10 +157,7 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
 
         switch (addr) {
             case 0xFF00: // JOYP - Joypad Input Register
-                // Bits 4 and 5 are writable (select button/d-pad lines)
-                // TODO: Update Input handler state based on data written
-                // std::cout << "MMU Write: JOYP (0xFF00) = 0x" << std::hex << (int)data << " - Needs Input Component" << std::endl;
-                // Only write relevant bits (4 and 5), keep others as they were
+                // Only write bits (4 and 5)
                 mmap->write_mem(addr, (mmap->read_mem(addr) & 0xCF) | (data & 0x30));
                 break;
 
