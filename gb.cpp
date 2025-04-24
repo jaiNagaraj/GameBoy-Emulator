@@ -107,8 +107,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
-    mmu->connect_ppu(ppu);
-    mmu->connect_cpu(cpu);
+    //mmu->connect_ppu(ppu);
+    //mmu->connect_cpu(cpu);
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);   
@@ -251,9 +251,6 @@ void GheithBoy::run_gb(const std::string& rom_path) {
             // other stuff
         } else if (cpu->decode_ADC_50(instruction)) {
             cpu->execute_ADC_50(instruction);
-            // other stuff
-        } else if (cpu->decode_SUB_50(instruction)) {
-            cpu->execute_SUB_50(instruction);
             // other stuff
         } else if (cpu->decode_SUB_51(instruction)) {
             cpu->execute_SUB_51(instruction);

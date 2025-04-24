@@ -11,6 +11,8 @@
 class GheithBoy {
     public:
         void run_gb(const std::string& rom_path);
+        GheithBoy();
+        ~GheithBoy();
     private:
         bool load_rom(MMAP* mmap, const std::string& rom_path);
         CPU* cpu;

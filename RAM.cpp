@@ -1,5 +1,7 @@
 #include "RAM.hpp"
 
+RAM::RAM() : mmap(nullptr) {}
+
 void RAM::connect_mmap(MMAP *mmap) {
     this->mmap = mmap;
 }
