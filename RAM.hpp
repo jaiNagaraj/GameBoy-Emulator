@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdexcept>
+#include <iostream> 
 
 #include "mmap.hpp"
 
@@ -25,6 +27,6 @@ public:
     void write_mem(uint16_t addr, uint8_t data);
 
     // Stack operations
-    uint16_t push_stack(uint16_t sp, uint16_t data);
-    uint32_t pop_stack(uint16_t sp);
+    void push_stack(uint16_t sp, uint16_t data);
+    uint16_t pop_stack(uint16_t sp);
 };

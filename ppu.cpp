@@ -12,51 +12,75 @@ const int TILE_HEIGHT = 8;
 const int MAP_WIDTH = 32;
 const int MAP_HEIGHT = 32;
 
-PPU::PPU() {
-	ram = new RAM();
-}
+const uint16_t OAM_START = 0xFE00;
+const int16_t SPRITE_Y_OFFSET = 16;
+const int16_t SPRITE_X_OFFSET = 8;
 
-PPU::PPU(RAM* ram) {
-	this->ram = ram;
+
+PPU::PPU() : mmu(nullptr) { // Initialize mmu pointer
 }
 
 PPU::~PPU() {
-	delete ram;
+}
+
+void PPU::connect_mmu(MMU* mmu_ptr) {
+    this->mmu = mmu_ptr;
 }
 
 uint64_t** PPU::writePixels() {
 	updateRegs();
 	updateBackground();
 	updateWindow();
-	updateSprites();
 
 	// now, mix the background and the window
 	for (int i = 0; i < SCREEN_HEIGHT; i++) {
 		for (int j = 0; j < SCREEN_WIDTH; j++) {
 			pixelData[i][j] = backgroundData[i][j];
-		}
-	}
-	// now overlay the window
-	for (int i = 0; i < SCREEN_HEIGHT; i++) {
-		for (int j = 0; j < SCREEN_WIDTH; j++) {
-			// account for WX, WY
-			int screenX = j + WX_reg - 7;
-			int screenY = i + WY_reg;
-			if (screenX >= 0 && screenX < SCREEN_WIDTH && screenY >= 0 && screenY < SCREEN_HEIGHT) {
-				pixelData[screenY][screenX] = windowData[i][j];
+
+			// display window data
+			if (windowData[i][j] != TRANSPARENT) {
+				pixelData[i][j] = windowData[i][j];
 			}
 		}
 	}
+
+	// i commented this out because i already accounted for the offset
+	// now overlay the window
+	// for (int i = 0; i < SCREEN_HEIGHT; i++) {
+	// 	for (int j = 0; j < SCREEN_WIDTH; j++) {
+	// 		// account for WX, WY
+	// 		int screenX = j + WX_reg - 7;
+	// 		int screenY = i + WY_reg;
+	// 		if (screenX >= 0 && screenX < SCREEN_WIDTH && screenY >= 0 && screenY < SCREEN_HEIGHT) {
+	// 			pixelData[screenY][screenX] = windowData[i][j];
+	// 		}
+	// 	}
+	// }
+
+	updateSprites(); // must be called last, deals with priority internally
 	// finally, overlay the sprites
+	if (~(LCDC_reg & 0b10)) { // sprites not enabled
+		return pixelData;
+	}
+	for (int r = 0; r < SCREEN_HEIGHT; r++) {
+		for (int c = 0; c < SCREEN_WIDTH; c++) {
+			pixelData[r][c] = spriteData[r][c];
+		}
+	}
+
+
+	return pixelData;
 }
 
 void PPU::updateRegs() {
 	// update the registers for graphics
-	LCDC_reg = ram->read_mem(0xFF40);
-	SCY_reg = ram->read_mem(0xFF42);
-	SCX_reg = ram->read_mem(0xFF43);
-	WY_reg = ram->read_mem(0xFF4A);
-	WX_reg = ram->read_mem(0xFF4B);
+	LCDC_reg = read_mem(0xFF40);
+	SCY_reg = read_mem(0xFF42);
+	SCX_reg = read_mem(0xFF43);
+	WY_reg = read_mem(0xFF4A);
+	WX_reg = read_mem(0xFF4B);
+	OBP0_reg = read_mem(0xFF48);
+	OBP1_reg = read_mem(0xFF49);
 }
 
 void PPU::updateBackground() {
@@ -73,17 +97,17 @@ void PPU::updateBackground() {
 			// get tiles in this row
 			uint8_t tile_addr;
 			if (simple_addressing_mode) {
-				uint8_t tile_offset = ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
+				uint8_t tile_offset = read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			else {
-				int8_t tile_offset = static_cast<int8_t>(ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
+				int8_t tile_offset = static_cast<int8_t>(read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			// transform tile data into pixel data
 			for (int k = 0; k < TILE_HEIGHT; k++) {
-				uint8_t lsbs = ram->read_mem(tile_addr + k*2);
-				uint8_t msbs = ram->read_mem(tile_addr + k*2 + 1);
+				uint8_t lsbs = read_mem(tile_addr + k*2);
+				uint8_t msbs = read_mem(tile_addr + k*2 + 1);
 				for (int l = 0; l < TILE_WIDTH; l++) {
 					// get color from each bit pair and store in map
 					uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
@@ -102,4 +126,189 @@ void PPU::updateBackground() {
 			backgroundData[i][j] = full_map[y][x];
 		}
 	}
+}
+
+void PPU::updateWindow() {
+	if (~(LCDC_reg & 0b1)) { // bit 0 window becomes white
+		for (int r = 0; r < 160; r++) {
+			for (int c = 0; c < 144; c++) {
+				windowData[r][c] = WHITE;
+			}
+		}
+		return;
+	}
+
+	// initializing to transparent
+	for (int r = 0; r < 160; r++) {
+		for (int c = 0; c < 144; c++) {
+			windowData[r][c] = TRANSPARENT;
+		}
+	}
+	if (~((LCDC_reg >> 5) & 0b1)) { // bit 5 window enabled, keep transparent
+		return;
+	}
+
+	uint8_t x = WX_reg - 7;
+	uint8_t y = WY_reg;
+	if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT) {
+		return;
+	}
+
+	bool unsigned_addressing = (LCDC_reg >> 4) & 0b1;
+	int basePointer = unsigned_addressing ? TILE_MAP_1 : TILE_MAP_2;
+
+	uint8_t tileMapPointer = (LCDC_reg >> 6) & 0b1 ? TILE_MAP_2 : TILE_MAP_1;
+	// iterating through the tile map, skipping tiles and pixels not displayed
+	for (int r = 0; r < MAP_HEIGHT; r++) {
+		// this row of tiles is not visible
+		if (y + r * TILE_HEIGHT>= SCREEN_HEIGHT) {
+			continue;
+		}
+		for (int c = 0; c < MAP_WIDTH; c++) {
+			// this column of tiles is not visible
+			if (x + c * TILE_WIDTH>= SCREEN_WIDTH) {
+				continue;
+			}
+
+			// finding address in memory of start of current tile
+			uint16_t tileAddr;
+			if (unsigned_addressing) {
+				uint8_t tileAddrOffset = read_mem(tileMapPointer);
+				tileAddr = basePointer + tileAddrOffset * TILE_DATA_SIZE;
+			} else {
+				int8_t tileAddrOffset = static_cast<int8_t>(read_mem(tileMapPointer));
+				tileAddr = basePointer + static_cast<int16_t>(tileAddrOffset) * TILE_DATA_SIZE;
+			}
+
+			// iterating through bytes of tile data
+			for (int i = 0; i < 16; i += 2) {
+				// this tile row of pixels is not visible
+				if (y + r * TILE_HEIGHT + i / 2 >= SCREEN_HEIGHT) {
+					continue;
+				}
+
+				uint8_t lsbs = read_mem(tileAddr + i);
+				uint8_t msbs = read_mem(tileAddr + i + 1);
+
+				// displaying this tile row of pixels
+				for (int j = 0; j < 8; j++) {
+					// this tile column of pixels is not visible
+					if (x + r * TILE_WIDTH + j >= SCREEN_WIDTH) {
+						continue;
+					}
+					uint8_t color = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
+					windowData[y + r * TILE_HEIGHT + i / 2][x + r * TILE_WIDTH + j] = static_cast<COLOR>(color);
+				}
+			}
+
+			// finding next tile address
+			tileMapPointer++;
+		}
+	}
+}
+void PPU::updateSprites() {
+	// initialize sprite data to transparent
+	for (int r = 0; r < SCREEN_HEIGHT; r++) {
+		for (int c = 0; c < SCREEN_WIDTH; c++) {
+			spriteData[r][c] = TRANSPARENT;
+		}
+	}
+
+	bool tall_sprites = LCDC_reg & 0b100;
+
+	COLOR obp0_palette[4];
+	obp0_palette[0] = static_cast<COLOR>(OBP0_reg & 0b11);
+	obp0_palette[1] = static_cast<COLOR>((OBP0_reg >> 2) & 0b11);
+	obp0_palette[2] = static_cast<COLOR>((OBP0_reg >> 4) & 0b11);
+	obp0_palette[3] = static_cast<COLOR>((OBP0_reg >> 6) & 0b11);
+	COLOR obp1_palette[4];
+	obp1_palette[0] = static_cast<COLOR>(OBP1_reg & 0b11);
+	obp1_palette[1] = static_cast<COLOR>((OBP1_reg >> 2) & 0b11);
+	obp1_palette[2] = static_cast<COLOR>((OBP1_reg >> 4) & 0b11);
+	obp1_palette[3] = static_cast<COLOR>((OBP1_reg >> 6) & 0b11);
+
+	for (int i = 0; i < 40; i++) {
+		int16_t y = static_cast<uint16_t>(read_mem(OAM_START + i * 4)) - SPRITE_Y_OFFSET;
+		int16_t x = static_cast<uint16_t>(read_mem(OAM_START + i * 4 + 1)) - SPRITE_X_OFFSET;
+
+		uint16_t tileAddr = TILE_DATA_1 + read_mem(OAM_START + i * 4 + 2);
+
+		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
+		bool background_priority = (flags >> 7) & 1;
+		bool flip_y = (flags >> 6) & 1;
+		bool flip_x = (flags >> 5) & 1;
+		COLOR palette[4] = ((flags >> 4) & 1) ? obp1_palette : obp0_palette;
+
+		int current_tile_height = TILE_HEIGHT;
+		if (tall_sprites) {
+			tileAddr &= 0xFE;
+			current_tile_height *= 2;
+		}
+		// iterating through bytes of tile data
+		for (int i = 0; i < current_tile_height * 2; i += 2) {
+			int index_y = flip_y ? y + current_tile_height - i / 2 - 1 : y + i / 2;
+			// this tile row of pixels is not visible
+			if (index_y >= SCREEN_HEIGHT || index_y < 0) {
+				continue;
+			}
+
+			uint8_t lsbs = read_mem(tileAddr + i);
+			uint8_t msbs = read_mem(tileAddr + i + 1);
+
+			// displaying this tile row of pixels
+			for (int j = 0; j < 8; j++) {
+				int index_x = flip_x ? x + TILE_WIDTH - j - 1 : x + j;
+				// this tile column of pixels is not visible
+				if (index_x >= SCREEN_WIDTH || index_x < 0) {
+					continue;
+				}
+				// sprite does not have priority
+				if (background_priority && pixelData[index_y][index_x] != TRANSPARENT) {
+					continue; 
+				}
+				uint8_t color_index = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
+				COLOR color = palette[color_index];
+				if (color != TRANSPARENT) {
+					spriteData[index_y][index_x] = color;
+				}
+			}
+		}
+	}
+  
+uint8_t PPU::read_mem(uint16_t addr) {
+    if (!mmu) {
+        throw std::runtime_error("PPU Error: MMU not connected!");
+    }
+
+    // If accessing VRAM or OAM, bypass MMU checks and go straight to MMAP
+    if ((addr >= 0x8000 && addr <= 0x9FFF) || (addr >= 0xFE00 && addr <= 0xFE9F)) {
+        MMAP* mmap_ptr = mmu->get_mmap(); // Get direct MMAP pointer
+        if (!mmap_ptr) {
+             throw std::runtime_error("PPU Error: MMU did not provide MMAP pointer!");
+        }
+        // PPU has direct, unrestricted access to VRAM/OAM via MMAP
+        return mmap_ptr->read_mem(addr);
+    } else {
+        // For other addresses (e.g., I/O registers like LCDC), go through MMU
+        return mmu->read_mem(addr);
+    }
+}
+
+void PPU::write_mem(uint16_t addr, uint8_t data) {
+    if (!mmu) {
+        throw std::runtime_error("PPU Error: MMU not connected!");
+    }
+
+    // If accessing VRAM or OAM, bypass MMU checks and go straight to MMAP
+    if ((addr >= 0x8000 && addr <= 0x9FFF) || (addr >= 0xFE00 && addr <= 0xFE9F)) {
+        MMAP* mmap_ptr = mmu->get_mmap(); // Get direct MMAP pointer
+         if (!mmap_ptr) {
+             throw std::runtime_error("PPU Error: MMU did not provide MMAP pointer!");
+        }
+        // PPU has direct, unrestricted access to VRAM/OAM via MMAP
+        mmap_ptr->write_mem(addr, data);
+    } else {
+        // For other addresses (e.g., I/O registers like LCDC), go through MMU
+        mmu->write_mem(addr, data);
+    }
 }

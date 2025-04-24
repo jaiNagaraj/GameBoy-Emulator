@@ -157,6 +157,7 @@ private:
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
     void set_af(uint16_t val);
+    uint16_t CPU::get_pc() { return pc; }
 
 public:
     CPU();
