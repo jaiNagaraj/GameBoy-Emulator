@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdexcept>
+#include <iostream> 
 
 #include "mmap.hpp"
 

@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "RAM.hpp"
+#include "mmu.hpp"
 
 class PPU {
     const static int SCREEN_WIDTH = 160;
@@ -12,7 +12,7 @@ class PPU {
         DARK_GRAY = 3,
     };
 
-    RAM* ram;
+    MMU* mmu;
     uint8_t LCDC_reg;
     uint8_t SCX_reg;
     uint8_t SCY_reg;
@@ -27,12 +27,16 @@ class PPU {
 	COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     PPU();
-    PPU(RAM* ram);
     ~PPU();
+    void connect_mmu(MMU* mmu);
 
     uint64_t** writePixels();
+    void update_LCDC();
 	void updateRegs();
     void updateBackground();
     void updateWindow();
     void updateSprites();
+
+    uint8_t read_mem(uint16_t addr);
+    void write_mem(uint16_t addr, uint8_t data);
 };

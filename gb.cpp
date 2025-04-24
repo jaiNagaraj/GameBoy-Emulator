@@ -1,10 +1,115 @@
 #include "gb.hpp"
 #include <iostream>
 
-void GheithBoy::run_gb() {
-    cpu = new CPU();
-    // Use this space to load the ROM
+// Constructor
+GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
 
+// Destructor
+GheithBoy::~GheithBoy() {
+    delete input;
+    delete ppu;
+    delete mmu;
+    delete ram;
+    delete mmap;
+    delete cpu;
+}
+
+bool GheithBoy::load_rom(MMAP* mmap, const std::string& rom_path) {
+    if (!mmap) {
+        std::cerr << "Error: MMAP object is null in load_rom." << std::endl;
+        return false;
+    }
+
+    // Open the ROM file in binary mode, positioned at the end
+    std::ifstream rom_file(rom_path, std::ios::binary | std::ios::ate);
+
+    if (!rom_file.is_open()) {
+        std::cerr << "Error: Failed to open ROM file: " << rom_path << std::endl;
+        return false;
+    }
+
+    // Get the size of the file
+    std::streamsize size = rom_file.tellg();
+    rom_file.seekg(0, std::ios::beg); // Go back to the beginning
+
+    if (size == 0) {
+         std::cerr << "file is empty: " << rom_path << std::endl;
+         return false;
+    }
+
+    std::cout << "Loading ROM: " << rom_path << " (" << size << " bytes)" << std::endl;
+
+    // Read the ROM data into a buffer
+    std::vector<char> buffer(size);
+    if (!rom_file.read(buffer.data(), size)) {
+        std::cerr << "Error: Failed to read ROM file: " << rom_path << std::endl;
+        rom_file.close();
+        return false;
+    }
+
+    rom_file.close();
+
+    // Limit loading to 32KB for now
+    size_t load_size = std::min((size_t)size, (size_t)0x8000);
+    for (size_t i = 0; i < load_size; ++i) {
+        mmap->write_mem(static_cast<uint16_t>(i), static_cast<uint8_t>(buffer[i]));
+    }
+
+    std::cout << "Loaded " << load_size << " bytes into memory." << std::endl;
+    return true;
+}
+
+void GheithBoy::handle_input(const SDL_Event& event) {
+    if (!input) return;
+
+    bool pressed = (event.type == SDL_KEYDOWN);
+    int button_index = -1;
+
+    // Map SDL keys to your button indices (adjust keys as needed)
+    switch (event.key.keysym.sym) {
+        case SDLK_RIGHT: button_index = 0; break; // Right
+        case SDLK_LEFT:  button_index = 1; break; // Left
+        case SDLK_UP:    button_index = 2; break; // Up
+        case SDLK_DOWN:  button_index = 3; break; // Down
+        case SDLK_z:     button_index = 4; break; // A button
+        case SDLK_x:     button_index = 5; break; // B button
+        case SDLK_RSHIFT:/*fallthrough*/ // Use Right Shift for Select
+        case SDLK_BACKSPACE: button_index = 6; break; // Select
+        case SDLK_RETURN: button_index = 7; break; // Start (Enter key)
+    }
+
+    if (button_index != -1) {
+        input->set_button_state(button_index, pressed);
+        // Optional: Request Joypad interrupt if a button was pressed
+        // if (pressed && mmu) {
+        //    uint8_t if_reg = mmu->read_mem(0xFF0F);
+        //    mmu->write_mem(0xFF0F, if_reg | 0x10); // Set Joypad interrupt flag (bit 4)
+        // }
+    }
+}
+
+void GheithBoy::run_gb(const std::string& rom_path) {
+    cpu = new CPU();
+    MMAP* mmap = new MMAP();
+    RAM* ram = new RAM();
+    MMU* mmu = new MMU();
+    PPU* ppu = new PPU();
+    input = new Input();
+    
+    if (!load_rom(mmap, rom_path)) {
+        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+        // Destructor will handle cleanup
+        return;
+    }
+
+    ram->connect_mmap(mmap);
+    mmu->connect_mmap(mmap);
+    mmu->connect_ram(ram);
+    mmu->connect_ppu(ppu);
+    mmu->connect_cpu(cpu);
+    mmu->connect_input(input);
+    cpu->connect_mmu(mmu);
+    ppu->connect_mmu(mmu);   
 
     // Use this space to run graphics (will include the main loop)
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -35,6 +140,18 @@ void GheithBoy::run_gb() {
 
     bool keep_window_open = true;
     while (keep_window_open) {
+        // Event handling
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) { // Process all pending events
+            if (event.type == SDL_QUIT) {
+                keep_window_open = false;
+            }
+            // handle input events
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+                handle_input(event);
+            }
+        }
+
         // fetch instruction
         uint32_t instruction = cpu->fetch_instruction();
 
@@ -221,4 +338,10 @@ void GheithBoy::run_gb() {
         // screen is updated, reflect that in SDL
         ;
     }
+}
+
+void GheithBoy::load_rom(/* MMAP* mmap, const std::string& rom_path */) {
+    // TODO: Open the ROM file, read its contents, and write them
+    // into the mmap->mem array starting at address 0x0000.
+    std::cout << "ROM Loading not implemented yet." << std::endl;
 }

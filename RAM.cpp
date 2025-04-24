@@ -1,15 +1,17 @@
 #include "RAM.hpp"
 
 void RAM::connect_mmap(MMAP *mmap) {
-    this->mmap;
+    this->mmap = mmap;
 }
 
 uint8_t RAM::read_mem(uint16_t addr) {
-    return (*mmap).read_mem(addr);
+    if (!mmap) throw std::runtime_error("RAM Error: MMAP not connected!");
+    return mmap->read_mem(addr);
 }
 
 void RAM::write_mem(uint16_t addr, uint8_t data) {
-    (*mmap).write_mem(addr, data);
+    if (!mmap) std::runtime_error("RAM Error: MMAP not connected!");
+    mmap->write_mem(addr, data);
 }
 
 uint16_t RAM::push_stack(uint16_t sp, uint16_t data) {

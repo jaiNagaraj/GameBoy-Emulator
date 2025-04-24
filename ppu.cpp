@@ -16,16 +16,15 @@ const uint16_t OAM_START = 0xFE00;
 const int16_t SPRITE_Y_OFFSET = 16;
 const int16_t SPRITE_X_OFFSET = 8;
 
-PPU::PPU() {
-	ram = new RAM();
-}
 
-PPU::PPU(RAM* ram) {
-	this->ram = ram;
+PPU::PPU() : mmu(nullptr) { // Initialize mmu pointer
 }
 
 PPU::~PPU() {
-	delete ram;
+}
+
+void PPU::connect_mmu(MMU* mmu_ptr) {
+    this->mmu = mmu_ptr;
 }
 
 uint64_t** PPU::writePixels() {
@@ -75,13 +74,13 @@ uint64_t** PPU::writePixels() {
 
 void PPU::updateRegs() {
 	// update the registers for graphics
-	LCDC_reg = ram->read_mem(0xFF40);
-	SCY_reg = ram->read_mem(0xFF42);
-	SCX_reg = ram->read_mem(0xFF43);
-	WY_reg = ram->read_mem(0xFF4A);
-	WX_reg = ram->read_mem(0xFF4B);
-	OBP0_reg = ram->read_mem(0xFF48);
-	OBP1_reg = ram->read_mem(0xFF49);
+	LCDC_reg = read_mem(0xFF40);
+	SCY_reg = read_mem(0xFF42);
+	SCX_reg = read_mem(0xFF43);
+	WY_reg = read_mem(0xFF4A);
+	WX_reg = read_mem(0xFF4B);
+	OBP0_reg = read_mem(0xFF48);
+	OBP1_reg = read_mem(0xFF49);
 }
 
 void PPU::updateBackground() {
@@ -98,17 +97,17 @@ void PPU::updateBackground() {
 			// get tiles in this row
 			uint8_t tile_addr;
 			if (simple_addressing_mode) {
-				uint8_t tile_offset = ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
+				uint8_t tile_offset = read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			else {
-				int8_t tile_offset = static_cast<int8_t>(ram->read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
+				int8_t tile_offset = static_cast<int8_t>(read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
 				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 			}
 			// transform tile data into pixel data
 			for (int k = 0; k < TILE_HEIGHT; k++) {
-				uint8_t lsbs = ram->read_mem(tile_addr + k*2);
-				uint8_t msbs = ram->read_mem(tile_addr + k*2 + 1);
+				uint8_t lsbs = read_mem(tile_addr + k*2);
+				uint8_t msbs = read_mem(tile_addr + k*2 + 1);
 				for (int l = 0; l < TILE_WIDTH; l++) {
 					// get color from each bit pair and store in map
 					uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
@@ -174,10 +173,10 @@ void PPU::updateWindow() {
 			// finding address in memory of start of current tile
 			uint16_t tileAddr;
 			if (unsigned_addressing) {
-				uint8_t tileAddrOffset = ram->read_mem(tileMapPointer);
+				uint8_t tileAddrOffset = read_mem(tileMapPointer);
 				tileAddr = basePointer + tileAddrOffset * TILE_DATA_SIZE;
 			} else {
-				int8_t tileAddrOffset = static_cast<int8_t>(ram->read_mem(tileMapPointer));
+				int8_t tileAddrOffset = static_cast<int8_t>(read_mem(tileMapPointer));
 				tileAddr = basePointer + static_cast<int16_t>(tileAddrOffset) * TILE_DATA_SIZE;
 			}
 
@@ -188,8 +187,8 @@ void PPU::updateWindow() {
 					continue;
 				}
 
-				uint8_t lsbs = ram->read_mem(tileAddr + i);
-				uint8_t msbs = ram->read_mem(tileAddr + i + 1);
+				uint8_t lsbs = read_mem(tileAddr + i);
+				uint8_t msbs = read_mem(tileAddr + i + 1);
 
 				// displaying this tile row of pixels
 				for (int j = 0; j < 8; j++) {
@@ -229,12 +228,12 @@ void PPU::updateSprites() {
 	obp1_palette[3] = static_cast<COLOR>((OBP1_reg >> 6) & 0b11);
 
 	for (int i = 0; i < 40; i++) {
-		int16_t y = static_cast<uint16_t>(ram->read_mem(OAM_START + i * 4)) - SPRITE_Y_OFFSET;
-		int16_t x = static_cast<uint16_t>(ram->read_mem(OAM_START + i * 4 + 1)) - SPRITE_X_OFFSET;
+		int16_t y = static_cast<uint16_t>(read_mem(OAM_START + i * 4)) - SPRITE_Y_OFFSET;
+		int16_t x = static_cast<uint16_t>(read_mem(OAM_START + i * 4 + 1)) - SPRITE_X_OFFSET;
 
-		uint16_t tileAddr = TILE_DATA_1 + ram->read_mem(OAM_START + i * 4 + 2);
+		uint16_t tileAddr = TILE_DATA_1 + read_mem(OAM_START + i * 4 + 2);
 
-		uint8_t flags = ram->read_mem(OAM_START + i * 4 + 3);
+		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
 		bool background_priority = (flags >> 7) & 1;
 		bool flip_y = (flags >> 6) & 1;
 		bool flip_x = (flags >> 5) & 1;
@@ -253,8 +252,8 @@ void PPU::updateSprites() {
 				continue;
 			}
 
-			uint8_t lsbs = ram->read_mem(tileAddr + i);
-			uint8_t msbs = ram->read_mem(tileAddr + i + 1);
+			uint8_t lsbs = read_mem(tileAddr + i);
+			uint8_t msbs = read_mem(tileAddr + i + 1);
 
 			// displaying this tile row of pixels
 			for (int j = 0; j < 8; j++) {
@@ -275,4 +274,41 @@ void PPU::updateSprites() {
 			}
 		}
 	}
+  
+uint8_t PPU::read_mem(uint16_t addr) {
+    if (!mmu) {
+        throw std::runtime_error("PPU Error: MMU not connected!");
+    }
+
+    // If accessing VRAM or OAM, bypass MMU checks and go straight to MMAP
+    if ((addr >= 0x8000 && addr <= 0x9FFF) || (addr >= 0xFE00 && addr <= 0xFE9F)) {
+        MMAP* mmap_ptr = mmu->get_mmap(); // Get direct MMAP pointer
+        if (!mmap_ptr) {
+             throw std::runtime_error("PPU Error: MMU did not provide MMAP pointer!");
+        }
+        // PPU has direct, unrestricted access to VRAM/OAM via MMAP
+        return mmap_ptr->read_mem(addr);
+    } else {
+        // For other addresses (e.g., I/O registers like LCDC), go through MMU
+        return mmu->read_mem(addr);
+    }
+}
+
+void PPU::write_mem(uint16_t addr, uint8_t data) {
+    if (!mmu) {
+        throw std::runtime_error("PPU Error: MMU not connected!");
+    }
+
+    // If accessing VRAM or OAM, bypass MMU checks and go straight to MMAP
+    if ((addr >= 0x8000 && addr <= 0x9FFF) || (addr >= 0xFE00 && addr <= 0xFE9F)) {
+        MMAP* mmap_ptr = mmu->get_mmap(); // Get direct MMAP pointer
+         if (!mmap_ptr) {
+             throw std::runtime_error("PPU Error: MMU did not provide MMAP pointer!");
+        }
+        // PPU has direct, unrestricted access to VRAM/OAM via MMAP
+        mmap_ptr->write_mem(addr, data);
+    } else {
+        // For other addresses (e.g., I/O registers like LCDC), go through MMU
+        mmu->write_mem(addr, data);
+    }
 }

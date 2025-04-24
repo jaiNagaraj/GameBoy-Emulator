@@ -7,13 +7,15 @@
 #include "ppu.hpp"
 #include "RAM.hpp"
 #include "mmap.hpp"
+#include "input.hpp"
 
 class MMU {
-private: 
+private:
     CPU *cpu;
     PPU *ppu;
     RAM *ram;
     MMAP *mmap;
+    Input *input;
 
 public:
     MMU();
@@ -22,6 +24,7 @@ public:
     void connect_ppu(PPU *ppu);
     void connect_ram(RAM *ram);
     void connect_mmap(MMAP *mmap);
+    void MMU::connect_input(Input *input);
 
     uint8_t read_mem(uint16_t addr);
     void write_mem(uint16_t addr, uint8_t data);
@@ -29,4 +32,5 @@ public:
     uint16_t push_stack(uint16_t sp, uint16_t data);
     uint16_t pop_stack(uint16_t sp);
 
+    MMAP* get_mmap();
 };
