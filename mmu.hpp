@@ -24,7 +24,7 @@ public:
     void connect_ppu(PPU *ppu);
     void connect_ram(RAM *ram);
     void connect_mmap(MMAP *mmap);
-    void MMU::connect_input(Input *input);
+    void connect_input(Input *input);
 
     uint8_t read_mem(uint16_t addr);
     void write_mem(uint16_t addr, uint8_t data);
