@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <bitset>
 
 CPU::CPU() {
     pc = 0x0100;
@@ -24,9 +25,15 @@ CPU::CPU() {
 uint32_t CPU::fetch_instruction() {
     // get the next three bytes from memory using PC
 	uint32_t instruction = 0;
-	instruction |= (mmu->read_mem(pc) << 16); // First byte
-	instruction |= (mmu->read_mem(pc + 1) << 8); // Second byte
-	instruction |= mmu->read_mem(pc + 2); // Third byte
+    uint32_t firstByte = static_cast<uint32_t>(mmu->read_mem(pc)) << 16;
+    uint32_t secondByte = static_cast<uint32_t>(mmu->read_mem(pc+1)) << 8;
+    uint32_t thirdByte = static_cast<uint32_t>(mmu->read_mem(pc+2));
+    //std::cout << std::bitset<32>(firstByte) << ", " << std::bitset<32>(secondByte) << ", " << std::bitset<32>(thirdByte) << "\n";
+    instruction |= firstByte;
+    instruction |= secondByte;
+    instruction |= thirdByte;
+
+	//std::cout << "Fetched instruction: " << std::hex << instruction << " at PC=" << pc << std::dec << '\n';
 
 	return instruction;
 }
