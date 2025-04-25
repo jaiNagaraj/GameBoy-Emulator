@@ -1,5 +1,7 @@
 #include "gb.hpp"
 #include <iostream>
+#include <fstream>
+#include <vector>
 
 // Constructor
 GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
@@ -90,10 +92,10 @@ void GheithBoy::handle_input(const SDL_Event& event) {
 
 void GheithBoy::run_gb(const std::string& rom_path) {
     cpu = new CPU();
-    MMAP* mmap = new MMAP();
-    RAM* ram = new RAM();
-    MMU* mmu = new MMU();
-    PPU* ppu = new PPU();
+    mmap = new MMAP();
+    ram = new RAM();
+    mmu = new MMU();
+    ppu = new PPU();
     input = new Input();
     
     if (!load_rom(mmap, rom_path)) {
@@ -105,8 +107,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
-    mmu->connect_ppu(ppu);
-    mmu->connect_cpu(cpu);
+    //mmu->connect_ppu(ppu);
+    //mmu->connect_cpu(cpu);
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);   
@@ -145,6 +147,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         while (SDL_PollEvent(&event)) { // Process all pending events
             if (event.type == SDL_QUIT) {
                 keep_window_open = false;
+                continue;
             }
             // handle input events
             if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
@@ -249,9 +252,6 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         } else if (cpu->decode_ADC_50(instruction)) {
             cpu->execute_ADC_50(instruction);
             // other stuff
-        } else if (cpu->decode_SUB_50(instruction)) {
-            cpu->execute_SUB_50(instruction);
-            // other stuff
         } else if (cpu->decode_SUB_51(instruction)) {
             cpu->execute_SUB_51(instruction);
             // other stuff
@@ -336,12 +336,25 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         }
 
         // screen is updated, reflect that in SDL
-        // Call ppu step?
-        ;
+        // Call PPU
+        uint32_t** pixelsToWrite = ppu->writePixels();
+		// Update the window surface with the pixel data
+		SDL_LockSurface(window_surface);
+		uint32_t* pixels = static_cast<uint32_t*>(window_surface->pixels);
+		for (int y = 0; y < WINDOW_HEIGHT; y++) {
+			for (int x = 0; x < WINDOW_WIDTH; x++) {
+				pixels[y * WINDOW_WIDTH + x] = pixelsToWrite[y][x]; 
+			}
+		}
+		SDL_UnlockSurface(window_surface);
+		SDL_UpdateWindowSurface(window);
+
+		// Delay to control frame rate
+		SDL_Delay(16); // ~60 FPS
     }
     // Destroyer
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
+    //SDL_DestroyTexture(texture);
+    //SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }

@@ -27,7 +27,7 @@ void PPU::connect_mmu(MMU* mmu_ptr) {
     this->mmu = mmu_ptr;
 }
 
-uint64_t** PPU::writePixels() {
+uint32_t** PPU::writePixels() {
 	updateRegs();
 	updateBackground();
 	updateWindow();
@@ -38,38 +38,51 @@ uint64_t** PPU::writePixels() {
 			pixelData[i][j] = backgroundData[i][j];
 
 			// display window data
-			if (windowData[i][j] != TRANSPARENT) {
+			if (windowData[i][j] != WINDOW_TRANSPARENT) {
 				pixelData[i][j] = windowData[i][j];
 			}
 		}
 	}
 
-	// i commented this out because i already accounted for the offset
-	// now overlay the window
-	// for (int i = 0; i < SCREEN_HEIGHT; i++) {
-	// 	for (int j = 0; j < SCREEN_WIDTH; j++) {
-	// 		// account for WX, WY
-	// 		int screenX = j + WX_reg - 7;
-	// 		int screenY = i + WY_reg;
-	// 		if (screenX >= 0 && screenX < SCREEN_WIDTH && screenY >= 0 && screenY < SCREEN_HEIGHT) {
-	// 			pixelData[screenY][screenX] = windowData[i][j];
-	// 		}
-	// 	}
-	// }
-
 	updateSprites(); // must be called last, deals with priority internally
 	// finally, overlay the sprites
-	if (~(LCDC_reg & 0b10)) { // sprites not enabled
-		return pixelData;
+	if (LCDC_reg & 0b10) { // sprites enabled
+		for (int r = 0; r < SCREEN_HEIGHT; r++) {
+			for (int c = 0; c < SCREEN_WIDTH; c++) {
+				if (spriteData[r][c] != WHITE_OR_TRANSPARENT) {
+					pixelData[r][c] = spriteData[r][c];
+				}
+			}
+		}
 	}
-	for (int r = 0; r < SCREEN_HEIGHT; r++) {
-		for (int c = 0; c < SCREEN_WIDTH; c++) {
-			pixelData[r][c] = spriteData[r][c];
+
+	// now, convert COLOR array into hex array
+	uint32_t** pixelDataReturn = new uint32_t * [SCREEN_HEIGHT];
+	for (int i = 0; i < SCREEN_HEIGHT; i++) {
+		pixelDataReturn[i] = new uint32_t[SCREEN_WIDTH];
+		for (int j = 0; j < SCREEN_WIDTH; j++) {
+			// All pixels are in ARGB format (1 byte per info)
+			switch (pixelDataReturn[i][j]) {
+				case WHITE_OR_TRANSPARENT:
+					pixelDataReturn[i][j] = 0xFFFFFFFF;
+					break;
+				case LIGHT_GRAY:
+					pixelDataReturn[i][j] = 0xFFAAAAAA;
+					break;
+				case DARK_GRAY:
+					pixelDataReturn[i][j] = 0xFF555555;
+					break;
+				case BLACK:
+					pixelDataReturn[i][j] = 0xFF000000;
+					break;
+				default:
+					pixelDataReturn[i][j] = 0xFFFFFFFF; // default to white for any other case
+			}
 		}
 	}
 
 
-	return pixelData;
+	return pixelDataReturn;
 }
 
 void PPU::updateRegs() {
@@ -79,13 +92,19 @@ void PPU::updateRegs() {
 	SCX_reg = read_mem(0xFF43);
 	WY_reg = read_mem(0xFF4A);
 	WX_reg = read_mem(0xFF4B);
+	BGP_reg = read_mem(0xFF47);
 	OBP0_reg = read_mem(0xFF48);
 	OBP1_reg = read_mem(0xFF49);
 }
 
 void PPU::updateBackground() {
-	// update background via tile map and scroll regs
-	
+	// get bg palette from register
+	COLOR bg_palette[4];
+	bg_palette[0] = static_cast<COLOR>(BGP_reg & 0b11);
+	bg_palette[1] = static_cast<COLOR>((BGP_reg >> 2) & 0b11);
+	bg_palette[2] = static_cast<COLOR>((BGP_reg >> 4) & 0b11);
+	bg_palette[3] = static_cast<COLOR>((BGP_reg >> 6) & 0b11);
+
 	// which tile map to use?
 	uint8_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
 	// start at 0x8000 w/ unsigned offsets OR at 0x9000 w/ signed offsets
@@ -111,7 +130,7 @@ void PPU::updateBackground() {
 				for (int l = 0; l < TILE_WIDTH; l++) {
 					// get color from each bit pair and store in map
 					uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
-					full_map[i + k][j + l] = static_cast<COLOR>(color);
+					full_map[i + k][j + l] = bg_palette[color];
 				}
 			}
 		}
@@ -132,7 +151,7 @@ void PPU::updateWindow() {
 	if (~(LCDC_reg & 0b1)) { // bit 0 window becomes white
 		for (int r = 0; r < 160; r++) {
 			for (int c = 0; c < 144; c++) {
-				windowData[r][c] = WHITE;
+				windowData[r][c] = WHITE_OR_TRANSPARENT;
 			}
 		}
 		return;
@@ -141,7 +160,7 @@ void PPU::updateWindow() {
 	// initializing to transparent
 	for (int r = 0; r < 160; r++) {
 		for (int c = 0; c < 144; c++) {
-			windowData[r][c] = TRANSPARENT;
+			windowData[r][c] = WINDOW_TRANSPARENT;
 		}
 	}
 	if (~((LCDC_reg >> 5) & 0b1)) { // bit 5 window enabled, keep transparent
@@ -206,11 +225,12 @@ void PPU::updateWindow() {
 		}
 	}
 }
+
 void PPU::updateSprites() {
 	// initialize sprite data to transparent
 	for (int r = 0; r < SCREEN_HEIGHT; r++) {
 		for (int c = 0; c < SCREEN_WIDTH; c++) {
-			spriteData[r][c] = TRANSPARENT;
+			spriteData[r][c] = WHITE_OR_TRANSPARENT;
 		}
 	}
 
@@ -237,7 +257,10 @@ void PPU::updateSprites() {
 		bool background_priority = (flags >> 7) & 1;
 		bool flip_y = (flags >> 6) & 1;
 		bool flip_x = (flags >> 5) & 1;
-		COLOR palette[4] = ((flags >> 4) & 1) ? obp1_palette : obp0_palette;
+		COLOR palette[4];
+		for (int i = 0; i < 4; i++) {
+			palette[i] = ((flags >> 4) & 1) ? obp1_palette[i] : obp0_palette[i];
+		}
 
 		int current_tile_height = TILE_HEIGHT;
 		if (tall_sprites) {
@@ -263,17 +286,18 @@ void PPU::updateSprites() {
 					continue;
 				}
 				// sprite does not have priority
-				if (background_priority && pixelData[index_y][index_x] != TRANSPARENT) {
-					continue; 
+				if (background_priority && pixelData[index_y][index_x] != WHITE_OR_TRANSPARENT) {
+					continue;
 				}
 				uint8_t color_index = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
 				COLOR color = palette[color_index];
-				if (color != TRANSPARENT) {
+				if (color != WHITE_OR_TRANSPARENT) {
 					spriteData[index_y][index_x] = color;
 				}
 			}
 		}
 	}
+}
   
 uint8_t PPU::read_mem(uint16_t addr) {
     if (!mmu) {

@@ -157,7 +157,7 @@ private:
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
     void set_af(uint16_t val);
-    uint16_t CPU::get_pc() { return pc; }
+    uint16_t get_pc() const { return pc; }
 
 public:
     CPU();
@@ -226,7 +226,6 @@ public:
     bool decode_ADC_48( uint32_t instruction);
     bool decode_ADC_49( uint32_t instruction);
     bool decode_ADC_50( uint32_t instruction);
-    bool decode_SUB_50( uint32_t instruction);
     bool decode_SUB_51( uint32_t instruction);
     bool decode_SUB_52( uint32_t instruction);
     bool decode_SUB_53( uint32_t instruction);
@@ -254,7 +253,6 @@ public:
     void execute_ADC_48( uint32_t instruction);
     void execute_ADC_49( uint32_t instruction);
     void execute_ADC_50( uint32_t instruction);
-    void execute_SUB_50( uint32_t instruction);
     void execute_SUB_51( uint32_t instruction);
     void execute_SUB_52( uint32_t instruction);
     void execute_SUB_53( uint32_t instruction);

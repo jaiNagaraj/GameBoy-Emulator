@@ -21,6 +21,16 @@ CPU::CPU() {
     regs[L_REGISTER] = 0x4D;
 }
 
+uint32_t CPU::fetch_instruction() {
+    // get the next three bytes from memory using PC
+	uint32_t instruction = 0;
+	instruction |= (mmu->read_mem(pc) << 16); // First byte
+	instruction |= (mmu->read_mem(pc + 1) << 8); // Second byte
+	instruction |= mmu->read_mem(pc + 2); // Third byte
+
+	return instruction;
+}
+
 void CPU::connect_mmu(MMU *mmu) {
     this->mmu = mmu;
 }
@@ -307,7 +317,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_SUB_53(uint32_t instruction) {
      // SUB A, n (immediate) - Opcode 0xD6 (0b11010110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xD6;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xD6;
      return outcome;
  }
  
@@ -375,7 +385,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_DEC_63(uint32_t instruction) {
      // DEC (HL) - Opcode 0x35 (0b00110101)
-     bool outcome = (instruction >> 16) & 0xFF == 0x35;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0x35;
      return outcome;
  }
  
@@ -395,7 +405,7 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
  
  bool CPU::decode_AND_66(uint32_t instruction) {
      // AND A, n (immediate) - Opcode 0xE6 (0b11100110)
-     bool outcome = (instruction >> 16) & 0xFF == 0xE6;
+     bool outcome = ((instruction >> 16) & 0xFF) == 0xE6;
      return outcome;
  }
  
