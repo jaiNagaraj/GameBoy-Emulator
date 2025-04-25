@@ -2313,7 +2313,7 @@ void CPU::execute_JR_113(uint32_t instruction) {
 
     // Calculate jump address
     int8_t signed_offset = static_cast<int8_t>(offset);
-    uint16_t jmp_addr = pc + signed_offset;
+    uint16_t jmp_addr = pc + signed_offset + 2;
 
     pc = jmp_addr; // Unconditional jump
 }
@@ -2342,11 +2342,12 @@ void CPU::execute_JR_114(uint32_t instruction) {
     }
 
     if (condition_met) {
-        uint8_t offset = (instruction >> 8) & 0xFF;
+        uint8_t offset = static_cast<uint8_t>((instruction >> 8) & 0xFF);
 
         // Calculate jump address
-        int8_t signed_offset = static_cast<int8_t>(offset);
-        uint16_t jmp_addr = pc + signed_offset;
+        int16_t signed_offset = static_cast<int8_t>(offset);
+		//std::cout << "JR offset: " << std::dec << static_cast<int>(signed_offset) << std::hex << std::endl;
+        uint16_t jmp_addr = static_cast<int16_t>(pc) + signed_offset + 2;
 
         pc = jmp_addr;
     } else {

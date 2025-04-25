@@ -14,6 +14,7 @@ class GheithBoy {
         GheithBoy();
         ~GheithBoy();
     private:
+        bool load_boot(MMAP* mmap);
         bool load_rom(MMAP* mmap, const std::string& rom_path);
         CPU* cpu;
         Input* input;

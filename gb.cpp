@@ -16,6 +16,52 @@ GheithBoy::~GheithBoy() {
     delete cpu;
 }
 
+bool GheithBoy::load_boot(MMAP* mmap) {
+    std::string boot_path = "boot.bin";
+    if (!mmap) {
+        std::cerr << "Error: MMAP object is null in load_boot." << std::endl;
+        return false;
+    }
+
+    // Open the ROM file in binary mode, positioned at the end
+    std::ifstream rom_file(boot_path, std::ios::binary | std::ios::ate);
+
+    if (!rom_file.is_open()) {
+        std::cerr << "Error: Failed to open ROM file: " << boot_path << std::endl;
+        return false;
+    }
+
+    // Get the size of the file
+    std::streamsize size = rom_file.tellg();
+    rom_file.seekg(0, std::ios::beg); // Go back to the beginning
+
+    if (size == 0) {
+        std::cerr << "file is empty: " << boot_path << std::endl;
+        return false;
+    }
+
+    std::cout << "Loading ROM: " << boot_path << " (" << size << " bytes)" << std::endl;
+
+    // Read the ROM data into a buffer
+    std::vector<char> buffer(size);
+    if (!rom_file.read(buffer.data(), size)) {
+        std::cerr << "Error: Failed to read ROM file: " << boot_path << std::endl;
+        rom_file.close();
+        return false;
+    }
+
+    rom_file.close();
+
+    // Limit loading to 32KB for now
+    size_t load_size = std::min((size_t)size, (size_t)0x8000);
+    for (size_t i = 0; i < load_size; ++i) {
+        mmap->write_mem(static_cast<uint16_t>(i), static_cast<uint8_t>(buffer[i]));
+    }
+
+    std::cout << "Loaded " << load_size << " bytes into memory." << std::endl;
+    return true;
+}
+
 bool GheithBoy::load_rom(MMAP* mmap, const std::string& rom_path) {
     if (!mmap) {
         std::cerr << "Error: MMAP object is null in load_rom." << std::endl;
@@ -97,13 +143,13 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     mmu = new MMU();
     ppu = new PPU();
     input = new Input();
-    
-    if (!load_rom(mmap, rom_path)) {
-        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+
+    if (!load_boot(mmap)) {
+        std::cerr << "Boot path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
         // Destructor will handle cleanup
         return;
     }
-
+    
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
@@ -112,6 +158,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);   
+
 
     // Use this space to run graphics (will include the main loop)
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -467,6 +514,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 			std::cout << "Unknown instruction: " << std::hex << instruction << std::endl;
         }
 
+        //std::cout << "HL: " << std::hex << cpu->get_hl() << '\n';
+
         // screen is updated, reflect that in SDL
         // Call PPU
         uint32_t** pixelsToWrite = ppu->writePixels();
@@ -487,6 +536,12 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 
 		// Delay to control frame rate
 		SDL_Delay(16); // ~60 FPS
+    }
+
+    if (!load_rom(mmap, rom_path)) {
+        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+        // Destructor will handle cleanup
+        return;
     }
     // Destroyer
     //SDL_DestroyTexture(texture);
