@@ -107,8 +107,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
-    //mmu->connect_ppu(ppu);
-    //mmu->connect_cpu(cpu);
+    ppu->connect_mmu(mmu);
+    cpu->connect_mmu(mmu);
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);   
@@ -315,7 +315,134 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         } else if (cpu->decode_XOR_71(instruction)) {
             cpu->execute_XOR_71(instruction);
             // other stuff
-        } else if (cpu->decode_RET_119(instruction)) {
+        }
+        else if (cpu->decode_XOR_72(instruction)) {
+            cpu->execute_XOR_72(instruction);
+        }
+        else if (cpu->decode_CCF_73(instruction)) {
+            cpu->execute_CCF_73(instruction);
+        }
+        else if (cpu->decode_SCF_74(instruction)) {
+            cpu->execute_SCF_74(instruction);
+        }
+        else if (cpu->decode_DAA_75(instruction)) {
+            cpu->execute_DAA_75(instruction);
+        }
+        else if (cpu->decode_CPL_76(instruction)) {
+            cpu->execute_CPL_76(instruction);
+        }
+        else if (cpu->decode_INC_77(instruction)) {
+            cpu->execute_INC_77(instruction);
+        }
+        else if (cpu->decode_DEC_78(instruction)) {
+            cpu->execute_DEC_78(instruction);
+        }
+        else if (cpu->decode_ADD_79(instruction)) {
+            cpu->execute_ADD_79(instruction);
+        }
+        else if (cpu->decode_ADD_80(instruction)) {
+            cpu->execute_ADD_80(instruction);
+        }
+        else if (cpu->decode_RLCA_82(instruction)) {
+            cpu->execute_RLCA_82(instruction);
+        }
+        else if (cpu->decode_RRCA_83(instruction)) {
+            cpu->execute_RRCA_83(instruction);
+        }
+        else if (cpu->decode_RLA_84(instruction)) {
+            cpu->execute_RLA_84(instruction);
+        }
+        else if (cpu->decode_RRA_85(instruction)) {
+            cpu->execute_RRA_85(instruction);
+        }
+        else if (cpu->decode_RLC_86(instruction)) {
+            cpu->execute_RLC_86(instruction);
+        }
+        else if (cpu->decode_RLC_87(instruction)) {
+            cpu->execute_RLC_87(instruction);
+        }
+        else if (cpu->decode_RRC_88(instruction)) {
+            cpu->execute_RRC_88(instruction);
+        }
+        else if (cpu->decode_RRC_89(instruction)) {
+            cpu->execute_RRC_89(instruction);
+        }
+        else if (cpu->decode_RL_90(instruction)) {
+            cpu->execute_RL_90(instruction);
+        }
+        else if (cpu->decode_RL_91(instruction)) {
+            cpu->execute_RL_91(instruction);
+        }
+        else if (cpu->decode_RR_92(instruction)) {
+            cpu->execute_RR_92(instruction);
+        }
+        else if (cpu->decode_RR_93(instruction)) {
+            cpu->execute_RR_93(instruction);
+        }
+        else if (cpu->decode_SLA_94(instruction)) {
+            cpu->execute_SLA_94(instruction);
+        }
+        else if (cpu->decode_SLA_95(instruction)) {
+            cpu->execute_SLA_95(instruction);
+        }
+        else if (cpu->decode_SRA_96(instruction)) {
+            cpu->execute_SRA_96(instruction);
+        }
+        else if (cpu->decode_SRA_97(instruction)) {
+            cpu->execute_SRA_97(instruction);
+        }
+        else if (cpu->decode_SWAP_98(instruction)) {
+            cpu->execute_SWAP_98(instruction);
+        }
+        else if (cpu->decode_SWAP_99(instruction)) {
+            cpu->execute_SWAP_99(instruction);
+        }
+        else if (cpu->decode_SRL_100(instruction)) {
+            cpu->execute_SRL_100(instruction);
+        }
+        else if (cpu->decode_SRL_101(instruction)) {
+            cpu->execute_SRL_101(instruction);
+        }
+        else if (cpu->decode_BIT_102(instruction)) {
+            cpu->execute_BIT_102(instruction);
+        }
+        else if (cpu->decode_BIT_103(instruction)) {
+            cpu->execute_BIT_103(instruction);
+        }
+        else if (cpu->decode_RES_104(instruction)) {
+            cpu->execute_RES_104(instruction);
+        }
+        else if (cpu->decode_RES_105(instruction)) {
+            cpu->execute_RES_105(instruction);
+        }
+        else if (cpu->decode_SET_106(instruction)) {
+            cpu->execute_SET_106(instruction);
+        }
+        else if (cpu->decode_SET_107(instruction)) {
+            cpu->execute_SET_107(instruction);
+        }
+        else if (cpu->decode_JP_109(instruction)) {
+            cpu->execute_JP_109(instruction);
+        }
+        else if (cpu->decode_JP_110(instruction)) {
+            cpu->execute_JP_110(instruction);
+        }
+        else if (cpu->decode_JP_111(instruction)) {
+            cpu->execute_JP_111(instruction);
+        }
+        else if (cpu->decode_JR_113(instruction)) {
+            cpu->execute_JR_113(instruction);
+        }
+        else if (cpu->decode_JR_114(instruction)) {
+            cpu->execute_JR_114(instruction);
+        }
+        else if (cpu->decode_CALL_116(instruction)) {
+            cpu->execute_CALL_116(instruction);
+		}
+		else if (cpu->decode_CALL_117(instruction)) {
+			cpu->execute_CALL_117(instruction);
+		}
+        else if (cpu->decode_RET_119(instruction)) {
             cpu->execute_RET_119(instruction);
             // other stuff
         } else if (cpu->decode_RET_120(instruction)) {
@@ -334,6 +461,11 @@ void GheithBoy::run_gb(const std::string& rom_path) {
             cpu->execute_EI_124(instruction);
             // other stuff
         }
+        else if (cpu->decode_NOP_125(instruction)) {
+            cpu->execute_NOP_125(instruction);
+        } else {
+			std::cout << "Unknown instruction: " << std::hex << instruction << std::endl;
+        }
 
         // screen is updated, reflect that in SDL
         // Call PPU
@@ -346,6 +478,10 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 				pixels[y * WINDOW_WIDTH + x] = pixelsToWrite[y][x]; 
 			}
 		}
+        for (int i = 0; i < WINDOW_HEIGHT; i++) {
+            delete pixelsToWrite[i];
+        }
+        delete pixelsToWrite;
 		SDL_UnlockSurface(window_surface);
 		SDL_UpdateWindowSurface(window);
 
@@ -355,6 +491,6 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     // Destroyer
     //SDL_DestroyTexture(texture);
     //SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    //SDL_DestroyWindow(window);
+    //SDL_Quit();
 }

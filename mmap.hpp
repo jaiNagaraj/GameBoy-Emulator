@@ -5,7 +5,7 @@
 
 class MMAP {
 private:
-    uint8_t mem[0xFFFF]; // 64KB of memory
+    uint8_t mem[0x10000]; // 64KB of memory
 
 public:
     MMAP();
