@@ -55,33 +55,40 @@ uint8_t MMU::read_mem(uint16_t addr) {
                 // TODO: Connect to Timer component if it tracks DIV internally
                 return mmap->read_mem(addr);
             case 0xFF05: // TIMA - Timer Counter
+                // DNE
             case 0xFF06: // TMA - Timer Modulo
+                // DNE
             case 0xFF07: // TAC - Timer Control
-                // TODO: Connect to Timer component for accurate values
-                return mmap->read_mem(addr);
-
+                // DNE
             case 0xFF0F: // IF - Interrupt Flag
                 return mmap->read_mem(addr) | 0xE0; // Top 3 bits always read as 1
 
             // --- PPU Registers ---
             case 0xFF40: // LCDC - LCD Control
-            case 0xFF42: // SCY - Scroll Y
-            case 0xFF43: // SCX - Scroll X
                 return mmap->read_mem(addr);
             case 0xFF41: // STAT - LCD Status
-                // TODO: PPU needs to manage STAT register state (mode bits, LYC flag)
-                // This read should combine PPU state (bits 0-2) with user-writable bits (3-6) from MMAP
-                // if (ppu) return ppu->read_stat(); // Ideal: PPU provides combined value
-                // Placeholder: Return MMAP value, potentially with mode bits masked if PPU doesn't update MMAP directly
+            // TODO: PPU needs to manage STAT register state (mode bits, LYC flag)
+            // This read should combine PPU state (bits 0-2) with user-writable bits (3-6) from MMAP
+            // if (ppu) return ppu->read_stat(); // Ideal: PPU provides combined value
+            // Placeholder: Return MMAP value, potentially with mode bits masked if PPU doesn't update MMAP directly
+            return mmap->read_mem(addr);
+            case 0xFF42: // SCY - Scroll Y
+                return mmap->read_mem(addr);
+            case 0xFF43: // SCX - Scroll X
                 return mmap->read_mem(addr);
             case 0xFF44: // LY - LCD Y-Coordinate (Read-Only, updated by PPU)
                 // PPU should update this value in MMAP via write_mem. Reading here gets the last value PPU wrote.
                 return mmap->read_mem(addr);
             case 0xFF45: // LYC - LY Compare
+                return mmap->read_mem(addr);
             case 0xFF47: // BGP - Background Palette Data
+                return mmap->read_mem(addr);
             case 0xFF48: // OBP0 - Object Palette 0 Data
+                return mmap->read_mem(addr);
             case 0xFF49: // OBP1 - Object Palette 1 Data
+                return mmap->read_mem(addr);
             case 0xFF4A: // WY - Window Y Position
+                return mmap->read_mem(addr);
             case 0xFF4B: // WX - Window X Position minus 7
                 return mmap->read_mem(addr);
             // --- End PPU Registers ---
@@ -90,6 +97,7 @@ uint8_t MMU::read_mem(uint16_t addr) {
                 return mmap->read_mem(addr);
 
             // TODO: Add cases for Sound Registers (0xFF10 - 0xFF26) - Read directly for now
+            // DNE
 
             default:
                 // For unhandled or simple I/O registers, read directly from MMAP
@@ -223,6 +231,7 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
                 break;
 
             // TODO: Add cases for Sound Registers (0xFF10 - 0xFF26) - Write directly for now
+            // DNE
             // TODO: Add cases for Waveform RAM (0xFF30 - 0xFF3F) - Write directly for now
 
             default:
