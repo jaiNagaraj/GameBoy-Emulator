@@ -998,10 +998,9 @@ void CPU::execute_PUSH_42(uint32_t instruction) {
     }
 
     // Push the value of rr onto the stack
-    sp--;
-    mmu->write_mem(sp, static_cast<uint8_t>(rr >> 8)); // Store MSB of rr
-    sp--;
-    mmu->write_mem(sp, static_cast<uint8_t>(rr & 0xFF)); // Store LSB of rr
+    mmu->push_stack(sp, rr);
+    sp -= 2;
+
     pc++;
 }
 
@@ -1011,10 +1010,8 @@ void CPU::execute_POP_43(uint32_t instruction) {
     uint16_t data;
 
     // Pop the value from the stack into rr
-    uint8_t lsb = mmu->read_mem(sp++); // Get lsb from stack, increment SP
-    uint8_t msb = mmu->read_mem(sp++); // Get msb from stack, increment SP
-
-    data = (static_cast<uint16_t>(msb) << 8) | lsb; // Combine MSB and LSB
+    data = mmu->pop_stack(sp);
+    sp += 2;
 
     if (((operation & 0b00110000) >> 4) == 0) {
         set_bc(data);
@@ -2367,9 +2364,8 @@ void CPU::execute_CALL_116(uint32_t instruction) {
     uint16_t call_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
     // Push current PC onto stack
+    mmu->push_stack(sp, pc);
     sp -= 2;
-    (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
-    (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
     pc = call_addr;
 }
@@ -2405,9 +2401,8 @@ void CPU::execute_CALL_117(uint32_t instruction) {
         uint16_t call_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
         // Push current PC onto stack
+        mmu->push_stack(sp, pc);
         sp -= 2;
-        (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
-        (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
         pc = call_addr;
     } else {
@@ -2417,12 +2412,8 @@ void CPU::execute_CALL_117(uint32_t instruction) {
 
 void CPU::execute_RET_119(uint32_t instruction) {
     // Pop address from stack
-    uint8_t lsb = (*mmu).read_mem(sp);
-    uint8_t msb = (*mmu).read_mem(sp + 1);
+    uint16_t ret_addr = mmu->pop_stack(sp);
     sp += 2;
-
-    // Calculate return address
-    uint16_t ret_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
     pc = ret_addr; // Unconditional return
 }
@@ -2452,12 +2443,8 @@ void CPU::execute_RET_120(uint32_t instruction) {
 
     if (condition_met) {
         // Pop address from stack
-        uint8_t lsb = (*mmu).read_mem(sp);
-        uint8_t msb = (*mmu).read_mem(sp + 1);
+        uint16_t ret_addr = mmu->pop_stack(sp);
         sp += 2;
-
-        // Calculate return address
-        uint16_t ret_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
         pc = ret_addr;
     } else {
@@ -2467,12 +2454,8 @@ void CPU::execute_RET_120(uint32_t instruction) {
 
 void CPU::execute_RETI_121(uint32_t instruction) {
     // Pop address from stack
-    uint8_t lsb = (*mmu).read_mem(sp);
-    uint8_t msb = (*mmu).read_mem(sp + 1);
+    uint16_t ret_addr = mmu->pop_stack(sp);
     sp += 2;
-
-    // Calculate return address
-    uint16_t ret_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
     ime = true; // Enable interrupts
 
@@ -2484,9 +2467,8 @@ void CPU::execute_RST_122(uint32_t instruction) {
     uint8_t addr = (opcode >> 3) & 0b00000111;
 
     // Push current PC onto stack
+    mmu->push_stack(sp, pc);
     sp -= 2;
-    (*mmu).write_mem(sp, pc & 0xFF); // PC LSB
-    (*mmu).write_mem(sp + 1, (pc >> 8) & 0xFF); // PC MSB
 
     // Jump based on addr
     switch (addr) {
