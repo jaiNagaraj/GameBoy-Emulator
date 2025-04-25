@@ -148,18 +148,18 @@ private:
     // Set a specific flag bit
     void set_flag(int flag_bit, bool value);
     // Get a 16-bit register value
+    // Set a 16-bit register value
+    uint16_t get_pc() const { return pc; }
+
+public:
     uint16_t get_hl();
     uint16_t get_bc();
     uint16_t get_de();
     uint16_t get_af();
-    // Set a 16-bit register value
     void set_hl(uint16_t val);
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
     void set_af(uint16_t val);
-    uint16_t get_pc() const { return pc; }
-
-public:
     CPU();
     void connect_mmu(MMU *mmu);
 
