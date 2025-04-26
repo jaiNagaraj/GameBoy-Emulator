@@ -152,6 +152,7 @@ private:
     uint16_t get_pc() const { return pc; }
 
 public:
+    uint16_t get_pc();
     uint16_t get_hl();
     uint16_t get_bc();
     uint16_t get_de();
