@@ -144,8 +144,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     ppu = new PPU();
     input = new Input();
 
-    if (!load_boot(mmap)) {
-        std::cerr << "Boot path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+    if (!load_rom(mmap, rom_path)) {
+        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
         // Destructor will handle cleanup
         return;
     }
@@ -537,12 +537,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 		// Delay to control frame rate
 		SDL_Delay(16); // ~60 FPS
     }
-
-    if (!load_rom(mmap, rom_path)) {
-        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
-        // Destructor will handle cleanup
-        return;
-    }
+    
     // Destroyer
     //SDL_DestroyTexture(texture);
     //SDL_DestroyRenderer(renderer);
