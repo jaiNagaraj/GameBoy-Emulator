@@ -98,14 +98,17 @@ void CPU::set_af(uint16_t val) {
 // Jai
 bool CPU::decode_LD_20(uint32_t instruction) {
     // LD r, r'
-    bool outcome = ((instruction >> 22) << 6) == 0x40;
+    bool outcome = ((instruction >> 22) << 6) == 0x40 &&
+                   ((instruction >> 16) & 0xc7) != 0x46 &&
+                   ((instruction >> 16) & 0xf8) != 0x70;
 
     return outcome;
 }
 
 bool CPU::decode_LD_21(uint32_t instruction) {
     // LD r, n (immediate)
-    bool outcome = ((instruction >> 16) & 0xc7) == 0x06;
+    bool outcome = ((instruction >> 16) & 0xc7) == 0x06 &&
+                   (instruction >> 16) != 0x36;
 
     return outcome;
 }
@@ -273,7 +276,8 @@ bool CPU::decode_LD_44(uint32_t instruction) {
 
 bool CPU::decode_ADD_45(uint32_t instruction) {
     // ADD A, r
-    bool outcome = (instruction >> 16) == 0x80;
+    bool outcome = ((instruction >> 16) & 0b11111000) == 0b10000000 &&
+                   ((instruction >> 16) & 0xFF) != 0b10000110;
 
     return outcome;
 }
@@ -508,7 +512,8 @@ bool CPU::decode_RRA_85(uint32_t instruction) {
 
 bool CPU::decode_RLC_86(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x06);
 }
 
 bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
@@ -518,7 +523,8 @@ bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RRC_88(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x0E);
 }
 
 bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
@@ -528,7 +534,8 @@ bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RL_90(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x16);
 }
 
 bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
@@ -538,7 +545,8 @@ bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RR_92(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x1E);
 }
 
 bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
@@ -548,7 +556,8 @@ bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_SLA_94(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x26);
 }
 
 bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
@@ -558,7 +567,8 @@ bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_SRA_96(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000) &&  // opcode
+           (((instruction >> 8) & 0xFF) != 0x2E);
 }
 
 bool CPU::decode_SRA_97(uint32_t instruction) { // 2-byte instruction
