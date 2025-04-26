@@ -135,35 +135,40 @@ enum INSTRUCTION {
 
 class CPU {
 private:
-    MMU *mmu;
     uint8_t regs[8]; // 0: B, 1: C, 2: D, 3: E, 4: H, 5: L, 6: F, 7: A
     uint16_t pc; // Program Counter
     uint16_t sp; // Stack Pointer
+
     bool ime; // Interrupt Master Enable
+    bool halted;
+
+    MMU *mmu;
 
     // #### FUNCTION DECLARATIONS ####
-    // Helper functions
     // Get a specific flag bit
     bool get_flag(int flag_bit);
     // Set a specific flag bit
     void set_flag(int flag_bit, bool value);
-    // Get a 16-bit register value
-    // Set a 16-bit register value
     uint16_t get_pc() const { return pc; }
 
 public:
+    CPU();
+
+    uint32_t fetch_instruction();
+
+    void connect_mmu(MMU *mmu);
+
+    // Get a 16-bit register value
     uint16_t get_hl();
     uint16_t get_bc();
     uint16_t get_de();
     uint16_t get_af();
+    // Set a 16-bit register value
     void set_hl(uint16_t val);
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
     void set_af(uint16_t val);
-    CPU();
-    void connect_mmu(MMU *mmu);
 
-    uint32_t fetch_instruction();
     // Decode & execute declarations
     // Jai
     bool decode_LD_20(uint32_t instruction);
@@ -350,8 +355,8 @@ public:
     bool decode_RET_120(uint32_t instruction);
     bool decode_RETI_121(uint32_t instruction);
     bool decode_RST_122(uint32_t instruction);
-    /*bool decode_HALT_123(uint32_t instruction);
-    bool decode_STOP_123(uint32_t instruction);*/
+    bool decode_HALT_123(uint32_t instruction);
+    bool decode_STOP_123(uint32_t instruction);
     bool decode_DI_123(uint32_t instruction);
     bool decode_EI_124(uint32_t instruction);
     bool decode_NOP_125(uint32_t instruction);
@@ -377,8 +382,8 @@ public:
     void execute_RET_120(uint32_t instruction);
     void execute_RETI_121(uint32_t instruction);
     void execute_RST_122(uint32_t instruction);
-    /*void execute_HALT_123(uint32_t instruction);
-    void execute_STOP_123(uint32_t instruction);*/
+    void execute_HALT_123(uint32_t instruction);
+    void execute_STOP_123(uint32_t instruction);
     void execute_DI_123(uint32_t instruction);
     void execute_EI_124(uint32_t instruction);
     void execute_NOP_125(uint32_t instruction);

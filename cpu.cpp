@@ -10,6 +10,7 @@ CPU::CPU() {
     sp = 0xFFFE;
 
     ime = true;
+    halted = false;
 
     // Register initialization
     regs[A_REGISTER] = 0x01;
@@ -705,20 +706,18 @@ bool CPU::decode_RST_122(uint32_t instruction) { // 1-byte instruction
     return outcome;
 }
 
-// DNE in gekkio documentation
-/*
-bool CPU::decode_HALT_123(uint32_t instruction) {
-    bool outcome = [instruction];
+bool CPU::decode_HALT_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0x76; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_STOP_123(uint32_t instruction) {
-    bool outcome = [instruction];
+bool CPU::decode_STOP_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0x10) &&
+                   (((instruction >> 8) & 0xFF) == 0x00);
 
     return outcome;
 }
-*/
 
 bool CPU::decode_DI_123(uint32_t instruction) { // 1-byte instruction
     bool outcome = ((instruction >> 16) & 0xFF) == 0xF3; // opcode
@@ -2506,6 +2505,18 @@ void CPU::execute_RST_122(uint32_t instruction) {
             break;
     }
 }
+
+void CPU::execute_HALT_123(uint32_t instruction) {
+    halted = true;
+
+    pc += 1; // 1-byte instruction
+};
+
+void CPU::execute_STOP_123(uint32_t instruction) {
+    // For Tetris, sufficient to treat STOP as NOP - ChatGPT
+    
+    pc += 2; // 2-byte instruction
+};
 
 void CPU::execute_DI_123(uint32_t instruction) {
     ime = false; // Disable interrupts
