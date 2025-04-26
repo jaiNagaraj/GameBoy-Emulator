@@ -6,6 +6,8 @@
 #include <bitset>
 
 CPU::CPU() {
+    cycles = 0;
+    
     pc = 0x0100;
     sp = 0xFFFE;
 
