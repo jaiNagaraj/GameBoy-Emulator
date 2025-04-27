@@ -156,14 +156,17 @@ private:
     uint16_t get_pc() const { return pc; }
 
 public:
+
     CPU();
 
     uint32_t fetch_instruction();
 
     void connect_mmu(MMU *mmu);
+  
 	void connect_interrupt_handler(InterruptHandler* IH);
 	uint64_t get_cycles() const { return cycles; }
 
+    uint16_t get_pc();
     // Get a 16-bit register value
     uint16_t get_hl();
     uint16_t get_bc();

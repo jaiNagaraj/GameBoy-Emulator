@@ -37,6 +37,13 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "numbers": "cpp",
+        "random": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "array": "cpp",
+        "vector": "cpp",
+        "span": "cpp"
     }
 }

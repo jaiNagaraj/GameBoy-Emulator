@@ -25,6 +25,10 @@ CPU::CPU() {
     regs[L_REGISTER] = 0x4D;
 }
 
+uint16_t CPU::get_pc() {
+    return this->pc;
+}
+
 uint32_t CPU::fetch_instruction() {
     // get the next three bytes from memory using PC
 	uint32_t instruction = 0;
@@ -960,7 +964,9 @@ void CPU::execute_LD_33(uint32_t instruction) {
     uint16_t addr = 0xFF00 | n; // Address is 0xFF00 + n
 
     uint8_t data = mmu->read_mem(addr); 
-
+    std::cout << "Reading from address: " << std::hex << addr << std::endl;
+    std::cout << "Data: " << std::hex << static_cast<int>(data) << std::endl;
+    std::cout << "Register A: " << std::hex << static_cast<int>(regs[A_REGISTER]) << std::endl;
     regs[A_REGISTER] = data;
     pc += 2; // one for instruction, one for imm
     cycles += 3;
@@ -2484,18 +2490,22 @@ void CPU::execute_JR_114(uint32_t instruction) {
     switch(condition) {
         case 0b00: // NZ
             condition_met = !get_flag(Z_FLAG_BIT);
+            std::cout << "JR NZ: " << std::dec << static_cast<int>(condition_met) << std::endl;
             break;
 
         case 0b01: // Z
             condition_met = get_flag(Z_FLAG_BIT);
+            std::cout << "JR Z: " << std::dec << static_cast<int>(condition_met) << std::endl;
             break;
 
         case 0b10: // NC
             condition_met = !get_flag(C_FLAG_BIT);
+            std::cout << "JR NC: " << std::dec << static_cast<int>(condition_met) << std::endl;
             break;
 
         case 0b11: // C
             condition_met = get_flag(C_FLAG_BIT);
+            std::cout << "JR C: " << std::dec << static_cast<int>(condition_met) << std::endl;
             break;
     }
 
@@ -2504,7 +2514,7 @@ void CPU::execute_JR_114(uint32_t instruction) {
 
         // Calculate jump address
         int16_t signed_offset = static_cast<int8_t>(offset);
-		//std::cout << "JR offset: " << std::dec << static_cast<int>(signed_offset) << std::hex << std::endl;
+		std::cout << "JR offset: " << std::dec << static_cast<int>(signed_offset) << std::hex << std::endl;
         uint16_t jmp_addr = static_cast<int16_t>(pc) + signed_offset + 2;
 
         pc = jmp_addr;
