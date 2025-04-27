@@ -1,4 +1,6 @@
 #include <iostream>
+#include <list>
+#include <algorithm>
 #include "ppu.hpp"
 
 const int LCDC_MAP_CHOICE_MASK = 0x08;
@@ -406,7 +408,8 @@ void PPU::updateWindow(uint8_t row)
 
 void PPU::updateSprites(uint8_t row)
 {
-	//spriteBuffer.sort();
+	if (!spriteBuffer.empty())
+		spriteBuffer.sort([](const Sprite& sp1, const Sprite& sp2) { return sp1.x < sp2.x; });
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 	{
