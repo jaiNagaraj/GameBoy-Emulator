@@ -180,7 +180,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
     input = new Input();
     IH = new InterruptHandler();
 
-    if (!load_boot(mmap))
+    if (!load_rom(mmap, rom_path))
     {
         std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
         // Destructor will handle cleanup
