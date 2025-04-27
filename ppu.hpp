@@ -23,7 +23,7 @@ public:
 
     Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
         : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
-    bool operator<(const Sprite &other)
+    bool operator<(const Sprite &other) const
     {
         return x < other.x;
     }
