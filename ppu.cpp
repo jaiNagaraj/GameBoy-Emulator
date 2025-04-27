@@ -159,7 +159,7 @@ void PPU::updatePixelData(uint8_t row)
 		}
 		else
 		{
-			pixelData[row][j] = WHITE_OR_TRANSPARENT; // bg/window not enabled, set to transparent
+			pixelData[row][j] = WHITE_OR_TRANSPARENT; // bg/window not enabled, set to white
 		}
 	}
 
@@ -213,24 +213,24 @@ void PPU::updateBackground(uint8_t row)
 	uint16_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
 	// start at 0x8000 w/ unsigned offsets OR at 0x9000 w/ signed offsets
 	bool simple_addressing_mode = (LCDC_reg & LCDC_ADDRESSING_MODE_MASK) == 0;
-
 	uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_1 : TILE_DATA_2;
-	uint16_t tiles_row = tiles_addr + ((SCY_reg + row) / TILE_HEIGHT * MAP_WIDTH) % (MAP_WIDTH * MAP_HEIGHT);
+
+	uint16_t map_row = map_addr + ((SCY_reg + row) / TILE_HEIGHT * MAP_WIDTH) % (MAP_WIDTH * MAP_HEIGHT);
 	uint16_t tile_row = (SCY_reg + row) % TILE_HEIGHT;
 	for (int i = 0; i < SCREEN_WIDTH;)
 	{
-		uint16_t tiles_col = tiles_row + ((SCX_reg + i) / TILE_WIDTH) % MAP_WIDTH;
+		uint16_t map_col = map_row + ((SCX_reg + i) / TILE_WIDTH) % MAP_WIDTH;
 		uint16_t tile_col = (SCX_reg + i) % TILE_WIDTH;
 		uint16_t tile_addr;
 		if (simple_addressing_mode)
 		{
-			uint16_t tile_offset = read_mem(tiles_col);
-			tile_addr = map_addr + tile_offset * TILE_DATA_SIZE;
+			uint16_t tile_offset = read_mem(map_col);
+			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		else
 		{
-			int16_t tile_offset = static_cast<int8_t>(read_mem(tiles_col));
-			tile_addr = map_addr + tile_offset * TILE_DATA_SIZE;
+			int16_t tile_offset = static_cast<int8_t>(read_mem(map_col));
+			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		uint8_t lsbs = read_mem(tile_addr + tile_row * 2);
 		uint8_t msbs = read_mem(tile_addr + tile_row * 2 + 1);
