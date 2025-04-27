@@ -143,6 +143,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     mmu = new MMU();
     ppu = new PPU();
     input = new Input();
+    IH = new InterruptHandler();
 
     if (!load_boot(mmap)) {
         std::cerr << "Boot path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
@@ -154,6 +155,8 @@ void GheithBoy::run_gb(const std::string& rom_path) {
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
     ppu->connect_mmu(mmu);
+	IH->connect_mmu(mmu);
+    ppu->connect_interrupt_handler(IH);
     cpu->connect_mmu(mmu);
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
@@ -518,7 +521,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 
         // screen is updated, reflect that in SDL
         // Call PPU
-        uint32_t** pixelsToWrite = ppu->writePixels();
+        bool render = ppu->tick();
 		// Update the window surface with the pixel data
 		SDL_LockSurface(window_surface);
 		uint32_t* pixels = static_cast<uint32_t*>(window_surface->pixels);
