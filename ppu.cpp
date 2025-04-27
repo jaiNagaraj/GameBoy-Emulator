@@ -54,15 +54,21 @@ bool PPU::tick(uint64_t outsideClock)
 	// perform different actions depending on the mode
 	switch (mode) {
 	case 2: //OAM
+		scanOAM(scanLine);
 		if (outsideClock - clock >= 80) {
 			// switch to VRAM mode
 			mode = 3;
+			clock = outsideClock;
 		}
 		break;
 	case 3: //VRAM
+		updateBackground(scanLine);
+		updateWindow(scanLine);
+		updateSprites(scanLine);
 		if (outsideClock - clock >= 172) {
 			// switch to HBLANK mode
 			mode = 0;
+			clock = outsideClock;
 		}
 		break;
 	case 0: // HBLANK
@@ -77,95 +83,91 @@ bool PPU::tick(uint64_t outsideClock)
 			else {
 				// switch back to OAM
 				mode = 2;
-				updateBackground(scanLine);
-				updateWindow(scanLine);
-				updateSprites(scanLine);
 				scanLine++;
 			}
+			clock = outsideClock;
 		}
 		break;
 	case 1: //VBLANK
-		if (scanLine == 153) {
+		if (scanLine > 154) {
 			// switch back to rendering/OAM
 			mode = 2;
+			clock - outsideClock;
 			scanLine = 0;
-			IH->disable_VBLANK_interrupt();
-			scanOAM(scanLine);
 		}
 		else {
-			scanLine++;
+			if (outsideClock - clock >= 456) {
+				// increment scanline
+				scanLine++;
+				clock = outsideClock;
+			}
 		}
 		break;
 	default:
 		std::cerr << "PPU Error: Unrecognized mode.\n";
 	}
 
-	updateLY();
+	update_LY();
+	update_LCDSTAT();
 
+	return render_on_return;
+}
+
+void PPU::update_LY() {
+	mmu->write_mem(0xFF44, scanLine);
+}
+
+void PPU::update_LCDSTAT() {
+	mmu->write_mem(0xFF41, mode);
+}
+
+void PPU::updatePixelData(uint8_t row) {
 	// now, mix the background and the window
-	for (int i = 0; i < SCREEN_HEIGHT; i++)
+	for (int j = 0; j < SCREEN_WIDTH; j++)
 	{
-		for (int j = 0; j < SCREEN_WIDTH; j++)
-		{
-			pixelData[i][j] = backgroundData[i][j];
+		pixelData[row][j] = backgroundData[row][j];
 
-			// display window data
-			if (windowData[i][j] != WINDOW_TRANSPARENT)
-			{
-				pixelData[i][j] = windowData[i][j];
-			}
+		// display window data
+		if (windowData[row][j] != WINDOW_TRANSPARENT)
+		{
+			pixelData[row][j] = windowData[i][j];
 		}
 	}
 
-	updateSprites(0); // must be called last, deals with priority internally
 	// finally, overlay the sprites
 	if (LCDC_reg & 0b10)
 	{ // sprites enabled
-		for (int r = 0; r < SCREEN_HEIGHT; r++)
+		for (int c = 0; c < SCREEN_WIDTH; c++)
 		{
-			for (int c = 0; c < SCREEN_WIDTH; c++)
+			if (spriteData[row][c] != WHITE_OR_TRANSPARENT)
 			{
-				if (spriteData[r][c] != WHITE_OR_TRANSPARENT)
-				{
-					pixelData[r][c] = spriteData[r][c];
-				}
+				pixelData[row][c] = spriteData[row][c];
 			}
 		}
 	}
 
 	// now, convert COLOR array into hex array
-	uint32_t **pixelDataReturn = new uint32_t *[SCREEN_HEIGHT];
-	for (int i = 0; i < SCREEN_HEIGHT; i++)
+	for (int j = 0; j < SCREEN_WIDTH; j++)
 	{
-		pixelDataReturn[i] = new uint32_t[SCREEN_WIDTH];
-		for (int j = 0; j < SCREEN_WIDTH; j++)
+		// All pixels are in ARGB format (1 byte per info)
+		switch (pixelsToRender[row][j])
 		{
-			// All pixels are in ARGB format (1 byte per info)
-			switch (pixelDataReturn[i][j])
-			{
-			case WHITE_OR_TRANSPARENT:
-				pixelDataReturn[i][j] = 0xFFFFFFFF;
-				break;
-			case LIGHT_GRAY:
-				pixelDataReturn[i][j] = 0xFFAAAAAA;
-				break;
-			case DARK_GRAY:
-				pixelDataReturn[i][j] = 0xFF555555;
-				break;
-			case BLACK:
-				pixelDataReturn[i][j] = 0xFF000000;
-				break;
-			default:
-				pixelDataReturn[i][j] = 0xFFFFFFFF; // default to white for any other case
-			}
+		case WHITE_OR_TRANSPARENT:
+			pixelsToRender[row][j] = 0xFFFFFFFF;
+			break;
+		case LIGHT_GRAY:
+			pixelsToRender[row][j] = 0xFFAAAAAA;
+			break;
+		case DARK_GRAY:
+			pixelsToRender[row][j] = 0xFF555555;
+			break;
+		case BLACK:
+			pixelsToRender[row][j] = 0xFF000000;
+			break;
+		default:
+			pixelsToRender[row][j] = 0xFFFFFFFF; // default to white for any other case
 		}
 	}
-
-	return pixelDataReturn;
-}
-
-void PPU::updateLY() {
-	mmu->write_mem(0xFF44, scanLine);
 }
 
 void PPU::updateRegs()

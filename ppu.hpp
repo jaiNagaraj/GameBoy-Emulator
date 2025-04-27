@@ -47,7 +47,9 @@ public:
 	void connect_interrupt_handler(InterruptHandler* IH);
 
     bool tick(uint64_t outsideClock);
-    void updateLY();
+    void update_LY();
+    void update_LCDSTAT();
+    void updatePixelData(uint8_t row);
     void updateRegs();
     void updateBackground(uint8_t row);
     void updateWindow(uint8_t row);
