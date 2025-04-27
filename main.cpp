@@ -1,6 +1,6 @@
 #define SDL_MAIN_HANDLED
 #include <iostream>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "gb.hpp"
 
 int main() {
