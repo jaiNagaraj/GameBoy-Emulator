@@ -2548,7 +2548,7 @@ void CPU::execute_CALL_116(uint32_t instruction) {
     uint16_t call_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
     // Push current PC onto stack
-    mmu->push_stack(sp, pc);
+    mmu->push_stack(sp, pc + 3); // 3-byte instruction
     sp -= 2;
 
     pc = call_addr;
@@ -2586,7 +2586,7 @@ void CPU::execute_CALL_117(uint32_t instruction) {
         uint16_t call_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
         // Push current PC onto stack
-        mmu->push_stack(sp, pc);
+        mmu->push_stack(sp, pc + 3); // 3-byte instruction
         sp -= 2;
 
         pc = call_addr;
@@ -2658,7 +2658,7 @@ void CPU::execute_RST_122(uint32_t instruction) {
     uint8_t addr = (opcode >> 3) & 0b00000111;
 
     // Push current PC onto stack
-    mmu->push_stack(sp, pc);
+    mmu->push_stack(sp, pc + 1); // 1-byte instruction
     sp -= 2;
 
     // Jump based on addr
