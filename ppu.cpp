@@ -65,12 +65,13 @@ bool PPU::tick(uint64_t outsideClock)
 		}
 		break;
 	case 3: // VRAM
-		updateBackground(scanLine);
-		updateWindow(scanLine);
-		updateSprites(scanLine);
-		updatePixelData(scanLine);
 		if (outsideClock - clock >= 172)
 		{
+			updateBackground(scanLine);
+			updateWindow(scanLine);
+			updateSprites(scanLine);
+			updatePixelData(scanLine);
+
 			// switch to HBLANK mode
 			mode = 0;
 			clock = outsideClock;
@@ -386,7 +387,6 @@ void PPU::updateSprites(uint8_t row)
 	{
 		Sprite sprite = spriteBuffer.front();
 		spriteBuffer.pop_front();
-		spriteBuffer.push_back(sprite);
 
 		uint8_t y = sprite.y;
 		uint8_t x = sprite.x;
