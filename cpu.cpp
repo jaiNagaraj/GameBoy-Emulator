@@ -8,7 +8,7 @@
 CPU::CPU() {
     cycles = 0;
     
-    pc = 0x0100;
+    pc = 0x0000;
     sp = 0xFFFE;
 
     ime = true;
@@ -964,9 +964,9 @@ void CPU::execute_LD_33(uint32_t instruction) {
     uint16_t addr = 0xFF00 | n; // Address is 0xFF00 + n
 
     uint8_t data = mmu->read_mem(addr); 
-    std::cout << "Reading from address: " << std::hex << addr << std::endl;
-    std::cout << "Data: " << std::hex << static_cast<int>(data) << std::endl;
-    std::cout << "Register A: " << std::hex << static_cast<int>(regs[A_REGISTER]) << std::endl;
+    //std::cout << "Reading from address: " << std::hex << addr << std::endl;
+    //std::cout << "Data: " << std::hex << static_cast<int>(data) << std::endl;
+    //std::cout << "Register A: " << std::hex << static_cast<int>(regs[A_REGISTER]) << std::endl;
     regs[A_REGISTER] = data;
     pc += 2; // one for instruction, one for imm
     cycles += 3;
@@ -1534,6 +1534,9 @@ void CPU::execute_DEC_62(uint32_t instruction) {
     int target_reg_index = (opcode >> 3) & 0x07;
     uint8_t old_val = regs[target_reg_index];
     uint8_t new_val = old_val - 1;
+    if (target_reg_index == C_REGISTER) {
+        std::cout << "VALUE OF C REGISTER IS: " << (int)regs[target_reg_index] << '\n';
+    }
 
     // Set flags
     set_flag(Z_FLAG_BIT, new_val == 0);

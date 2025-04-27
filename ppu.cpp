@@ -55,8 +55,21 @@ void PPU::connect_interrupt_handler(InterruptHandler *IH)
 
 bool PPU::tick(uint64_t outsideClock)
 {
+	outsideClock *= 4;
 	updateRegs();
 	bool render_on_return = false;
+
+	// check for LY=LYC and STAT interrupt
+	uint8_t stat = read_mem(0xFF41);
+	uint8_t LY = read_mem(0xFF44);
+	uint8_t LYC = read_mem(0xFF45);
+	if (LY == LYC) {
+		stat |= 0b00000100; // set the LYC=LY flag
+		if ((stat & 0b01000000)) {
+			IH->enable_STAT_interrupt();
+		}
+	}
+
 	// perform different actions depending on the mode
 	switch (mode)
 	{
@@ -79,6 +92,11 @@ bool PPU::tick(uint64_t outsideClock)
 
 			// switch to HBLANK mode
 			mode = 0;
+			// check for STAT interrupt
+			uint8_t stat = read_mem(0xFF41);
+			if (stat & 0b00001000) {
+				IH->enable_STAT_interrupt();
+			}
 			clock = outsideClock;
 		}
 		break;
@@ -90,6 +108,11 @@ bool PPU::tick(uint64_t outsideClock)
 			if (scanLine == 144)
 			{
 				mode = 1;
+				// check for STAT interrupt
+				uint8_t stat = read_mem(0xFF41);
+				if (stat & 0b00010000) {
+					IH->enable_STAT_interrupt();
+				}
 				IH->enable_VBLANK_interrupt();
 				render_on_return = true;
 			}
@@ -97,6 +120,11 @@ bool PPU::tick(uint64_t outsideClock)
 			{
 				// switch back to OAM
 				mode = 2;
+				// check for STAT interrupt
+				uint8_t stat = read_mem(0xFF41);
+				if (stat & 0b00100000) {
+					IH->enable_STAT_interrupt();
+				}
 				scanLine++;
 			}
 			clock = outsideClock;
@@ -107,6 +135,11 @@ bool PPU::tick(uint64_t outsideClock)
 		{
 			// switch back to rendering/OAM
 			mode = 2;
+			// check for STAT interrupt
+			uint8_t stat = read_mem(0xFF41);
+			if (stat & 0b00100000) {
+				IH->enable_STAT_interrupt();
+			}
 			clock = outsideClock;
 			scanLine = 0;
 		}
@@ -117,6 +150,9 @@ bool PPU::tick(uint64_t outsideClock)
 				// increment scanline
 				scanLine++;
 				clock = outsideClock;
+			}
+			else {
+				std::cout << "CHILLIN IN VBLANK\n";
 			}
 		}
 		break;
@@ -137,7 +173,10 @@ void PPU::update_LY()
 
 void PPU::update_LCDSTAT()
 {
-	ram->write_mem(0xFF41, mode);
+	uint8_t stat = read_mem(0xFF41);
+	stat &= 0b11111100; // clear the mode bits
+	stat |= mode; // set the new mode
+	ram->write_mem(0xFF41, stat);
 }
 
 void PPU::updatePixelData(uint8_t row)
@@ -367,7 +406,7 @@ void PPU::updateWindow(uint8_t row)
 
 void PPU::updateSprites(uint8_t row)
 {
-	spriteBuffer.sort();
+	//spriteBuffer.sort();
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 	{
