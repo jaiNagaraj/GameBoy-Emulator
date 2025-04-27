@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include "mmu.hpp"
+#include "InterruptHandler.hpp"
+#include <list>
 
 enum COLOR
 {
@@ -9,6 +11,22 @@ enum COLOR
     DARK_GRAY = 2,
     BLACK = 3,
     WINDOW_TRANSPARENT = 4,
+};
+
+class Sprite
+{
+public:
+    uint8_t y;
+    uint8_t x;
+    uint8_t tileIndex;
+    uint8_t flags;
+
+    Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
+        : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
+    bool operator<(const Sprite &other) const
+    {
+        return x < other.x;
+    }
 };
 
 class PPU
@@ -27,25 +45,37 @@ private:
     uint8_t BGP_reg;
     MMU *mmu;
     RAM *ram;
+    InterruptHandler *IH;
+
+    int mode;
+    uint8_t scanLine;
+    uint64_t clock;
 
     COLOR pixelData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR backgroundData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
+    std::list<Sprite> spriteBuffer;
+
 public:
-    uint64_t clock;
+    uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     PPU();
     ~PPU();
     void connect_mmu(MMU *mmu);
     void connect_ram(RAM *ram);
+    void connect_interrupt_handler(InterruptHandler *IH);
 
-    uint32_t **writePixels();
+    bool tick(uint64_t outsideClock);
+    void update_LY();
+    void update_LCDSTAT();
+    void updatePixelData(uint8_t row);
     void updateRegs();
     void updateBackground(uint8_t row);
     void updateWindow(uint8_t row);
     void updateSprites(uint8_t row);
+    void scanOAM(uint8_t row);
 
     uint8_t read_mem(uint16_t addr);
     void write_mem(uint16_t addr, uint8_t data);
