@@ -19,7 +19,7 @@ GheithBoy::~GheithBoy()
 
 bool GheithBoy::load_boot(MMAP *mmap)
 {
-    std::string boot_path = "boot.bin";
+    std::string boot_path = "cpu_instrs.gb";
     if (!mmap)
     {
         std::cerr << "Error: MMAP object is null in load_boot." << std::endl;
@@ -251,6 +251,8 @@ void GheithBoy::run_gb(const std::string &rom_path)
 
         // fetch instruction
         std::cout << "PC: " << std::hex << cpu->get_pc() << std::dec << '\n';
+        std::cout << "SP: " << std::hex << cpu->get_sp() << std::dec << '\n';
+        std::cout << "instruction: " << std::hex << cpu->fetch_instruction() << std::dec << '\n';
         uint32_t instruction = cpu->fetch_instruction();
 
         // decode switch! (i hate ts </3)
@@ -773,6 +775,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
         }
         else if (cpu->decode_CALL_117(instruction))
         {
+            std::cout << "CALL 117\n";
             cpu->execute_CALL_117(instruction);
         }
         else if (cpu->decode_RET_119(instruction))
@@ -827,6 +830,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
         else
         {
             std::cout << "Unknown instruction: " << std::hex << instruction << std::endl;
+            keep_window_open = false;
         }
 
         // std::cout << "HL: " << std::hex << cpu->get_hl() << '\n';

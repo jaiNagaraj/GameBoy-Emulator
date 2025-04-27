@@ -154,6 +154,7 @@ private:
     // Set a specific flag bit
     void set_flag(int flag_bit, bool value);
     uint16_t get_pc() const { return pc; }
+    uint16_t get_sp() const { return sp; }
 
 public:
 
@@ -167,6 +168,7 @@ public:
 	uint64_t get_cycles() const { return cycles; }
 
     uint16_t get_pc();
+    uint16_t get_sp();
     // Get a 16-bit register value
     uint16_t get_hl();
     uint16_t get_bc();
