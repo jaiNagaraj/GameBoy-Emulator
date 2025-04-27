@@ -12,10 +12,6 @@ void InterruptHandler::connect_mmu(MMU* mmu) {
 	this->mmu = mmu;
 }
 
-bool InterruptHandler::interrupts_enabled() {
-	return interrupts_enabled;
-}
-
 uint8_t InterruptHandler::get_IE() {
 	return mmu->read_mem(0xFFFF);
 }
