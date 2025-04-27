@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
 
 # Include flags: Point to the directory containing the SDL2 folder
-CPPFLAGS = -I/opt/homebrew/include
+CPPFLAGS = -I/opt/homebrew/include/SDL2
 
 # Linker flags: Use sdl2-config to get necessary library paths and linking flags for SDL2
 LDFLAGS = $(shell sdl2-config --libs)
