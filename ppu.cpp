@@ -65,9 +65,11 @@ bool PPU::tick(uint64_t outsideClock)
 	uint8_t stat = read_mem(0xFF41);
 	uint8_t LY = read_mem(0xFF44);
 	uint8_t LYC = read_mem(0xFF45);
-	if (LY == LYC) {
+	if (LY == LYC)
+	{
 		stat |= 0b00000100; // set the LYC=LY flag
-		if ((stat & 0b01000000)) {
+		if ((stat & 0b01000000))
+		{
 			IH->enable_STAT_interrupt();
 		}
 	}
@@ -96,7 +98,8 @@ bool PPU::tick(uint64_t outsideClock)
 			mode = 0;
 			// check for STAT interrupt
 			uint8_t stat = read_mem(0xFF41);
-			if (stat & 0b00001000) {
+			if (stat & 0b00001000)
+			{
 				IH->enable_STAT_interrupt();
 			}
 			clock = outsideClock;
@@ -112,7 +115,8 @@ bool PPU::tick(uint64_t outsideClock)
 				mode = 1;
 				// check for STAT interrupt
 				uint8_t stat = read_mem(0xFF41);
-				if (stat & 0b00010000) {
+				if (stat & 0b00010000)
+				{
 					IH->enable_STAT_interrupt();
 				}
 				IH->enable_VBLANK_interrupt();
@@ -124,7 +128,8 @@ bool PPU::tick(uint64_t outsideClock)
 				mode = 2;
 				// check for STAT interrupt
 				uint8_t stat = read_mem(0xFF41);
-				if (stat & 0b00100000) {
+				if (stat & 0b00100000)
+				{
 					IH->enable_STAT_interrupt();
 				}
 				scanLine++;
@@ -139,7 +144,8 @@ bool PPU::tick(uint64_t outsideClock)
 			mode = 2;
 			// check for STAT interrupt
 			uint8_t stat = read_mem(0xFF41);
-			if (stat & 0b00100000) {
+			if (stat & 0b00100000)
+			{
 				IH->enable_STAT_interrupt();
 			}
 			clock = outsideClock;
@@ -153,7 +159,8 @@ bool PPU::tick(uint64_t outsideClock)
 				scanLine++;
 				clock = outsideClock;
 			}
-			else {
+			else
+			{
 				std::cout << "CHILLIN IN VBLANK\n";
 			}
 		}
@@ -177,7 +184,7 @@ void PPU::update_LCDSTAT()
 {
 	uint8_t stat = read_mem(0xFF41);
 	stat &= 0b11111100; // clear the mode bits
-	stat |= mode; // set the new mode
+	stat |= mode;		// set the new mode
 	ram->write_mem(0xFF41, stat);
 }
 
@@ -266,12 +273,12 @@ void PPU::updateBackground(uint8_t row)
 		if (simple_addressing_mode)
 		{
 			uint16_t tile_offset = read_mem(map_col);
-			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		else
 		{
 			int16_t tile_offset = static_cast<int8_t>(read_mem(map_col));
-			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		uint8_t lsbs = read_mem(tile_addr + tile_row * 2);
 		uint8_t msbs = read_mem(tile_addr + tile_row * 2 + 1);
@@ -409,7 +416,8 @@ void PPU::updateWindow(uint8_t row)
 void PPU::updateSprites(uint8_t row)
 {
 	if (!spriteBuffer.empty())
-		spriteBuffer.sort([](const Sprite& sp1, const Sprite& sp2) { return sp1.x < sp2.x; });
+		spriteBuffer.sort([](const Sprite &sp1, const Sprite &sp2)
+						  { return sp1.x < sp2.x; });
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 	{
