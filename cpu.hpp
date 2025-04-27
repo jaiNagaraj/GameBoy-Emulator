@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "mmu.hpp"
+#include "InterruptHandler.hpp"
 
 const int A_REGISTER = 7;
 const int B_REGISTER = 0;
@@ -145,6 +146,7 @@ private:
     bool halted;
 
     MMU *mmu;
+	InterruptHandler* IH;
 
     // #### FUNCTION DECLARATIONS ####
     // Get a specific flag bit
@@ -160,7 +162,9 @@ public:
     uint32_t fetch_instruction();
 
     void connect_mmu(MMU *mmu);
-	  uint64_t get_cycles() const { return cycles; }
+  
+	void connect_interrupt_handler(InterruptHandler* IH);
+	uint64_t get_cycles() const { return cycles; }
 
     uint16_t get_pc();
     // Get a 16-bit register value
@@ -173,6 +177,8 @@ public:
     void set_bc(uint16_t val);
     void set_de(uint16_t val);
     void set_af(uint16_t val);
+
+    void handle_interrupts();
 
     // Decode & execute declarations
     // Jai
