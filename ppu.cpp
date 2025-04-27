@@ -264,12 +264,12 @@ void PPU::updateBackground(uint8_t row)
 		if (simple_addressing_mode)
 		{
 			uint16_t tile_offset = read_mem(map_col);
-			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		else
 		{
 			int16_t tile_offset = static_cast<int8_t>(read_mem(map_col));
-			tile_addr = tile_addr + tile_offset * TILE_DATA_SIZE;
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
 		}
 		uint8_t lsbs = read_mem(tile_addr + tile_row * 2);
 		uint8_t msbs = read_mem(tile_addr + tile_row * 2 + 1);
