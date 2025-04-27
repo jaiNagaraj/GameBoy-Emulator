@@ -18,7 +18,7 @@ const int16_t SPRITE_Y_OFFSET = 16;
 const int16_t SPRITE_X_OFFSET = 8;
 
 PPU::PPU() : mmu(nullptr)
-{ 
+{
 	mode = 2;
 	clock = 0;
 	for (int i = 0; i < SCREEN_HEIGHT; i++)
@@ -43,29 +43,34 @@ void PPU::connect_mmu(MMU *mmu_ptr)
 	this->mmu = mmu_ptr;
 }
 
-void PPU::connect_interrupt_handler(InterruptHandler* IH)
+void PPU::connect_interrupt_handler(InterruptHandler *IH)
 {
 	this->IH = IH;
 }
 
 bool PPU::tick(uint64_t outsideClock)
 {
+	updateRegs();
 	bool render_on_return = false;
 	// perform different actions depending on the mode
-	switch (mode) {
-	case 2: //OAM
+	switch (mode)
+	{
+	case 2: // OAM
 		scanOAM(scanLine);
-		if (outsideClock - clock >= 80) {
+		if (outsideClock - clock >= 80)
+		{
 			// switch to VRAM mode
 			mode = 3;
 			clock = outsideClock;
 		}
 		break;
-	case 3: //VRAM
+	case 3: // VRAM
 		updateBackground(scanLine);
 		updateWindow(scanLine);
 		updateSprites(scanLine);
-		if (outsideClock - clock >= 172) {
+		updatePixelData(scanLine);
+		if (outsideClock - clock >= 172)
+		{
 			// switch to HBLANK mode
 			mode = 0;
 			clock = outsideClock;
@@ -73,14 +78,17 @@ bool PPU::tick(uint64_t outsideClock)
 		break;
 	case 0: // HBLANK
 		// check for end of HBLANK
-		if (outsideClock - clock >= 204) {
+		if (outsideClock - clock >= 204)
+		{
 			// check for VBLANK switch
-			if (scanLine == 144) {
+			if (scanLine == 144)
+			{
 				mode = 1;
 				IH->enable_VBLANK_interrupt();
 				render_on_return = true;
 			}
-			else {
+			else
+			{
 				// switch back to OAM
 				mode = 2;
 				scanLine++;
@@ -88,15 +96,18 @@ bool PPU::tick(uint64_t outsideClock)
 			clock = outsideClock;
 		}
 		break;
-	case 1: //VBLANK
-		if (scanLine > 154) {
+	case 1: // VBLANK
+		if (scanLine > 154)
+		{
 			// switch back to rendering/OAM
 			mode = 2;
 			clock - outsideClock;
 			scanLine = 0;
 		}
-		else {
-			if (outsideClock - clock >= 456) {
+		else
+		{
+			if (outsideClock - clock >= 456)
+			{
 				// increment scanline
 				scanLine++;
 				clock = outsideClock;
@@ -113,36 +124,36 @@ bool PPU::tick(uint64_t outsideClock)
 	return render_on_return;
 }
 
-void PPU::update_LY() {
+void PPU::update_LY()
+{
 	mmu->write_mem(0xFF44, scanLine);
 }
 
-void PPU::update_LCDSTAT() {
+void PPU::update_LCDSTAT()
+{
 	mmu->write_mem(0xFF41, mode);
 }
 
-void PPU::updatePixelData(uint8_t row) {
-	// now, mix the background and the window
+void PPU::updatePixelData(uint8_t row)
+{
+	// mix the layers
 	for (int j = 0; j < SCREEN_WIDTH; j++)
 	{
-		pixelData[row][j] = backgroundData[row][j];
-
-		// display window data
-		if (windowData[row][j] != WINDOW_TRANSPARENT)
-		{
+		if ((LCDC_reg & 0b10) && spriteData[row][j] != WHITE_OR_TRANSPARENT)
+		{ // sprites enabled
+			pixelData[row][j] = spriteData[row][j];
+		}
+		else if ((LCDC_reg & 0b100000) && (LCDC_reg & 1) && windowData[row][j] != WINDOW_TRANSPARENT)
+		{ // window enabled
 			pixelData[row][j] = windowData[row][j];
 		}
-	}
-
-	// finally, overlay the sprites
-	if (LCDC_reg & 0b10)
-	{ // sprites enabled
-		for (int c = 0; c < SCREEN_WIDTH; c++)
+		else if (LCDC_reg & 1)
+		{ // display background
+			pixelData[row][j] = backgroundData[row][j];
+		}
+		else
 		{
-			if (spriteData[row][c] != WHITE_OR_TRANSPARENT)
-			{
-				pixelData[row][c] = spriteData[row][c];
-			}
+			pixelData[row][j] = WHITE_OR_TRANSPARENT; // bg/window not enabled, set to transparent
 		}
 	}
 
@@ -193,80 +204,88 @@ void PPU::updateBackground(uint8_t row)
 	bg_palette[3] = static_cast<COLOR>((BGP_reg >> 6) & 0b11);
 
 	// which tile map to use?
-	uint8_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
+	uint16_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
 	// start at 0x8000 w/ unsigned offsets OR at 0x9000 w/ signed offsets
 	bool simple_addressing_mode = (LCDC_reg & LCDC_ADDRESSING_MODE_MASK) == 0;
-	COLOR full_map[MAP_HEIGHT * TILE_HEIGHT][MAP_WIDTH * TILE_WIDTH];
+
 	uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_1 : TILE_DATA_2;
-	for (int i = 0; i < MAP_HEIGHT * TILE_HEIGHT; i += TILE_HEIGHT)
+	uint16_t tiles_row = tiles_addr + ((SCY_reg + row) / TILE_HEIGHT * MAP_WIDTH) % (MAP_WIDTH * MAP_HEIGHT);
+	uint16_t tile_row = (SCY_reg + row) % TILE_HEIGHT;
+	for (int i = 0; i < SCREEN_WIDTH;)
 	{
-		for (int j = 0; j < MAP_WIDTH * TILE_WIDTH; j += TILE_WIDTH)
+		uint16_t tiles_col = tiles_row + ((SCX_reg + i) / TILE_WIDTH) % MAP_WIDTH;
+		uint16_t tile_col = (SCX_reg + i) % TILE_WIDTH;
+		uint16_t tile_addr;
+		if (simple_addressing_mode)
 		{
-			// get tiles in this row
-			uint8_t tile_addr;
-			if (simple_addressing_mode)
-			{
-				uint8_t tile_offset = read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH));
-				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
-			}
-			else
-			{
-				int8_t tile_offset = static_cast<int8_t>(read_mem(map_addr + (i / TILE_HEIGHT) * MAP_WIDTH + (j / TILE_WIDTH)));
-				tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
-			}
-			// transform tile data into pixel data
-			for (int k = 0; k < TILE_HEIGHT; k++)
-			{
-				uint8_t lsbs = read_mem(tile_addr + k * 2);
-				uint8_t msbs = read_mem(tile_addr + k * 2 + 1);
-				for (int l = 0; l < TILE_WIDTH; l++)
-				{
-					// get color from each bit pair and store in map
-					uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
-					full_map[i + k][j + l] = bg_palette[color];
-				}
-			}
+			uint16_t tile_offset = read_mem(tiles_col);
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
+		}
+		else
+		{
+			int16_t tile_offset = static_cast<int8_t>(read_mem(tiles_col));
+			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
+		}
+		uint8_t lsbs = read_mem(tile_addr + tile_row * 2);
+		uint8_t msbs = read_mem(tile_addr + tile_row * 2 + 1);
+		for (int j = tile_col; j < TILE_WIDTH; j++)
+		{
+			uint8_t color = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
+			backgroundData[row][i] = bg_palette[color];
+			i++;
 		}
 	}
 
-	// now, apply scroll
-	for (int i = 0; i < SCREEN_HEIGHT; i++)
-	{
-		for (int j = 0; j < SCREEN_WIDTH; j++)
-		{
-			// use SCX, SCY regs as offsets w/ wrap-around
-			int y = (i + SCX_reg) % (MAP_HEIGHT * TILE_HEIGHT);
-			int x = (j + SCY_reg) % (MAP_WIDTH * TILE_WIDTH);
-			backgroundData[i][j] = full_map[y][x];
-		}
-	}
+	// keeping this just in case i'm bad at coding
+	// COLOR full_map[MAP_HEIGHT * TILE_HEIGHT][MAP_WIDTH * TILE_WIDTH];
+	// uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_1 : TILE_DATA_2;
+	// for (int i = 0; i < MAP_HEIGHT * TILE_HEIGHT; i += TILE_HEIGHT)
+	// {
+	// 	for (int j = 0; j < MAP_WIDTH * TILE_WIDTH; j += TILE_WIDTH)
+	// 	{
+	// 		// get tiles in this row
+	// 		uint8_t tile_addr;
+	// 		// transform tile data into pixel data
+	// 		for (int k = 0; k < TILE_HEIGHT; k++)
+	// 		{
+	// 			uint8_t lsbs = read_mem(tile_addr + k * 2);
+	// 			uint8_t msbs = read_mem(tile_addr + k * 2 + 1);
+	// 			for (int l = 0; l < TILE_WIDTH; l++)
+	// 			{
+	// 				// get color from each bit pair and store in map
+	// 				uint8_t color = ((lsbs >> (7 - l)) & 1) | (((msbs >> (7 - l)) & 1) << 1);
+	// 				full_map[i + k][j + l] = bg_palette[color];
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// // now, apply scroll
+	// for (int i = 0; i < SCREEN_HEIGHT; i++)
+	// {
+	// 	for (int j = 0; j < SCREEN_WIDTH; j++)
+	// 	{
+	// 		// use SCX, SCY regs as offsets w/ wrap-around
+	// 		int y = (i + SCX_reg) % (MAP_HEIGHT * TILE_HEIGHT);
+	// 		int x = (j + SCY_reg) % (MAP_WIDTH * TILE_WIDTH);
+	// 		backgroundData[i][j] = full_map[y][x];
+	// 	}
+	// }
 }
 
 void PPU::updateWindow(uint8_t row)
 {
-	if (~(LCDC_reg & 0b1))
-	{ // bit 0 window becomes white
-		for (int r = 0; r < 160; r++)
-		{
-			for (int c = 0; c < 144; c++)
-			{
-				windowData[r][c] = WHITE_OR_TRANSPARENT;
-			}
-		}
-		return;
-	}
+	// get bg palette from register
+	COLOR bg_palette[4];
+	bg_palette[0] = static_cast<COLOR>(BGP_reg & 0b11);
+	bg_palette[1] = static_cast<COLOR>((BGP_reg >> 2) & 0b11);
+	bg_palette[2] = static_cast<COLOR>((BGP_reg >> 4) & 0b11);
+	bg_palette[3] = static_cast<COLOR>((BGP_reg >> 6) & 0b11);
 
 	// initializing to transparent
-	for (int r = 0; r < 160; r++)
+	for (int i = 0; i < 160; i++)
 	{
-		for (int c = 0; c < 144; c++)
-		{
-			windowData[r][c] = WINDOW_TRANSPARENT;
-		}
-	}
-	if (~((LCDC_reg >> 5) & 0b1))
-	{ // bit 5 window enabled, keep transparent
-		return;
+		windowData[row][i] = WINDOW_TRANSPARENT;
 	}
 
 	uint8_t x = WX_reg - 7;
@@ -313,7 +332,7 @@ void PPU::updateWindow(uint8_t row)
 			for (int i = 0; i < 16; i += 2)
 			{
 				// this tile row of pixels is not visible
-				if (y + r * TILE_HEIGHT + i / 2 >= SCREEN_HEIGHT)
+				if (y + r * TILE_HEIGHT + i / 2 != row)
 				{
 					continue;
 				}
@@ -330,7 +349,7 @@ void PPU::updateWindow(uint8_t row)
 						continue;
 					}
 					uint8_t color = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
-					windowData[y + r * TILE_HEIGHT + i / 2][x + r * TILE_WIDTH + j] = static_cast<COLOR>(color);
+					windowData[y + r * TILE_HEIGHT + i / 2][x + r * TILE_WIDTH + j] = bg_palette[color];
 				}
 			}
 
@@ -342,16 +361,12 @@ void PPU::updateWindow(uint8_t row)
 
 void PPU::updateSprites(uint8_t row)
 {
-	// initialize sprite data to transparent
-	for (int r = 0; r < SCREEN_HEIGHT; r++)
-	{
-		for (int c = 0; c < SCREEN_WIDTH; c++)
-		{
-			spriteData[r][c] = WHITE_OR_TRANSPARENT;
-		}
-	}
+	spriteBuffer.sort();
 
-	bool tall_sprites = LCDC_reg & 0b100;
+	for (int i = 0; i < SCREEN_WIDTH; i++)
+	{
+		spriteData[row][i] = WHITE_OR_TRANSPARENT;
+	}
 
 	COLOR obp0_palette[4];
 	obp0_palette[0] = static_cast<COLOR>(OBP0_reg & 0b11);
@@ -364,64 +379,89 @@ void PPU::updateSprites(uint8_t row)
 	obp1_palette[2] = static_cast<COLOR>((OBP1_reg >> 4) & 0b11);
 	obp1_palette[3] = static_cast<COLOR>((OBP1_reg >> 6) & 0b11);
 
-	for (int i = 0; i < 40; i++)
+	bool tall_sprites = LCDC_reg & 0b100;
+	int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
+
+	while (!spriteBuffer.empty())
 	{
-		int16_t y = static_cast<uint16_t>(read_mem(OAM_START + i * 4)) - SPRITE_Y_OFFSET;
-		int16_t x = static_cast<uint16_t>(read_mem(OAM_START + i * 4 + 1)) - SPRITE_X_OFFSET;
+		Sprite sprite = spriteBuffer.front();
+		spriteBuffer.pop_front();
+		spriteBuffer.push_back(sprite);
 
-		uint16_t tileAddr = TILE_DATA_1 + read_mem(OAM_START + i * 4 + 2);
+		uint8_t y = sprite.y;
+		uint8_t x = sprite.x;
+		uint8_t tileIndex = sprite.tileIndex;
+		uint8_t flags = sprite.flags;
 
-		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
+		uint16_t tileAddr = TILE_DATA_1 + tileIndex * TILE_DATA_SIZE;
+		if (tall_sprites)
+		{
+			tileAddr &= 0xFE;
+		}
+
 		bool background_priority = (flags >> 7) & 1;
 		bool flip_y = (flags >> 6) & 1;
 		bool flip_x = (flags >> 5) & 1;
+
+		int sprite_row = flip_y ? sprite_height - (row - y) - 1 : row - y;
+
 		COLOR palette[4];
 		for (int i = 0; i < 4; i++)
 		{
 			palette[i] = ((flags >> 4) & 1) ? obp1_palette[i] : obp0_palette[i];
 		}
 
-		int current_tile_height = TILE_HEIGHT;
-		if (tall_sprites)
+		uint8_t lsbs = read_mem(tileAddr + sprite_row * 2);
+		uint8_t msbs = read_mem(tileAddr + sprite_row * 2 + 1);
+
+		for (int i = 0; i < TILE_WIDTH; i++)
 		{
-			tileAddr &= 0xFE;
-			current_tile_height *= 2;
-		}
-		// iterating through bytes of tile data
-		for (int i = 0; i < current_tile_height * 2; i += 2)
-		{
-			int index_y = flip_y ? y + current_tile_height - i / 2 - 1 : y + i / 2;
-			// this tile row of pixels is not visible
-			if (index_y >= SCREEN_HEIGHT || index_y < 0)
+			int index_x = flip_x ? x + TILE_WIDTH - i - 1 : x + i;
+			if (spriteData[row][index_x] != WHITE_OR_TRANSPARENT)
 			{
 				continue;
 			}
-
-			uint8_t lsbs = read_mem(tileAddr + i);
-			uint8_t msbs = read_mem(tileAddr + i + 1);
-
-			// displaying this tile row of pixels
-			for (int j = 0; j < 8; j++)
+			// this tile column of pixels is not visible
+			if (index_x >= SCREEN_WIDTH || index_x < 0)
 			{
-				int index_x = flip_x ? x + TILE_WIDTH - j - 1 : x + j;
-				// this tile column of pixels is not visible
-				if (index_x >= SCREEN_WIDTH || index_x < 0)
-				{
-					continue;
-				}
-				// sprite does not have priority
-				if (background_priority && pixelData[index_y][index_x] != WHITE_OR_TRANSPARENT)
-				{
-					continue;
-				}
-				uint8_t color_index = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
-				COLOR color = palette[color_index];
-				if (color != WHITE_OR_TRANSPARENT)
-				{
-					spriteData[index_y][index_x] = color;
-				}
+				continue;
 			}
+			// sprite does not have priority
+			if (background_priority && pixelData[row][index_x] != WHITE_OR_TRANSPARENT)
+			{
+				continue;
+			}
+			uint8_t color_index = ((lsbs >> (7 - index_x)) & 1) | (((msbs >> (7 - index_x)) & 1) << 1);
+			COLOR color = palette[color_index];
+			spriteData[row][index_x] = color;
 		}
+	}
+}
+
+void PPU::scanOAM(uint8_t row)
+{
+	bool tall_sprites = LCDC_reg & 0b100;
+	int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
+	for (int i = 0; i < 40; i++)
+	{
+		if (spriteBuffer.size() >= 10)
+		{
+			return; // too many sprites, do nothing
+		}
+
+		uint8_t y = read_mem(OAM_START + i * 4);
+		if (row + 16 < y || row + 16 >= y + sprite_height)
+		{
+			return; // sprite is not visible
+		}
+		uint8_t x = read_mem(OAM_START + i * 4 + 1);
+		if (x <= 0)
+		{
+			return; // sprite is not visible
+		}
+		uint8_t tileIndex = read_mem(OAM_START + i * 4 + 2);
+		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
+		spriteBuffer.push_back(Sprite(y, x, tileIndex, flags));
 	}
 }
 
