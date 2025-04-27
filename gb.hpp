@@ -28,7 +28,7 @@ private:
     InterruptHandler *IH;
     SDL_Window *window;
     SDL_Surface *window_surface;
-    const int SCALE_FACTOR = 6;
+    const int SCALE_FACTOR = 2;
     const int WINDOW_WIDTH = 160 * SCALE_FACTOR;
     const int WINDOW_HEIGHT = 144 * SCALE_FACTOR;
 
