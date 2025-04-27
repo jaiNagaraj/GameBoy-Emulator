@@ -438,11 +438,14 @@ bool CPU::decode_ADD_45(uint32_t instruction) {
      return outcome;
  }
  
- bool CPU::decode_INC_60(uint32_t instruction) {
+bool CPU::decode_INC_60(uint32_t instruction) {
      // INC r (register) - Opcodes 0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x3C
      // Pattern 0b00xxx100 (excludes 0x34 INC (HL))
      uint8_t opcode = (instruction >> 16) & 0xFF;
-     bool outcome = ((opcode & 0x07) == 0x04) && (opcode != 0x34);
+     // Check that the last 3 bits are 100 AND the first 2 bits are 00
+     bool pattern_match = ((opcode & 0x07) == 0x04) && ((opcode & 0xC0) == 0x00);
+     // Also explicitly exclude INC (HL) just in case, although the pattern check should handle it
+     bool outcome = pattern_match && (opcode != 0x34);
      return outcome;
  }
  
