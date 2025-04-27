@@ -521,24 +521,19 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 
         // screen is updated, reflect that in SDL
         // Call PPU
-        bool render = ppu->tick();
-		// Update the window surface with the pixel data
-		SDL_LockSurface(window_surface);
-		uint32_t* pixels = static_cast<uint32_t*>(window_surface->pixels);
-		for (int y = 0; y < WINDOW_HEIGHT; y++) {
-			for (int x = 0; x < WINDOW_WIDTH; x++) {
-				pixels[y * WINDOW_WIDTH + x] = pixelsToWrite[y][x]; 
-			}
-		}
-        for (int i = 0; i < WINDOW_HEIGHT; i++) {
-            delete pixelsToWrite[i];
+        bool render = ppu->tick(cpu->get_cycles());
+        if (render) {
+		    // Update the window surface with the pixel data
+		    SDL_LockSurface(window_surface);
+		    uint32_t* pixels = static_cast<uint32_t*>(window_surface->pixels);
+		    for (int y = 0; y < WINDOW_HEIGHT; y++) {
+			    for (int x = 0; x < WINDOW_WIDTH; x++) {
+				    pixels[y * WINDOW_WIDTH + x] = ppu->pixelsToRender[y][x]; 
+			    }
+		    }
+		    SDL_UnlockSurface(window_surface);
+		    SDL_UpdateWindowSurface(window);
         }
-        delete pixelsToWrite;
-		SDL_UnlockSurface(window_surface);
-		SDL_UpdateWindowSurface(window);
-
-		// Delay to control frame rate
-		SDL_Delay(16); // ~60 FPS
     }
 
     if (!load_rom(mmap, rom_path)) {

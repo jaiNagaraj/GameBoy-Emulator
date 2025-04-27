@@ -130,7 +130,7 @@ void PPU::updatePixelData(uint8_t row) {
 		// display window data
 		if (windowData[row][j] != WINDOW_TRANSPARENT)
 		{
-			pixelData[row][j] = windowData[i][j];
+			pixelData[row][j] = windowData[row][j];
 		}
 	}
 
