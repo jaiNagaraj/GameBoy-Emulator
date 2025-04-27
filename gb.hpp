@@ -7,6 +7,7 @@
 #include "ppu.hpp"
 #include "RAM.hpp"
 #include "input.hpp"
+#include "InterruptHandler.hpp"
 
 class GheithBoy {
     public:
@@ -22,6 +23,7 @@ class GheithBoy {
 		MMU* mmu;
 		PPU* ppu;
 		RAM* ram;
+		InterruptHandler* IH;
         SDL_Window* window;
         SDL_Surface* window_surface;
         const int WINDOW_WIDTH = 160;

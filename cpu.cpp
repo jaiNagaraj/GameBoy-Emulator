@@ -6,10 +6,13 @@
 #include <bitset>
 
 CPU::CPU() {
+    cycles = 0;
+    
     pc = 0x0100;
     sp = 0xFFFE;
 
     ime = true;
+    halted = false;
 
     // Register initialization
     regs[A_REGISTER] = 0x01;
@@ -99,14 +102,17 @@ void CPU::set_af(uint16_t val) {
 // Jai
 bool CPU::decode_LD_20(uint32_t instruction) {
     // LD r, r'
-    bool outcome = ((instruction >> 22) << 6) == 0x40;
+    bool outcome = ((instruction >> 22) << 6) == 0x40 &&
+                   ((instruction >> 16) & 0xc7) != 0x46 &&
+                   ((instruction >> 16) & 0xf8) != 0x70;
 
     return outcome;
 }
 
 bool CPU::decode_LD_21(uint32_t instruction) {
     // LD r, n (immediate)
-    bool outcome = ((instruction >> 16) & 0xc7) == 0x06;
+    bool outcome = ((instruction >> 16) & 0xc7) == 0x06 &&
+                   (instruction >> 16) != 0x36;
 
     return outcome;
 }
@@ -274,7 +280,8 @@ bool CPU::decode_LD_44(uint32_t instruction) {
 
 bool CPU::decode_ADD_45(uint32_t instruction) {
     // ADD A, r
-    bool outcome = (instruction >> 16) == 0x80;
+    bool outcome = ((instruction >> 16) & 0b11111000) == 0b10000000 &&
+                   ((instruction >> 16) & 0xFF) != 0b10000110;
 
     return outcome;
 }
@@ -509,7 +516,8 @@ bool CPU::decode_RRA_85(uint32_t instruction) {
 
 bool CPU::decode_RLC_86(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x06);
 }
 
 bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
@@ -519,7 +527,8 @@ bool CPU::decode_RLC_87(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RRC_88(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0000'1000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x0E);
 }
 
 bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
@@ -529,7 +538,8 @@ bool CPU::decode_RRC_89(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RL_90(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x16);
 }
 
 bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
@@ -539,7 +549,8 @@ bool CPU::decode_RL_91(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_RR_92(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0001'1000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x1E);
 }
 
 bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
@@ -549,7 +560,8 @@ bool CPU::decode_RR_93(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_SLA_94(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'0000) && // opcode
+           (((instruction >> 8) & 0xFF) != 0x26);
 }
 
 bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
@@ -559,7 +571,8 @@ bool CPU::decode_SLA_95(uint32_t instruction) { // 2-byte instruction
 
 bool CPU::decode_SRA_96(uint32_t instruction) { // 2-byte instruction
     return (((instruction >> 16) & 0xFF) == 0xCB) && // 0xCB prefix
-           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000); // opcode
+           (((instruction >> 8) & 0b1111'1000) == 0b0010'1000) &&  // opcode
+           (((instruction >> 8) & 0xFF) != 0x2E);
 }
 
 bool CPU::decode_SRA_97(uint32_t instruction) { // 2-byte instruction
@@ -709,20 +722,18 @@ bool CPU::decode_RST_122(uint32_t instruction) { // 1-byte instruction
     return outcome;
 }
 
-// DNE in gekkio documentation
-/*
-bool CPU::decode_HALT_123(uint32_t instruction) {
-    bool outcome = [instruction];
+bool CPU::decode_HALT_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = ((instruction >> 16) & 0xFF) == 0x76; // opcode
 
     return outcome;
 }
 
-bool CPU::decode_STOP_123(uint32_t instruction) {
-    bool outcome = [instruction];
+bool CPU::decode_STOP_123(uint32_t instruction) { // 1-byte instruction
+    bool outcome = (((instruction >> 16) & 0xFF) == 0x10) &&
+                   (((instruction >> 8) & 0xFF) == 0x00);
 
     return outcome;
 }
-*/
 
 bool CPU::decode_DI_123(uint32_t instruction) { // 1-byte instruction
     bool outcome = ((instruction >> 16) & 0xFF) == 0xF3; // opcode
@@ -751,6 +762,7 @@ void CPU::execute_LD_20(uint32_t instruction) {
     uint8_t reg2 = operation & 0b00000111;
     regs[reg1] = regs[reg2];
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_LD_21(uint32_t instruction) {
@@ -761,6 +773,7 @@ void CPU::execute_LD_21(uint32_t instruction) {
 
     regs[reg] = n;
     pc += 2; // one for instruction, one for imm
+    cycles += 2;
 }
 
 void CPU::execute_LD_22(uint32_t instruction) {
@@ -772,6 +785,7 @@ void CPU::execute_LD_22(uint32_t instruction) {
 
     regs[reg] = data;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_23(uint32_t instruction) {
@@ -783,6 +797,7 @@ void CPU::execute_LD_23(uint32_t instruction) {
 
    mmu->write_mem(addr, data);
    pc++;
+   cycles += 2;
 }
 
 void CPU::execute_LD_24(uint32_t instruction) {
@@ -793,6 +808,7 @@ void CPU::execute_LD_24(uint32_t instruction) {
 
     mmu->write_mem(addr, n);
     pc += 2; // one for instruction, one for imm
+    cycles += 3;
 }
 
 void CPU::execute_LD_25(uint32_t instruction) {
@@ -802,6 +818,7 @@ void CPU::execute_LD_25(uint32_t instruction) {
 
     regs[A_REGISTER] = data;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_26(uint32_t instruction) {
@@ -811,6 +828,7 @@ void CPU::execute_LD_26(uint32_t instruction) {
 
     regs[A_REGISTER] = data;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_27(uint32_t instruction) {
@@ -820,6 +838,7 @@ void CPU::execute_LD_27(uint32_t instruction) {
 
     mmu->write_mem(addr, data);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_28(uint32_t instruction) {
@@ -829,6 +848,7 @@ void CPU::execute_LD_28(uint32_t instruction) {
 
     mmu->write_mem(addr, data);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_29(uint32_t instruction) {
@@ -842,6 +862,7 @@ void CPU::execute_LD_29(uint32_t instruction) {
 
     regs[A_REGISTER] = data;
     pc += 3; // one for instruction, two for imm
+    cycles += 4;
 }
 
 void CPU::execute_LD_30(uint32_t instruction) {
@@ -855,6 +876,7 @@ void CPU::execute_LD_30(uint32_t instruction) {
 
     mmu->write_mem(addr, data);
     pc += 3; // one for instruction, two for imm
+    cycles += 4;
 }
 
 void CPU::execute_LD_31(uint32_t instruction) {
@@ -866,6 +888,7 @@ void CPU::execute_LD_31(uint32_t instruction) {
 
     regs[A_REGISTER] = data;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_32(uint32_t instruction) {
@@ -877,6 +900,7 @@ void CPU::execute_LD_32(uint32_t instruction) {
 
     mmu->write_mem(addr, data);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_33(uint32_t instruction) {
@@ -890,6 +914,7 @@ void CPU::execute_LD_33(uint32_t instruction) {
     std::cout << "Register A: " << std::hex << static_cast<int>(regs[A_REGISTER]) << std::endl;
     regs[A_REGISTER] = data;
     pc += 2; // one for instruction, one for imm
+    cycles += 3;
 }
 
 void CPU::execute_LD_34(uint32_t instruction) {
@@ -901,6 +926,7 @@ void CPU::execute_LD_34(uint32_t instruction) {
 
     mmu->write_mem(addr, data);
     pc += 2; // one for instruction, one for imm
+    cycles += 3;
 }
 
 void CPU::execute_LD_35(uint32_t instruction) {
@@ -913,6 +939,7 @@ void CPU::execute_LD_35(uint32_t instruction) {
     // Decrement HL after reading
     set_hl(addr - 1);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_36(uint32_t instruction) {
@@ -925,6 +952,7 @@ void CPU::execute_LD_36(uint32_t instruction) {
     // Decrement HL after writing
     set_hl(addr - 1);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_37(uint32_t instruction) {
@@ -937,6 +965,7 @@ void CPU::execute_LD_37(uint32_t instruction) {
     // Increment HL after reading
     set_hl(addr + 1);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_38(uint32_t instruction) {
@@ -949,6 +978,7 @@ void CPU::execute_LD_38(uint32_t instruction) {
     // Increment HL after writing
     set_hl(addr + 1);
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_LD_39(uint32_t instruction) {
@@ -968,6 +998,7 @@ void CPU::execute_LD_39(uint32_t instruction) {
         sp = nn; // LD SP, nn
     }
     pc += 3; // one for instruction, two for imm
+    cycles += 3;
 }
 
 void CPU::execute_LD_40(uint32_t instruction) {
@@ -981,12 +1012,14 @@ void CPU::execute_LD_40(uint32_t instruction) {
     mmu->write_mem(addr, static_cast<uint8_t>(sp & 0xFF)); // Store LSB of SP
     mmu->write_mem(addr + 1, static_cast<uint8_t>((sp >> 8) & 0xFF)); // Store MSB of SP
     pc += 3; // one for instruction, two for imm
+    cycles += 5;
 }
 
 void CPU::execute_LD_41(uint32_t instruction) {
     // LD SP, HL
     sp = get_hl();
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_PUSH_42(uint32_t instruction) {
@@ -1008,6 +1041,7 @@ void CPU::execute_PUSH_42(uint32_t instruction) {
     sp -= 2;
 
     pc++;
+    cycles += 4;
 }
 
 void CPU::execute_POP_43(uint32_t instruction) {
@@ -1029,6 +1063,7 @@ void CPU::execute_POP_43(uint32_t instruction) {
         set_af(data);
     }
     pc++;
+    cycles += 3;
 }
 
 void CPU::execute_LD_44(uint32_t instruction) {
@@ -1043,6 +1078,7 @@ void CPU::execute_LD_44(uint32_t instruction) {
     set_flag(H_FLAG_BIT, ((sp & 0x0F) + (e & 0x0F)) > 0x0F); // Half Carry: Check carry from bit 3 to bit 4
     set_flag(C_FLAG_BIT, ((sp & 0xFF) + e) > 0xFF); // Carry: Check carry from bit 7
     pc += 2; // one for instruction, one for imm
+    cycles += 3;
 }
 
 void CPU::execute_ADD_45(uint32_t instruction) {
@@ -1068,6 +1104,7 @@ void CPU::execute_ADD_45(uint32_t instruction) {
     // Store result back in A register
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 
@@ -1090,6 +1127,7 @@ void CPU::execute_ADD_46(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_ADD_47(uint32_t instruction) {
@@ -1109,6 +1147,7 @@ void CPU::execute_ADD_47(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_ADC_48(uint32_t instruction) {
@@ -1141,7 +1180,8 @@ void CPU::execute_ADC_48(uint32_t instruction) {
     set_flag(C_FLAG_BIT, result16 > 0xFF);
 
     regs[A_REGISTER] = result8;
-    pc++; 
+    pc++;
+    cycles += 1;
 }
 
 void CPU::execute_ADC_49(uint32_t instruction) {
@@ -1163,6 +1203,7 @@ void CPU::execute_ADC_49(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_ADC_50(uint32_t instruction) {
@@ -1183,6 +1224,7 @@ void CPU::execute_ADC_50(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_SUB_51(uint32_t instruction) {
@@ -1213,6 +1255,7 @@ void CPU::execute_SUB_51(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_SUB_52(uint32_t instruction) {
@@ -1232,6 +1275,7 @@ void CPU::execute_SUB_52(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_SUB_53(uint32_t instruction) {
@@ -1249,6 +1293,7 @@ void CPU::execute_SUB_53(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_SBC_54(uint32_t instruction) {
@@ -1282,6 +1327,7 @@ void CPU::execute_SBC_54(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_SBC_55(uint32_t instruction) {
@@ -1304,6 +1350,7 @@ void CPU::execute_SBC_55(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_SBC_56(uint32_t instruction) {
@@ -1323,6 +1370,7 @@ void CPU::execute_SBC_56(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_CP_57(uint32_t instruction) {
@@ -1351,6 +1399,7 @@ void CPU::execute_CP_57(uint32_t instruction) {
     set_flag(C_FLAG_BIT, a_val < r_val);
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_CP_58(uint32_t instruction) {
@@ -1369,6 +1418,7 @@ void CPU::execute_CP_58(uint32_t instruction) {
     set_flag(C_FLAG_BIT, a_val < data);
 
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_CP_59(uint32_t instruction) {
@@ -1384,6 +1434,7 @@ void CPU::execute_CP_59(uint32_t instruction) {
     set_flag(C_FLAG_BIT, a_val < n);
 
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_INC_60(uint32_t instruction) {
@@ -1401,6 +1452,7 @@ void CPU::execute_INC_60(uint32_t instruction) {
 
     regs[target_reg_index] = new_val;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_INC_61(uint32_t instruction) {
@@ -1418,6 +1470,7 @@ void CPU::execute_INC_61(uint32_t instruction) {
 
     mmu->write_mem(addr, new_val);
     pc++;
+    cycles += 3;
 }
 
 void CPU::execute_DEC_62(uint32_t instruction) {
@@ -1434,6 +1487,7 @@ void CPU::execute_DEC_62(uint32_t instruction) {
 
     regs[target_reg_index] = new_val;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_DEC_63(uint32_t instruction) {
@@ -1450,6 +1504,7 @@ void CPU::execute_DEC_63(uint32_t instruction) {
 
     mmu->write_mem(addr, new_val);
     pc++;
+    cycles += 3;
 }
 
 void CPU::execute_AND_64(uint32_t instruction) {
@@ -1480,6 +1535,7 @@ void CPU::execute_AND_64(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_AND_65(uint32_t instruction) {
@@ -1497,6 +1553,7 @@ void CPU::execute_AND_65(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_AND_66(uint32_t instruction) {
@@ -1512,7 +1569,8 @@ void CPU::execute_AND_66(uint32_t instruction) {
     set_flag(C_FLAG_BIT, false);
 
     regs[A_REGISTER] = result8;
-   pc += 2;
+    pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_OR_67(uint32_t instruction) {
@@ -1542,6 +1600,7 @@ void CPU::execute_OR_67(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_OR_68(uint32_t instruction) {
@@ -1560,6 +1619,7 @@ void CPU::execute_OR_68(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_OR_69(uint32_t instruction) {
@@ -1576,6 +1636,7 @@ void CPU::execute_OR_69(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc += 2;
+    cycles += 2;
 }
 
 void CPU::execute_XOR_70(uint32_t instruction) {
@@ -1606,6 +1667,7 @@ void CPU::execute_XOR_70(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_XOR_71(uint32_t instruction) {
@@ -1625,6 +1687,7 @@ void CPU::execute_XOR_71(uint32_t instruction) {
 
     regs[A_REGISTER] = result8;
     pc++;
+    cycles += 2;
 }
 
 // Ella
@@ -1640,6 +1703,7 @@ void CPU::execute_XOR_72(uint32_t instruction) {
     set_flag(C_FLAG_BIT, false);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_CCF_73(uint32_t instruction) {
@@ -1648,6 +1712,7 @@ void CPU::execute_CCF_73(uint32_t instruction) {
     set_flag(C_FLAG_BIT, !get_flag(C_FLAG_BIT));
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_SCF_74(uint32_t instruction) {
@@ -1656,6 +1721,7 @@ void CPU::execute_SCF_74(uint32_t instruction) {
     set_flag(C_FLAG_BIT, true);
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_DAA_75(uint32_t instruction) {
@@ -1692,6 +1758,7 @@ void CPU::execute_DAA_75(uint32_t instruction) {
     set_flag(H_FLAG_BIT, false);
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_CPL_76(uint32_t instruction) {
@@ -1701,6 +1768,7 @@ void CPU::execute_CPL_76(uint32_t instruction) {
     set_flag(H_FLAG_BIT, true);
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_INC_77(uint32_t instruction) {
@@ -1720,6 +1788,7 @@ void CPU::execute_INC_77(uint32_t instruction) {
     }
 
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_DEC_78(uint32_t instruction) {
@@ -1739,6 +1808,7 @@ void CPU::execute_DEC_78(uint32_t instruction) {
     }
 
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_ADD_79(uint32_t instruction) { // ADD HL, rr
@@ -1768,6 +1838,7 @@ void CPU::execute_ADD_79(uint32_t instruction) { // ADD HL, rr
     set_flag(C_FLAG_BIT, result > 0xFFFF); // Carry: Check carry from bit 15
 
     pc++;
+    cycles += 2;
 }
 
 void CPU::execute_ADD_80(uint32_t instruction) { // ADD SP, e
@@ -1783,6 +1854,7 @@ void CPU::execute_ADD_80(uint32_t instruction) { // ADD SP, e
     sp += static_cast<int8_t>(e); // Sign-extend
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_RLCA_82(uint32_t instruction) {
@@ -1801,6 +1873,7 @@ void CPU::execute_RLCA_82(uint32_t instruction) {
     regs[A_REGISTER] = a_val;
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_RRCA_83(uint32_t instruction) {
@@ -1819,6 +1892,7 @@ void CPU::execute_RRCA_83(uint32_t instruction) {
     regs[A_REGISTER] = a_val;
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_RLA_84(uint32_t instruction) {
@@ -1837,6 +1911,7 @@ void CPU::execute_RLA_84(uint32_t instruction) {
     regs[A_REGISTER] = a_val;
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_RRA_85(uint32_t instruction) {
@@ -1855,6 +1930,7 @@ void CPU::execute_RRA_85(uint32_t instruction) {
     regs[A_REGISTER] = a_val;
 
     pc++;
+    cycles += 1;
 }
 
 void CPU::execute_RLC_86(uint32_t instruction) {
@@ -1874,6 +1950,7 @@ void CPU::execute_RLC_86(uint32_t instruction) {
     regs[regNum] = reg;
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_RLC_87(uint32_t instruction) {
@@ -1893,6 +1970,7 @@ void CPU::execute_RLC_87(uint32_t instruction) {
     mmu->write_mem(addr, hl);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_RRC_88(uint32_t instruction) {
@@ -1912,6 +1990,7 @@ void CPU::execute_RRC_88(uint32_t instruction) {
     regs[regNum] = reg;
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_RRC_89(uint32_t instruction) {
@@ -1931,6 +2010,7 @@ void CPU::execute_RRC_89(uint32_t instruction) {
     mmu->write_mem(addr, hl);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_RL_90(uint32_t instruction) {
@@ -1952,6 +2032,7 @@ void CPU::execute_RL_90(uint32_t instruction) {
     set_flag(Z_FLAG_BIT, reg == 0);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_RL_91(uint32_t instruction) {
@@ -1973,6 +2054,7 @@ void CPU::execute_RL_91(uint32_t instruction) {
     set_flag(Z_FLAG_BIT, hl == 0);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_RR_92(uint32_t instruction) {
@@ -1994,6 +2076,7 @@ void CPU::execute_RR_92(uint32_t instruction) {
     set_flag(Z_FLAG_BIT, reg == 0);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_RR_93(uint32_t instruction) {
@@ -2015,6 +2098,7 @@ void CPU::execute_RR_93(uint32_t instruction) {
     set_flag(Z_FLAG_BIT, hl == 0);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_SLA_94(uint32_t instruction) {
@@ -2034,6 +2118,7 @@ void CPU::execute_SLA_94(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_SLA_95(uint32_t instruction) {
@@ -2053,6 +2138,7 @@ void CPU::execute_SLA_95(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_SRA_96(uint32_t instruction) {
@@ -2072,6 +2158,7 @@ void CPU::execute_SRA_96(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_SRA_97(uint32_t instruction) {
@@ -2091,6 +2178,7 @@ void CPU::execute_SRA_97(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 // Rishi
@@ -2112,6 +2200,7 @@ void CPU::execute_SWAP_98(uint32_t instruction) {
     set_flag(C_FLAG_BIT, false);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_SWAP_99(uint32_t instruction) {
@@ -2129,6 +2218,7 @@ void CPU::execute_SWAP_99(uint32_t instruction) {
     set_flag(C_FLAG_BIT, false);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_SRL_100(uint32_t instruction) {
@@ -2149,6 +2239,7 @@ void CPU::execute_SRL_100(uint32_t instruction) {
     set_flag(C_FLAG_BIT, cur_data & 1);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_SRL_101(uint32_t instruction) {
@@ -2166,6 +2257,7 @@ void CPU::execute_SRL_101(uint32_t instruction) {
     set_flag(C_FLAG_BIT, cur_data & 1);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_BIT_102(uint32_t instruction) {
@@ -2184,6 +2276,7 @@ void CPU::execute_BIT_102(uint32_t instruction) {
     set_flag(H_FLAG_BIT, true);
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_BIT_103(uint32_t instruction) {
@@ -2201,6 +2294,7 @@ void CPU::execute_BIT_103(uint32_t instruction) {
     set_flag(H_FLAG_BIT, true);
 
     pc += 2; // 2-byte instruction
+    cycles += 3;
 }
 
 void CPU::execute_RES_104(uint32_t instruction) {
@@ -2216,6 +2310,7 @@ void CPU::execute_RES_104(uint32_t instruction) {
     regs[reg] = new_data;
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_RES_105(uint32_t instruction) {
@@ -2230,6 +2325,7 @@ void CPU::execute_RES_105(uint32_t instruction) {
     (*mmu).write_mem(get_hl(), new_data);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_SET_106(uint32_t instruction) {
@@ -2245,6 +2341,7 @@ void CPU::execute_SET_106(uint32_t instruction) {
     regs[reg] = new_data;
 
     pc += 2; // 2-byte instruction
+    cycles += 2;
 }
 
 void CPU::execute_SET_107(uint32_t instruction) {
@@ -2259,6 +2356,7 @@ void CPU::execute_SET_107(uint32_t instruction) {
     (*mmu).write_mem(get_hl(), new_data);
 
     pc += 2; // 2-byte instruction
+    cycles += 4;
 }
 
 void CPU::execute_JP_109(uint32_t instruction) {
@@ -2269,6 +2367,7 @@ void CPU::execute_JP_109(uint32_t instruction) {
     uint16_t jmp_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
     pc = jmp_addr; // Unconditional jump
+    cycles += 4;
 }
 
 void CPU::execute_JP_110(uint32_t instruction) {
@@ -2276,6 +2375,7 @@ void CPU::execute_JP_110(uint32_t instruction) {
     uint16_t jmp_addr = get_hl();
 
     pc = jmp_addr; // Unconditional jump
+    cycles += 1;
 }
 
 void CPU::execute_JP_111(uint32_t instruction) {
@@ -2309,8 +2409,10 @@ void CPU::execute_JP_111(uint32_t instruction) {
         uint16_t jmp_addr = static_cast<uint16_t>(msb << 8) | lsb;
 
         pc = jmp_addr;
+        cycles += 4;
     } else {
         pc += 3; // 3-byte instruction
+        cycles += 3;
     }
 }
 
@@ -2322,6 +2424,7 @@ void CPU::execute_JR_113(uint32_t instruction) {
     uint16_t jmp_addr = pc + signed_offset + 2;
 
     pc = jmp_addr; // Unconditional jump
+    cycles += 3;
 }
 
 void CPU::execute_JR_114(uint32_t instruction) {
@@ -2360,8 +2463,10 @@ void CPU::execute_JR_114(uint32_t instruction) {
         uint16_t jmp_addr = static_cast<int16_t>(pc) + signed_offset + 2;
 
         pc = jmp_addr;
+        cycles += 3;
     } else {
         pc += 2; // 2-byte instruction
+        cycles += 2;
     }
 }
 
@@ -2379,6 +2484,7 @@ void CPU::execute_CALL_116(uint32_t instruction) {
     sp -= 2;
 
     pc = call_addr;
+    cycles += 6;
 }
 
 void CPU::execute_CALL_117(uint32_t instruction) {
@@ -2416,8 +2522,10 @@ void CPU::execute_CALL_117(uint32_t instruction) {
         sp -= 2;
 
         pc = call_addr;
+        cycles += 6;
     } else {
         pc += 3; // 3-byte instruction
+        cycles += 3;
     }
 }
 
@@ -2427,6 +2535,7 @@ void CPU::execute_RET_119(uint32_t instruction) {
     sp += 2;
 
     pc = ret_addr; // Unconditional return
+    cycles += 4;
 }
 
 void CPU::execute_RET_120(uint32_t instruction) {
@@ -2458,8 +2567,10 @@ void CPU::execute_RET_120(uint32_t instruction) {
         sp += 2;
 
         pc = ret_addr;
+        cycles += 5;
     } else {
         pc += 1; // 1-byte instruction
+        cycles += 2;
     }
 }
 
@@ -2471,6 +2582,7 @@ void CPU::execute_RETI_121(uint32_t instruction) {
     ime = true; // Enable interrupts
 
     pc = ret_addr; // Unconditional return
+    cycles += 4;
 }
 
 void CPU::execute_RST_122(uint32_t instruction) {
@@ -2515,20 +2627,38 @@ void CPU::execute_RST_122(uint32_t instruction) {
             pc = 0x0038;
             break;
     }
+    cycles += 4;
 }
+
+void CPU::execute_HALT_123(uint32_t instruction) {
+    halted = true;
+
+    pc += 1; // 1-byte instruction
+    cycles += 2;
+};
+
+void CPU::execute_STOP_123(uint32_t instruction) {
+    // For Tetris, sufficient to treat STOP as NOP - ChatGPT
+    
+    pc += 2; // 2-byte instruction
+    cycles += 2;
+};
 
 void CPU::execute_DI_123(uint32_t instruction) {
     ime = false; // Disable interrupts
 
     pc += 1; // 1-byte instruction
+    cycles += 1;
 }
 
 void CPU::execute_EI_124(uint32_t instruction) {
     ime = true; // Enable interrupts
 
     pc += 1; // 1-byte instruction
+    cycles += 1;
 }
 
 void CPU::execute_NOP_125(uint32_t instruction) {
     pc += 1; // 1-byte instruction
+    cycles += 1;
 }
