@@ -26,6 +26,7 @@ private:
     uint8_t OBP1_reg;
     uint8_t BGP_reg;
     MMU *mmu;
+    RAM *ram;
 
     COLOR pixelData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR backgroundData[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -38,6 +39,7 @@ public:
     PPU();
     ~PPU();
     void connect_mmu(MMU *mmu);
+    void connect_ram(RAM *ram);
 
     uint32_t **writePixels();
     void updateRegs();

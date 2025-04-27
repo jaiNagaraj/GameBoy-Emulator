@@ -29,6 +29,10 @@ void PPU::connect_mmu(MMU *mmu_ptr)
 	this->mmu = mmu_ptr;
 }
 
+void PPU::connect_ram(RAM *ram_ptr) {
+	this->ram = ram_ptr;
+}
+
 uint32_t **PPU::writePixels()
 {
 	// TODO: adhere to the clock cycle
