@@ -843,7 +843,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
             {
                 for (int x = 0; x < WINDOW_WIDTH; x++)
                 {
-                    pixels[y * WINDOW_WIDTH + x] = ppu->pixelsToRender[y][x];
+                    pixels[y * WINDOW_WIDTH + x] = ppu->pixelsToRender[y / SCALE_FACTOR][x / SCALE_FACTOR];
                 }
             }
             SDL_UnlockSurface(window_surface);
