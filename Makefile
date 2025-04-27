@@ -11,7 +11,8 @@ CPPFLAGS = -I/opt/homebrew/include
 LDFLAGS = $(shell sdl2-config --libs)
 
 # Source files
-SRCS = main.cpp cpu.cpp gb.cpp input.cpp mmap.cpp mmu.cpp ppu.cpp RAM.cpp
+# --- Added InterruptHandler.cpp ---
+SRCS = main.cpp cpu.cpp gb.cpp input.cpp mmap.cpp mmu.cpp ppu.cpp RAM.cpp InterruptHandler.cpp
 
 # Object directory
 OBJDIR = obj
@@ -33,7 +34,7 @@ $(TARGET): $(OBJS)
 # Generic rule to compile source files (.cpp) into object files (.o) in OBJDIR
 # $< represents the first prerequisite (the .cpp file)
 # $@ represents the target (the .o file in OBJDIR)
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp *.hpp # Added *.hpp dependency to recompile if headers change
 	@echo "Compiling $< -> $@..."
 	@mkdir -p $(OBJDIR) # Ensure the object directory exists
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
