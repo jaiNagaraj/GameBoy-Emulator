@@ -23,9 +23,9 @@ public:
 
     Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
         : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
-    bool operator<(const Sprite &other) const
+    bool comp_sprite(const Sprite& sp1, const Sprite& sp2) const
     {
-        return x < other.x;
+        return sp1.x < sp2.x;
     }
 };
 

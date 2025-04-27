@@ -3,8 +3,6 @@
 #include <fstream>
 #include <vector>
 
-#define ENABLE_DEBUG
-
 // Constructor
 GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
 
