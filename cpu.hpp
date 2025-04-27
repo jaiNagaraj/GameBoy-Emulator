@@ -159,6 +159,7 @@ public:
     uint32_t fetch_instruction();
 
     void connect_mmu(MMU *mmu);
+	uint64_t get_cycles() const { return cycles; }
 
     // Get a 16-bit register value
     uint16_t get_hl();
