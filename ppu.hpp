@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "mmu.hpp"
+#include "InterruptHandler.hpp"
 
 enum COLOR
 {
@@ -26,6 +27,11 @@ private:
     uint8_t OBP1_reg;
     uint8_t BGP_reg;
     MMU *mmu;
+	InterruptHandler* IH;
+    
+    int mode;
+    uint8_t scanLine;
+    uint64_t clock;
 
     COLOR pixelData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR backgroundData[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -33,13 +39,15 @@ private:
     COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
 public:
-    uint64_t clock;
+	uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     PPU();
     ~PPU();
     void connect_mmu(MMU *mmu);
+	void connect_interrupt_handler(InterruptHandler* IH);
 
-    uint32_t **writePixels();
+    bool tick(uint64_t outsideClock);
+    void updateLY();
     void updateRegs();
     void updateBackground(uint8_t row);
     void updateWindow(uint8_t row);

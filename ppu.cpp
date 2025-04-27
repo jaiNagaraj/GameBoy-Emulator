@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ppu.hpp"
 
 const int LCDC_MAP_CHOICE_MASK = 0x08;
@@ -17,7 +18,20 @@ const int16_t SPRITE_Y_OFFSET = 16;
 const int16_t SPRITE_X_OFFSET = 8;
 
 PPU::PPU() : mmu(nullptr)
-{ // Initialize mmu pointer
+{ 
+	mode = 2;
+	clock = 0;
+	for (int i = 0; i < SCREEN_HEIGHT; i++)
+	{
+		for (int j = 0; j < SCREEN_WIDTH; j++)
+		{
+			pixelsToRender[i][j] = 0xFFFFFFFF; // white
+			pixelData[i][j] = WHITE_OR_TRANSPARENT;
+			backgroundData[i][j] = WHITE_OR_TRANSPARENT;
+			windowData[i][j] = WINDOW_TRANSPARENT;
+			spriteData[i][j] = WHITE_OR_TRANSPARENT;
+		}
+	}
 }
 
 PPU::~PPU()
@@ -29,13 +43,64 @@ void PPU::connect_mmu(MMU *mmu_ptr)
 	this->mmu = mmu_ptr;
 }
 
-uint32_t **PPU::writePixels()
+void PPU::connect_interrupt_handler(InterruptHandler* IH)
 {
-	// TODO: adhere to the clock cycle
-	// depending on the mode either call update functions, update pixels, or do nothing
-	updateRegs();
-	updateBackground(0);
-	updateWindow(0);
+	this->IH = IH;
+}
+
+bool PPU::tick(uint64_t outsideClock)
+{
+	bool render_on_return = false;
+	// perform different actions depending on the mode
+	switch (mode) {
+	case 2: //OAM
+		if (outsideClock - clock >= 80) {
+			// switch to VRAM mode
+			mode = 3;
+		}
+		break;
+	case 3: //VRAM
+		if (outsideClock - clock >= 172) {
+			// switch to HBLANK mode
+			mode = 0;
+		}
+		break;
+	case 0: // HBLANK
+		// check for end of HBLANK
+		if (outsideClock - clock >= 204) {
+			// check for VBLANK switch
+			if (scanLine == 144) {
+				mode = 1;
+				IH->enable_VBLANK_interrupt();
+				render_on_return = true;
+			}
+			else {
+				// switch back to OAM
+				mode = 2;
+				updateBackground(scanLine);
+				updateWindow(scanLine);
+				updateSprites(scanLine);
+				scanLine++;
+			}
+		}
+		break;
+	case 1: //VBLANK
+		if (scanLine == 153) {
+			// switch back to rendering/OAM
+			mode = 2;
+			scanLine = 0;
+			IH->disable_VBLANK_interrupt();
+			scanOAM(scanLine);
+		}
+		else {
+			scanLine++;
+		}
+		break;
+	default:
+		std::cerr << "PPU Error: Unrecognized mode.\n";
+	}
+
+	updateLY();
 
 	// now, mix the background and the window
 	for (int i = 0; i < SCREEN_HEIGHT; i++)
@@ -97,6 +162,10 @@ uint32_t **PPU::writePixels()
 	}
 
 	return pixelDataReturn;
+}
+
+void PPU::updateLY() {
+	mmu->write_mem(0xFF44, scanLine);
 }
 
 void PPU::updateRegs()
