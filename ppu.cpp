@@ -43,6 +43,11 @@ void PPU::connect_mmu(MMU *mmu_ptr)
 	this->mmu = mmu_ptr;
 }
 
+void PPU::connect_ram(RAM *ram_ptr) {
+	this->ram = ram_ptr;
+}
+
+uint32_t **PPU::writePixels()
 void PPU::connect_interrupt_handler(InterruptHandler *IH)
 {
 	this->IH = IH;

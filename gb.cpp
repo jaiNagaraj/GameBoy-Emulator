@@ -586,11 +586,10 @@ void GheithBoy::run_gb(const std::string& rom_path) {
         else if (cpu->decode_CALL_116(instruction)) {
             std::cout << "CALL 116\n";
             cpu->execute_CALL_116(instruction);
-		}
-		else if (cpu->decode_CALL_117(instruction)) {
-            std::cout << "CALL 117\n";
-			cpu->execute_CALL_117(instruction);
-		}
+        }
+        else if (cpu->decode_CALL_117(instruction)) {
+            cpu->execute_CALL_117(instruction);
+        }
         else if (cpu->decode_RET_119(instruction)) {
             std::cout << "RET 119\n";
             cpu->execute_RET_119(instruction);
@@ -607,6 +606,12 @@ void GheithBoy::run_gb(const std::string& rom_path) {
             std::cout << "RST 122\n";
             cpu->execute_RST_122(instruction);
             // other stuff
+        } else if (cpu->decode_HALT_123(instruction)) {
+            cpu->execute_HALT_123(instruction);
+
+        } else if (cpu->decode_STOP_123(instruction)) {
+            cpu->execute_STOP_123(instruction);
+            
         } else if (cpu->decode_DI_123(instruction)) {
             std::cout << "DI 123\n";
             cpu->execute_DI_123(instruction);

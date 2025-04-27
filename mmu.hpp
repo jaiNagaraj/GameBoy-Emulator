@@ -11,8 +11,6 @@
 
 class MMU {
 private:
-    //CPU *cpu;
-    //PPU *ppu;
     RAM *ram;
     MMAP *mmap;
     Input *input;
@@ -20,8 +18,6 @@ private:
 public:
     MMU();
 
-    //void connect_cpu(CPU *cpu);
-    //void connect_ppu(PPU *ppu);
     void connect_ram(RAM *ram);
     void connect_mmap(MMAP *mmap);
     void connect_input(Input *input);

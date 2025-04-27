@@ -44,6 +44,7 @@ private:
     uint8_t OBP1_reg;
     uint8_t BGP_reg;
     MMU *mmu;
+    RAM *ram;
     InterruptHandler *IH;
 
     int mode;
@@ -63,6 +64,7 @@ public:
     PPU();
     ~PPU();
     void connect_mmu(MMU *mmu);
+    void connect_ram(RAM *ram);
     void connect_interrupt_handler(InterruptHandler *IH);
 
     bool tick(uint64_t outsideClock);
