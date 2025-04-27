@@ -158,6 +158,7 @@ void GheithBoy::run_gb(const std::string& rom_path) {
 	IH->connect_mmu(mmu);
     ppu->connect_interrupt_handler(IH);
     cpu->connect_mmu(mmu);
+	cpu->connect_interrupt_handler(IH);
     mmu->connect_input(input);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);   
@@ -204,6 +205,9 @@ void GheithBoy::run_gb(const std::string& rom_path) {
                 handle_input(event);
             }
         }
+
+        // Interrupt handling
+        cpu->handle_interrupts();
 
         // fetch instruction
         uint32_t instruction = cpu->fetch_instruction();

@@ -45,6 +45,10 @@ void CPU::connect_mmu(MMU *mmu) {
     this->mmu = mmu;
 }
 
+void CPU::connect_interrupt_handler(InterruptHandler* IH) {
+	this->IH = IH;
+}
+
 // Helper function to set/clear a specific flag bit
 void CPU::set_flag(int flag_bit, bool value) {
     if (value) {
@@ -92,6 +96,57 @@ void CPU::set_de(uint16_t val) {
 void CPU::set_af(uint16_t val) {
     regs[A_REGISTER] = static_cast<uint8_t>((val >> 8) & 0xFF);
     regs[FLAGS_REGISTER] = static_cast<uint8_t>(val & 0xFF);
+}
+
+void CPU::handle_interrupts() {
+	uint8_t IE = IH->get_IE();
+    if (!ime || !IE) {
+        // not servicing interrupts at this time
+        return;
+    }
+
+	// check VBLANK interrupt
+    if (IH->is_VBLANK_interrupt() && (IE & 0x01)) {
+        mmu->push_stack(sp, pc);
+        sp -= 2;
+        cycles += 4;
+		pc = 0x0040; // VBLANK interrupt handler address
+		ime = false; // disable interrupts
+        IH->disable_VBLANK_interrupt();
+    }
+    if (IH->is_STAT_interrupt() && (IE & 0x02)) {
+        mmu->push_stack(sp, pc);
+        sp -= 2;
+        cycles += 4;
+        pc = 0x0048; // STAT interrupt handler address
+        ime = false; // disable interrupts
+        IH->disable_STAT_interrupt();
+    }
+    if (IH->is_TIMER_interrupt() && (IE & 0x04)) {
+        mmu->push_stack(sp, pc);
+        sp -= 2;
+        cycles += 4;
+        pc = 0x0050; // TIMER interrupt handler address
+        ime = false; // disable interrupts
+        IH->disable_TIMER_interrupt();
+    }
+	if (IH->is_SERIAL_interrupt() && (IE & 0x08)) {
+		mmu->push_stack(sp, pc);
+		sp -= 2;
+		cycles += 4;
+		pc = 0x0058; // SERIAL interrupt handler address
+		ime = false; // disable interrupts
+		IH->disable_SERIAL_interrupt();
+	}
+	if (IH->is_JOYPAD_interrupt() && (IE & 0x10)) {
+		mmu->push_stack(sp, pc);
+		sp -= 2;
+		cycles += 4;
+		pc = 0x0060; // JOYPAD interrupt handler address
+		ime = false; // disable interrupts
+		IH->disable_JOYPAD_interrupt();
+	}
+
 }
 
 // DECODE
