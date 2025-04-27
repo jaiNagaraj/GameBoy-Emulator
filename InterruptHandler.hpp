@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 #include "mmu.hpp"
 
@@ -9,7 +10,6 @@ public:
 	InterruptHandler();
 	~InterruptHandler();
 	void connect_mmu(MMU* mmu);
-	bool interrupts_enabled();
 	void enable_VBLANK_interrupt();
 	void disable_VBLANK_interrupt();
 	bool is_VBLANK_interrupt();
