@@ -43,11 +43,11 @@ void PPU::connect_mmu(MMU *mmu_ptr)
 	this->mmu = mmu_ptr;
 }
 
-void PPU::connect_ram(RAM *ram_ptr) {
+void PPU::connect_ram(RAM *ram_ptr)
+{
 	this->ram = ram_ptr;
 }
 
-uint32_t **PPU::writePixels()
 void PPU::connect_interrupt_handler(InterruptHandler *IH)
 {
 	this->IH = IH;
@@ -132,12 +132,12 @@ bool PPU::tick(uint64_t outsideClock)
 
 void PPU::update_LY()
 {
-	mmu->write_mem(0xFF44, scanLine);
+	ram->write_mem(0xFF44, scanLine);
 }
 
 void PPU::update_LCDSTAT()
 {
-	mmu->write_mem(0xFF41, mode);
+	ram->write_mem(0xFF41, mode);
 }
 
 void PPU::updatePixelData(uint8_t row)
@@ -393,8 +393,8 @@ void PPU::updateSprites(uint8_t row)
 		Sprite sprite = spriteBuffer.front();
 		spriteBuffer.pop_front();
 
-		uint8_t y = sprite.y;
-		uint8_t x = sprite.x;
+		int16_t y = sprite.y - SPRITE_Y_OFFSET;
+		int16_t x = sprite.x - SPRITE_X_OFFSET;
 		uint8_t tileIndex = sprite.tileIndex;
 		uint8_t flags = sprite.flags;
 
@@ -408,7 +408,7 @@ void PPU::updateSprites(uint8_t row)
 		bool flip_y = (flags >> 6) & 1;
 		bool flip_x = (flags >> 5) & 1;
 
-		int sprite_row = flip_y ? sprite_height - (row - y) - 1 : row - y;
+		int sprite_row = flip_y ? sprite_height - (static_cast<uint16_t>(row) - y) - 1 : static_cast<uint16_t>(row) - y;
 
 		COLOR palette[4];
 		for (int i = 0; i < 4; i++)
@@ -422,6 +422,10 @@ void PPU::updateSprites(uint8_t row)
 		for (int i = 0; i < TILE_WIDTH; i++)
 		{
 			int index_x = flip_x ? x + TILE_WIDTH - i - 1 : x + i;
+			if (index_x >= SCREEN_WIDTH || index_x < 0)
+			{
+				continue;
+			}
 			if (spriteData[row][index_x] != WHITE_OR_TRANSPARENT)
 			{
 				continue;
