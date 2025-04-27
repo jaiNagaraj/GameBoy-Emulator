@@ -206,7 +206,7 @@ void PPU::updatePixelData(uint8_t row)
 	for (int j = 0; j < SCREEN_WIDTH; j++)
 	{
 		// All pixels are in ARGB format (1 byte per info)
-		switch (pixelsToRender[row][j])
+		switch (pixelData[row][j])
 		{
 		case WHITE_OR_TRANSPARENT:
 			pixelsToRender[row][j] = 0xFFFFFFFF;
