@@ -12,7 +12,7 @@ LDFLAGS = $(shell sdl2-config --libs)
 
 # Source files
 # --- Added InterruptHandler.cpp ---
-SRCS = main.cpp cpu.cpp gb.cpp input.cpp mmap.cpp mmu.cpp ppu.cpp RAM.cpp InterruptHandler.cpp
+SRCS = main.cpp cpu.cpp gb.cpp input.cpp mmap.cpp mmu.cpp ppu.cpp RAM.cpp InterruptHandler.cpp timer.cpp
 
 # Object directory
 OBJDIR = obj
