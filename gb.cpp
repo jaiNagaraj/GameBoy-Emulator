@@ -19,7 +19,7 @@ GheithBoy::~GheithBoy()
 
 bool GheithBoy::load_boot(MMAP *mmap)
 {
-    std::string boot_path = "cpu_instrs.gb";
+    std::string boot_path = "boot.bin";
     if (!mmap)
     {
         std::cerr << "Error: MMAP object is null in load_boot." << std::endl;
@@ -180,12 +180,12 @@ void GheithBoy::run_gb(const std::string &rom_path)
     input = new Input();
     IH = new InterruptHandler();
 
-    if (!load_rom(mmap, rom_path))
-    {
-        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
-        // Destructor will handle cleanup
-        return;
-    }
+    // if (!load_rom(mmap, rom_path))
+    // {
+    //     std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+    //     // Destructor will handle cleanup
+    //     return;
+    // }
 
     if (!load_boot(mmap))
     {
