@@ -782,7 +782,7 @@ bool CPU::decode_RETI_121(uint32_t instruction) { // 1-byte instruction
 }
 
 bool CPU::decode_RST_122(uint32_t instruction) { // 1-byte instruction
-    bool outcome = (((instruction >> 16) & 0xFF) & 11000111) == 0b11000111; // opcode
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11000111) == 0b11000111; // opcode
 
     return outcome;
 }
