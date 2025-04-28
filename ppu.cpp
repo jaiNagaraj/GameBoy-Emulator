@@ -2,6 +2,7 @@
 #include <list>
 #include <algorithm>
 #include "ppu.hpp"
+#include <bitset>
 
 const int LCDC_MAP_CHOICE_MASK = 0x08;
 const int LCDC_ADDRESSING_MODE_MASK = 0x10;
@@ -239,6 +240,7 @@ void PPU::updateRegs()
 {
 	// update the registers for graphics
 	LCDC_reg = read_mem(0xFF40);
+	//std::cout << "LCDC reg: " << std::bitset<8>(LCDC_reg) << '\n';
 	SCY_reg = read_mem(0xFF42);
 	SCX_reg = read_mem(0xFF43);
 	WY_reg = read_mem(0xFF4A);
@@ -340,6 +342,11 @@ void PPU::updateWindow(uint8_t row)
 	for (int i = 0; i < 160; i++)
 	{
 		windowData[row][i] = WINDOW_TRANSPARENT;
+	}
+
+	if (!(LCDC_reg & 0b00100000)) {
+		// window disabled
+		return;
 	}
 
 	uint8_t x = WX_reg - 7;
@@ -545,7 +552,7 @@ uint8_t PPU::read_mem(uint16_t addr)
 	else
 	{
 		// For other addresses (e.g., I/O registers like LCDC), go through MMU
-		return mmu->read_mem(addr);
+		return ram->read_mem(addr);
 	}
 }
 
@@ -570,6 +577,6 @@ void PPU::write_mem(uint16_t addr, uint8_t data)
 	else
 	{
 		// For other addresses (e.g., I/O registers like LCDC), go through MMU
-		mmu->write_mem(addr, data);
+		ram->write_mem(addr, data);
 	}
 }

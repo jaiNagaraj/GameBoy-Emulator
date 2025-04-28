@@ -29,6 +29,7 @@ uint8_t MMU::read_mem(uint16_t addr) {
 
     // VRAM : 0x8000 - 0x9FFF
     if (addr >= 0x8000 && addr <= 0x9FFF) {
+        return ram->read_mem(addr);
         uint8_t stat = ram->read_mem(0xFF41);
 
         if ((stat & 0b00000011) == 0b00000011) { // Mode 3
@@ -178,6 +179,8 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
 
     // VRAM : 0x8000 - 0x9FFF
     if (addr >= 0x8000 && addr <= 0x9FFF) {
+        ram->write_mem(addr, data);
+        return;
         uint8_t stat = ram->read_mem(0xFF41);
 
         if ((stat & 0b00000011) == 0b00000010 || (stat & 0b00000011) == 0b00000011) { // Mode 2 or Mode 3
