@@ -8,7 +8,7 @@
 CPU::CPU() {
     cycles = 0;
     
-    pc = 0x0100;
+    pc = 0x0000;
     sp = 0xFFFE;
 
     ime = true;
@@ -861,6 +861,10 @@ void CPU::execute_LD_23(uint32_t instruction) {
     uint8_t data = regs[reg]; 
 
    mmu->write_mem(addr, data);
+   if (addr == 0xFF46) {
+       // DMA transfer, adjust cycles
+       cycles += 160;
+   }
    pc++;
    cycles += 2;
 }
@@ -872,6 +876,10 @@ void CPU::execute_LD_24(uint32_t instruction) {
     uint8_t n = static_cast<uint8_t>((instruction >> 8) & 0xFF); // Get the immediate value
 
     mmu->write_mem(addr, n);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc += 2; // one for instruction, one for imm
     cycles += 3;
 }
@@ -902,6 +910,10 @@ void CPU::execute_LD_27(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc++;
     cycles += 2;
 }
@@ -912,6 +924,10 @@ void CPU::execute_LD_28(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc++;
     cycles += 2;
 }
@@ -940,6 +956,10 @@ void CPU::execute_LD_30(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc += 3; // one for instruction, two for imm
     cycles += 4;
 }
@@ -964,6 +984,10 @@ void CPU::execute_LD_32(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc++;
     cycles += 2;
 }
@@ -990,6 +1014,10 @@ void CPU::execute_LD_34(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc += 2; // one for instruction, one for imm
     cycles += 3;
 }
@@ -1013,6 +1041,10 @@ void CPU::execute_LD_36(uint32_t instruction) {
     uint8_t data = regs[A_REGISTER]; 
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Decrement HL after writing
     set_hl(addr - 1);
@@ -1042,6 +1074,10 @@ void CPU::execute_LD_38(uint32_t instruction)
 	//std::cout << "Storing data " << std::hex << (int)data << " at address: " << std::hex << addr << "\n\n";
 
     mmu->write_mem(addr, data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Increment HL after writing
     set_hl(addr + 1);
@@ -1541,6 +1577,10 @@ void CPU::execute_INC_61(uint32_t instruction) {
     // no change to C flag
 
     mmu->write_mem(addr, new_val);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc++;
     cycles += 3;
 }
@@ -1579,6 +1619,10 @@ void CPU::execute_DEC_63(uint32_t instruction) {
     set_flag(H_FLAG_BIT, (old_val & 0x0F) == 0x00);
 
     mmu->write_mem(addr, new_val);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
     pc++;
     cycles += 3;
 }
@@ -2050,6 +2094,10 @@ void CPU::execute_RLC_87(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     pc += 2; // 2-byte instruction
     cycles += 4;
@@ -2090,6 +2138,10 @@ void CPU::execute_RRC_89(uint32_t instruction) {
     set_flag(C_FLAG_BIT, carry);
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     pc += 2; // 2-byte instruction
     cycles += 4;
@@ -2131,6 +2183,10 @@ void CPU::execute_RL_91(uint32_t instruction) {
     hl = (hl << 1) | carry;
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Must set after register updated
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2175,6 +2231,10 @@ void CPU::execute_RR_93(uint32_t instruction) {
     hl = (hl >> 1) | (carry << 7);
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Must set after register updated
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2212,6 +2272,10 @@ void CPU::execute_SLA_95(uint32_t instruction) {
     hl <<= 1;
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Set flags
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2252,6 +2316,10 @@ void CPU::execute_SRA_97(uint32_t instruction) {
     hl = (hl & 0x80) | (hl >> 1);
 
     mmu->write_mem(addr, hl);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Set flags
     set_flag(Z_FLAG_BIT, hl == 0);
@@ -2290,8 +2358,13 @@ void CPU::execute_SWAP_99(uint32_t instruction) {
     uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Swap nibbles
     uint8_t new_data = ((cur_data & 0x0F) << 4) | ((cur_data & 0xF0) >> 4);
+    uint16_t addr = get_hl();
     // Store value
-    (*mmu).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(addr, new_data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -2329,8 +2402,13 @@ void CPU::execute_SRL_101(uint32_t instruction) {
     uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Shift right
     uint8_t new_data = cur_data >> 1;
+    uint16_t addr = get_hl();
     // Store value
-    (*mmu).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(addr, new_data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     // Set flags
     set_flag(Z_FLAG_BIT, !new_data);
@@ -2403,8 +2481,13 @@ void CPU::execute_RES_105(uint32_t instruction) {
     uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Clear bit
     uint8_t new_data = cur_data & ~(1 << bit);
+	uint16_t addr = get_hl();
     // Store value
-    (*mmu).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(addr, new_data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     pc += 2; // 2-byte instruction
     cycles += 4;
@@ -2434,8 +2517,13 @@ void CPU::execute_SET_107(uint32_t instruction) {
     uint8_t cur_data = (*mmu).read_mem(get_hl());
     // Set bit
     uint8_t new_data = cur_data | (1 << bit);
+	uint16_t addr = get_hl();
     // Store value
-    (*mmu).write_mem(get_hl(), new_data);
+    (*mmu).write_mem(addr, new_data);
+    if (addr == 0xFF46) {
+        // DMA transfer, adjust cycles
+        cycles += 160;
+    }
 
     pc += 2; // 2-byte instruction
     cycles += 4;

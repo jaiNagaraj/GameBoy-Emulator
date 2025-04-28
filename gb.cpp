@@ -12,12 +12,12 @@ GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) 
 // Destructor
 GheithBoy::~GheithBoy()
 {
-    delete input;
-    delete ppu;
-    delete mmu;
-    delete ram;
-    delete mmap;
-    delete cpu;
+    //delete input;
+    //delete ppu;
+    //delete mmu;
+    //delete ram;
+    //delete mmap;
+    //delete cpu;
 }
 
 bool GheithBoy::load_boot(MMAP *mmap)
