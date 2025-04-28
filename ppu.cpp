@@ -161,7 +161,7 @@ bool PPU::tick(uint64_t outsideClock)
 			}
 			else
 			{
-				std::cout << "CHILLIN IN VBLANK\n";
+				//std::cout << "CHILLIN IN VBLANK\n";
 			}
 		}
 		break;
