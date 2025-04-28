@@ -259,38 +259,53 @@ void PPU::updateBackground(uint8_t row)
 	bg_palette[2] = static_cast<COLOR>((BGP_reg >> 4) & 0b11);
 	bg_palette[3] = static_cast<COLOR>((BGP_reg >> 6) & 0b11);
 
-	// which tile map to use?
-	uint16_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
-	// start at 0x8000 w/ unsigned offsets OR at 0x9000 w/ signed offsets
-	bool simple_addressing_mode = (LCDC_reg & LCDC_ADDRESSING_MODE_MASK) == 0;
-	uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_1 : TILE_DATA_2;
+    // which tile map to use? (0x9800 or 0x9C00) - LCDC Bit 3
+    uint16_t map_base_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
 
-	uint16_t map_row = map_addr + ((SCY_reg + row) / TILE_HEIGHT * MAP_WIDTH) % (MAP_WIDTH * MAP_HEIGHT);
-	uint16_t tile_row = (SCY_reg + row) % TILE_HEIGHT;
-	for (int i = 0; i < SCREEN_WIDTH;)
-	{
-		uint16_t map_col = map_row + ((SCX_reg + i) / TILE_WIDTH) % MAP_WIDTH;
-		uint16_t tile_col = (SCX_reg + i) % TILE_WIDTH;
-		uint16_t tile_addr;
-		if (simple_addressing_mode)
-		{
-			uint16_t tile_offset = read_mem(map_col);
-			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
-		}
-		else
-		{
-			int16_t tile_offset = static_cast<int8_t>(read_mem(map_col));
-			tile_addr = tiles_addr + tile_offset * TILE_DATA_SIZE;
-		}
-		uint8_t lsbs = read_mem(tile_addr + tile_row * 2);
-		uint8_t msbs = read_mem(tile_addr + tile_row * 2 + 1);
-		for (int j = tile_col; j < TILE_WIDTH; j++)
-		{
-			uint8_t color = ((lsbs >> (7 - j)) & 1) | (((msbs >> (7 - j)) & 1) << 1);
-			backgroundData[row][i] = bg_palette[color];
-			i++;
-		}
-	}
+    // get Tile Data Addressing Mode based on LCDC Bit 4
+    // Bit 4 = 1 -> Use $8000 base with unsigned tile index
+    // Bit 4 = 0 -> Use $9000 base with signed tile index
+    bool use_unsigned_8000_mode = (LCDC_reg & LCDC_ADDRESSING_MODE_MASK); // True if Bit 4 is 1
+
+    uint8_t map_pixel_y = SCY_reg + row;
+    uint8_t tile_row_pixel = map_pixel_y % TILE_HEIGHT; // Row within the tile (0-7)
+
+    for (int screen_x = 0; screen_x < SCREEN_WIDTH; ++screen_x)
+    {
+        uint8_t map_pixel_x = SCX_reg + screen_x;
+
+        // get tile map coordinates
+        uint16_t map_tile_y = map_pixel_y / TILE_HEIGHT;
+        uint16_t map_tile_x = map_pixel_x / TILE_WIDTH;
+
+        uint16_t map_offset = (map_tile_y * MAP_WIDTH) + map_tile_x;
+        uint16_t tile_index_addr = map_base_addr + map_offset;
+        uint8_t tile_index = read_mem(tile_index_addr);
+
+        // Calculate the address of the tile data based on the mode
+        uint16_t tile_data_addr;
+        if (use_unsigned_8000_mode)
+        {
+            tile_data_addr = TILE_DATA_1 + tile_index * TILE_DATA_SIZE;
+        }
+        else
+        {
+            int8_t signed_index = static_cast<int8_t>(tile_index);
+            tile_data_addr = TILE_DATA_2 + static_cast<int16_t>(signed_index) * TILE_DATA_SIZE;
+        }
+
+        uint16_t tile_row_data_addr = tile_data_addr + tile_row_pixel * 2;
+        uint8_t lsbs = read_mem(tile_row_data_addr);
+        uint8_t msbs = read_mem(tile_row_data_addr + 1);
+
+        // Calculate the specific pixel's column within the tile (0-7)
+        uint8_t tile_col_pixel = map_pixel_x % TILE_WIDTH;
+
+        uint8_t shift = 7 - tile_col_pixel;
+        uint8_t color_index = ((lsbs >> shift) & 1) | (((msbs >> shift) & 1) << 1);
+
+        backgroundData[row][screen_x] = bg_palette[color_index];
+    }
 
 	// keeping this just in case i'm bad at coding
 	// COLOR full_map[MAP_HEIGHT * TILE_HEIGHT][MAP_WIDTH * TILE_WIDTH];
