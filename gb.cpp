@@ -19,7 +19,7 @@ GheithBoy::~GheithBoy()
 
 bool GheithBoy::load_boot(MMAP *mmap)
 {
-    std::string boot_path = "boot.bin";
+    std::string boot_path = "cpu_instrs.gb";
     if (!mmap)
     {
         std::cerr << "Error: MMAP object is null in load_boot." << std::endl;
@@ -1032,6 +1032,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
         else
         {
             std::cout << "Unknown instruction: " << std::hex << instruction << std::endl;
+            keep_window_open = false;
         }
 
         // std::cout << "HL: " << std::hex << cpu->get_hl() << '\n';
