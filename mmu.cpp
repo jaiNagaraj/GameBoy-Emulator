@@ -289,7 +289,7 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
 
             case 0xFF46: { // DMA - DMA Transfer Start Address
                 ram->write_mem(addr, data);
-                //dma_transfer(static_cast<uint16_t>(data) << 8);
+                dma_transfer(static_cast<uint16_t>(data) << 8);
                 return;
             }
 
@@ -374,6 +374,8 @@ MMAP* MMU::get_mmap() {
 }
 
 void MMU::dma_transfer(uint16_t addr) {
+    std::cout << "DMA TRANSFER!\n";
+    std::cout << "Loading from address " << std::hex << (int)addr << '\n';
     for (int i = 0; i < 160; i++) {
         ram->write_mem(0xFE00 + i, ram->read_mem(addr + i)); // 0xFE00 = OAM_START
     }

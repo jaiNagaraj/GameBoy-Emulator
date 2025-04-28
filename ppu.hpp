@@ -3,7 +3,7 @@
 #include "mmu.hpp"
 #include "RAM.hpp"
 #include "InterruptHandler.hpp"
-#include <list>
+#include <deque>
 
 enum COLOR
 {
@@ -22,12 +22,10 @@ public:
     uint8_t tileIndex;
     uint8_t flags;
 
+    Sprite() : y(0), x(0), tileIndex(0), flags(0) {}
+
     Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
         : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
-    bool comp_sprite(const Sprite &sp1, const Sprite &sp2) const
-    {
-        return sp1.x < sp2.x;
-    }
 };
 
 class PPU
@@ -57,7 +55,7 @@ private:
     COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
-    std::list<Sprite> spriteBuffer;
+    std::deque<Sprite> spriteBuffer;
 
 public:
     uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
