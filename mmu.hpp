@@ -16,6 +16,9 @@ private:
     Input *input;
 
 public:
+    bool transfer_pending;
+    uint8_t dma_buffer[0xA0]; // DMA buffer for 0xFE00 - 0xFE9F
+
     MMU();
 
     void connect_ram(RAM *ram);
@@ -29,5 +32,6 @@ public:
     uint16_t pop_stack(uint16_t sp);
 
     MMAP* get_mmap();
-    void dma_transfer(uint16_t addr);
+    void fill_buffer(uint16_t addr);
+    void dma_transfer();
 };
