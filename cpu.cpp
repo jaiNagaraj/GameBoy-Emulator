@@ -1801,40 +1801,46 @@ void CPU::execute_SCF_74(uint32_t instruction) {
 }
 
 void CPU::execute_DAA_75(uint32_t instruction) {
-    uint8_t adjustment = 0;
+    uint8_t a_val = regs[A_REGISTER];
+    uint16_t correction = 0;
+    bool original_c = get_flag(C_FLAG_BIT); // Store original C flag
+    bool set_c_flag = false;
 
     if (get_flag(N_FLAG_BIT)) {
-
-        // Subtraction mode
+        // If the previous subtraction caused a borrow (C flag set)
+        if (original_c) {
+            correction |= 0x60;
+            set_c_flag = true;
+        }
+        // If the previous subtraction caused a half-borrow (H flag set)
         if (get_flag(H_FLAG_BIT)) {
-            adjustment += 0x6;
+            correction |= 0x06;
         }
-        if (get_flag(C_FLAG_BIT)) {
-            adjustment += 0x60;
-        }
-
-        regs[A_REGISTER] -= adjustment;
+        a_val -= static_cast<uint8_t>(correction);
     } else {
-        // Addition mode
-        if (get_flag(H_FLAG_BIT) || (regs[A_REGISTER] & 0xF) > 0x9) {
-            adjustment += 0x6;
+        // Check if lower nibble needs correction or if Half Carry was set
+        if (get_flag(H_FLAG_BIT) || (a_val & 0x0F) > 0x09) {
+            correction |= 0x06;
         }
-        if (get_flag(C_FLAG_BIT) || regs[A_REGISTER] > 0x99) {
-            adjustment += 0x60;
+        // Check if upper nibble needs correction or if original Carry was set
+        if (original_c || a_val > 0x99) {
+            correction |= 0x60;
+            set_c_flag = true; // DAA sets the Carry flag if upper nibble needed correction
         }
-        
-        // Special case, set carry flag here
-        set_flag(C_FLAG_BIT, get_flag(C_FLAG_BIT) || (regs[A_REGISTER] > 0x99));
-
-        regs[A_REGISTER] += adjustment;
+        a_val += static_cast<uint8_t>(correction);
     }
 
-    // Set flags
-    set_flag(Z_FLAG_BIT, regs[A_REGISTER] == 0);
-    set_flag(H_FLAG_BIT, false);
+    // Update A register
+    regs[A_REGISTER] = a_val;
 
-    pc++;
-    cycles += 1;
+    // Set flags
+    set_flag(Z_FLAG_BIT, (a_val == 0)); // Z is set if result is 0
+    set_flag(H_FLAG_BIT, false);       // H is always reset
+    set_flag(C_FLAG_BIT, set_c_flag);  // C is set based on the DAA logic above
+    // N flag remains unchanged
+
+    pc++;      // 1-byte instruction
+    cycles += 1; // 1 M-cycle
 }
 
 void CPU::execute_CPL_76(uint32_t instruction) {
