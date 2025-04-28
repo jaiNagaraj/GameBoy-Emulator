@@ -438,9 +438,9 @@ void PPU::updateWindow(uint8_t row)
 
 void PPU::updateSprites(uint8_t row)
 {
-	if (!spriteBuffer.empty())
-		std::sort(spriteBuffer.begin(), spriteBuffer.end(), [](const Sprite &sp1, const Sprite &sp2)
-						  { return sp1.x < sp2.x; });
+	//if (spriteBuffer.size() > 1)
+	//	std::sort(spriteBuffer.begin(), spriteBuffer.end(), [](const Sprite* sp1, const Sprite* sp2)
+	//					  { return sp1->x < sp2->x; });
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 	{
@@ -463,13 +463,16 @@ void PPU::updateSprites(uint8_t row)
 
 	while (!spriteBuffer.empty())
 	{
-		Sprite sprite = spriteBuffer.front();
-		spriteBuffer.pop_front();
+		Sprite* sprite = spriteBuffer.top();
+		//std::cout << "Sprite address: " <<  sprite << '\n';
+		//std::cout << "Sprite X: " << (int)(sprite->x) << '\n';
+		//std::cout << "Sprite Y" << (int)(sprite->y) << '\n';
+		spriteBuffer.pop();
 
-		int16_t y = sprite.y - SPRITE_Y_OFFSET;
-		int16_t x = sprite.x - SPRITE_X_OFFSET;
-		uint8_t tileIndex = sprite.tileIndex;
-		uint8_t flags = sprite.flags;
+		int16_t y = sprite->y - SPRITE_Y_OFFSET;
+		int16_t x = sprite->x - SPRITE_X_OFFSET;
+		uint8_t tileIndex = sprite->tileIndex;
+		uint8_t flags = sprite->flags;
 
 		uint16_t tileAddr = TILE_DATA_1 + tileIndex * TILE_DATA_SIZE;
 		if (tall_sprites)
@@ -534,16 +537,16 @@ void PPU::scanOAM(uint8_t row)
 		uint8_t y = read_mem(OAM_START + i * 4);
 		if (row + 16 < y || row + 16 >= y + sprite_height)
 		{
-			return; // sprite is not visible
+			continue; // sprite is not visible
 		}
 		uint8_t x = read_mem(OAM_START + i * 4 + 1);
-		if (x <= 0)
+		if (x <= 0 || x >= 168)
 		{
-			return; // sprite is not visible
+			continue; // sprite is not visible
 		}
 		uint8_t tileIndex = read_mem(OAM_START + i * 4 + 2);
 		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
-		spriteBuffer.push_back(Sprite(y, x, tileIndex, flags));
+		spriteBuffer.push(new Sprite(y, x, tileIndex, flags));
 	}
 }
 

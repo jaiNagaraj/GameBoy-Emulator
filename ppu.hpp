@@ -1,9 +1,11 @@
 #pragma once
 #include <stdint.h>
+#include <vector>
+#include <queue>
 #include "mmu.hpp"
 #include "RAM.hpp"
 #include "InterruptHandler.hpp"
-#include <deque>
+#include "Sprite.hpp"
 
 enum COLOR
 {
@@ -14,18 +16,11 @@ enum COLOR
     WINDOW_TRANSPARENT = 4,
 };
 
-class Sprite
-{
+class Compare {
 public:
-    uint8_t y;
-    uint8_t x;
-    uint8_t tileIndex;
-    uint8_t flags;
-
-    Sprite() : y(0), x(0), tileIndex(0), flags(0) {}
-
-    Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
-        : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
+    bool operator()(Sprite* a, Sprite* b) {
+        return a->x > b->x;
+    }
 };
 
 class PPU
@@ -55,7 +50,7 @@ private:
     COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
-    std::deque<Sprite> spriteBuffer;
+    std::priority_queue<Sprite*, std::vector<Sprite*>, Compare> spriteBuffer;
 
 public:
     uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
