@@ -263,7 +263,7 @@ void PPU::updateBackground(uint8_t row)
 	uint16_t map_addr = (LCDC_reg & LCDC_MAP_CHOICE_MASK) ? TILE_MAP_2 : TILE_MAP_1;
 	// start at 0x8000 w/ unsigned offsets OR at 0x9000 w/ signed offsets
 	bool simple_addressing_mode = (LCDC_reg & LCDC_ADDRESSING_MODE_MASK) == 0;
-	uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_1 : TILE_DATA_2;
+	uint16_t tiles_addr = simple_addressing_mode ? TILE_DATA_2 : TILE_DATA_1;
 
 	uint16_t map_row = map_addr + ((SCY_reg + row) / TILE_HEIGHT * MAP_WIDTH) % (MAP_WIDTH * MAP_HEIGHT);
 	uint16_t tile_row = (SCY_reg + row) % TILE_HEIGHT;

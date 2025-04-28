@@ -4,6 +4,7 @@
 #include <vector>
 
 //#define ENABLE_INSTR_LOG
+//#define ENABLE_BOOT
 
 // Constructor
 GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
@@ -188,13 +189,14 @@ void GheithBoy::run_gb(const std::string &rom_path)
         // Destructor will handle cleanup
         return;
     }
-
-    //if (!load_boot(mmap))
-    //{
-    //    std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
-    //    // Destructor will handle cleanup
-    //    return;
-    //}
+#ifdef ENABLE_BOOT
+    if (!load_boot(mmap))
+    {
+        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+        // Destructor will handle cleanup
+        return;
+    }
+#endif // ENABLE_BOOT
 
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
