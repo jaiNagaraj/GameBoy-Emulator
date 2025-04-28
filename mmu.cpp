@@ -1,7 +1,7 @@
 #include "mmu.hpp"
 
 MMU::MMU() {
-
+    transfer_pending = false;
 }
 
 void MMU::connect_ram(RAM *ram) {
@@ -289,7 +289,8 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
 
             case 0xFF46: { // DMA - DMA Transfer Start Address
                 ram->write_mem(addr, data);
-                dma_transfer(static_cast<uint16_t>(data) << 8);
+                fill_buffer(static_cast<uint16_t>(data) << 8);
+                transfer_pending = true;
                 return;
             }
 
@@ -373,10 +374,14 @@ MMAP* MMU::get_mmap() {
     return mmap;
 }
 
-void MMU::dma_transfer(uint16_t addr) {
-    std::cout << "DMA TRANSFER!\n";
-    std::cout << "Loading from address " << std::hex << (int)addr << '\n';
+void MMU::fill_buffer(uint16_t addr) {
     for (int i = 0; i < 160; i++) {
-        ram->write_mem(0xFE00 + i, ram->read_mem(addr + i)); // 0xFE00 = OAM_START
+        dma_buffer[i] = ram->read_mem(addr + i);
+    }
+}
+
+void MMU::dma_transfer() {
+    for (int i = 0; i < 160; i++) {
+        ram->write_mem(0xFE00 + i, dma_buffer[i]); // 0xFE00 = OAM_START
     }
 }
