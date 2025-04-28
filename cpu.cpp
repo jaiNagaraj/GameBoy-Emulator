@@ -8,7 +8,7 @@
 CPU::CPU() {
     cycles = 0;
     
-    pc = 0x0100;
+    pc = 0x0000;
     sp = 0xFFFE;
 
     ime = true;
