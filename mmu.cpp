@@ -1,7 +1,7 @@
 #include "mmu.hpp"
 
 MMU::MMU() {
-    
+
 }
 
 void MMU::connect_ram(RAM *ram) {
@@ -375,6 +375,6 @@ MMAP* MMU::get_mmap() {
 
 void MMU::dma_transfer(uint16_t addr) {
     for (int i = 0; i < 160; i++) {
-        write_mem(0xFE00 + i, read_mem(addr + i)); // 0xFE00 = OAM_START
+        ram->write_mem(0xFE00 + i, read_mem(addr + i)); // 0xFE00 = OAM_START
     }
 }
