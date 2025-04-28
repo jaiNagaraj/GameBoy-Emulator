@@ -16,6 +16,10 @@ void MMU::connect_input(Input *input) {
     this->input = input; 
 }
 
+void MMU::connect_ppu(PPU *ppu) {
+    this->ppu = ppu;
+}
+
 uint8_t MMU::read_mem(uint16_t addr) {
     // ROM Bank 0 : 0x0000 - 0x3FFF
     if (addr <= 0x3FFF) {
@@ -288,7 +292,7 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
             }
 
             case 0xFF46: { // DMA - DMA Transfer Start Address
-                // TODO: set DMA transfer flag
+                ppu->dma_transfer = true;
                 ram->write_mem(addr, data);
                 return;
             }
