@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 //#include "cpu.hpp"
-//#include "ppu.hpp"
+#include "ppu.hpp"
 #include "RAM.hpp"
 #include "mmap.hpp"
 #include "input.hpp"
@@ -14,6 +14,7 @@ private:
     RAM *ram;
     MMAP *mmap;
     Input *input;
+    PPU *ppu;
 
 public:
     MMU();
@@ -21,6 +22,7 @@ public:
     void connect_ram(RAM *ram);
     void connect_mmap(MMAP *mmap);
     void connect_input(Input *input);
+    void connect_ppu(PPU *ppu);
 
     uint8_t read_mem(uint16_t addr);
     void write_mem(uint16_t addr, uint8_t data);

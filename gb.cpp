@@ -205,6 +205,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
     cpu->connect_mmu(mmu);
     cpu->connect_interrupt_handler(IH);
     mmu->connect_input(input);
+    mmu->connect_ppu(ppu);
     cpu->connect_mmu(mmu);
     ppu->connect_mmu(mmu);
     ppu->connect_ram(ram);
