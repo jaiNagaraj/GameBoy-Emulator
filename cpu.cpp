@@ -1033,7 +1033,9 @@ void CPU::execute_LD_37(uint32_t instruction) {
     cycles += 2;
 }
 
-void CPU::execute_LD_38(uint32_t instruction) {
+void CPU::execute_LD_38(uint32_t instruction)
+{
+    std::cout << "HELLO! In LD 38\n" << "PC is: " << std::hex << pc << '\n';
     // LD (HL+), A
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
@@ -1509,6 +1511,10 @@ void CPU::execute_INC_60(uint32_t instruction) {
     uint8_t old_val = regs[target_reg_index];
     uint8_t new_val = old_val + 1;
 
+    if (target_reg_index == H_REGISTER) {
+        //std::cout << "H REGISTER VALUE IS: " << std::hex << (int)regs[H_REGISTER] << '\n';
+    }
+
     // Set flags
     set_flag(Z_FLAG_BIT, new_val == 0);
     set_flag(N_FLAG_BIT, false);
@@ -1544,8 +1550,9 @@ void CPU::execute_DEC_62(uint32_t instruction) {
     int target_reg_index = (opcode >> 3) & 0x07;
     uint8_t old_val = regs[target_reg_index];
     uint8_t new_val = old_val - 1;
-    if (target_reg_index == C_REGISTER) {
-        std::cout << "VALUE OF C REGISTER IS: " << (int)regs[target_reg_index] << '\n';
+    if (target_reg_index == C_REGISTER)
+    {
+        //std::cout << "VALUE OF C REGISTER IS: " << (int)regs[target_reg_index] << '\n';
     }
 
     // Set flags
@@ -2500,26 +2507,27 @@ void CPU::execute_JR_114(uint32_t instruction) {
     uint8_t condition = (opcode >> 3) & 0b00000011;
 
     bool condition_met;
-    switch(condition) {
-        case 0b00: // NZ
-            condition_met = !get_flag(Z_FLAG_BIT);
-            std::cout << "JR NZ: " << std::dec << static_cast<int>(condition_met) << std::endl;
-            break;
+    switch (condition)
+    {
+    case 0b00: // NZ
+        condition_met = !get_flag(Z_FLAG_BIT);
+        //std::cout << "JR NZ: " << std::dec << static_cast<int>(condition_met) << std::endl;
+        break;
 
-        case 0b01: // Z
-            condition_met = get_flag(Z_FLAG_BIT);
-            std::cout << "JR Z: " << std::dec << static_cast<int>(condition_met) << std::endl;
-            break;
+    case 0b01: // Z
+        condition_met = get_flag(Z_FLAG_BIT);
+        //std::cout << "JR Z: " << std::dec << static_cast<int>(condition_met) << std::endl;
+        break;
 
-        case 0b10: // NC
-            condition_met = !get_flag(C_FLAG_BIT);
-            std::cout << "JR NC: " << std::dec << static_cast<int>(condition_met) << std::endl;
-            break;
+    case 0b10: // NC
+        condition_met = !get_flag(C_FLAG_BIT);
+        //std::cout << "JR NC: " << std::dec << static_cast<int>(condition_met) << std::endl;
+        break;
 
-        case 0b11: // C
-            condition_met = get_flag(C_FLAG_BIT);
-            std::cout << "JR C: " << std::dec << static_cast<int>(condition_met) << std::endl;
-            break;
+    case 0b11: // C
+        condition_met = get_flag(C_FLAG_BIT);
+        //std::cout << "JR C: " << std::dec << static_cast<int>(condition_met) << std::endl;
+        break;
     }
 
     if (condition_met) {
@@ -2527,7 +2535,7 @@ void CPU::execute_JR_114(uint32_t instruction) {
 
         // Calculate jump address
         int16_t signed_offset = static_cast<int8_t>(offset);
-		std::cout << "JR offset: " << std::dec << static_cast<int>(signed_offset) << std::hex << std::endl;
+        //std::cout << "JR offset: " << std::dec << static_cast<int>(signed_offset) << std::hex << std::endl;
         uint16_t jmp_addr = static_cast<int16_t>(pc) + signed_offset + 2;
 
         pc = jmp_addr;

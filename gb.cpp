@@ -180,6 +180,13 @@ void GheithBoy::run_gb(const std::string &rom_path)
     input = new Input();
     IH = new InterruptHandler();
 
+    if (!load_rom(mmap, rom_path))
+    {
+        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+        // Destructor will handle cleanup
+        return;
+    }
+
     if (!load_boot(mmap))
     {
         std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
@@ -250,555 +257,750 @@ void GheithBoy::run_gb(const std::string &rom_path)
         cpu->handle_interrupts();
 
         // fetch instruction
-        std::cout << "PC: " << std::hex << cpu->get_pc() << std::dec << '\n';
-        std::cout << "SP: " << std::hex << cpu->get_sp() << std::dec << '\n';
-        std::cout << "instruction: " << std::hex << cpu->fetch_instruction() << std::dec << '\n';
+        //std::cout << "PC: " << std::hex << cpu->get_pc() << std::dec << '\n';
         uint32_t instruction = cpu->fetch_instruction();
 
         // decode switch! (i hate ts </3)
         if (cpu->decode_LD_20(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 20\n";
+#endif // ENABLE_INSTR_LOG
+
             cpu->execute_LD_20(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_21(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 21\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_21(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_22(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 22\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_22(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_23(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 23\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_23(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_24(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 24\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_24(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_25(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 25\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_25(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_26(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 26\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_26(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_27(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 27\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_27(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_28(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 28\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_28(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_29(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 29\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_29(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_30(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 30\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_30(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_31(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 31\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_31(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_32(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 32\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_32(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_33(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 33\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_33(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_34(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 34\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_34(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_35(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 35\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_35(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_36(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 36\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_36(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_37(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 37\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_37(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_38(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 38\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_38(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_39(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 39\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_39(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_40(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 40\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_40(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_41(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 41\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_41(instruction);
             // other stuff
         }
         else if (cpu->decode_PUSH_42(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "PUSH 42\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_PUSH_42(instruction);
             // other stuff
         }
         else if (cpu->decode_POP_43(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "POP 43\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_POP_43(instruction);
             // other stuff
         }
         else if (cpu->decode_LD_44(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "LD 44\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_LD_44(instruction);
             // other stuff
         }
         else if (cpu->decode_ADD_45(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 45\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADD_45(instruction);
             // other stuff
         }
         else if (cpu->decode_ADD_46(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 46\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADD_46(instruction);
             // other stuff
         }
         else if (cpu->decode_ADD_47(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 47\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADD_47(instruction);
             // other stuff
         }
         else if (cpu->decode_ADC_48(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 48\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADC_48(instruction);
             // other stuff
         }
         else if (cpu->decode_ADC_49(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 49\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADC_49(instruction);
             // other stuff
         }
         else if (cpu->decode_ADC_50(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 50\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADC_50(instruction);
             // other stuff
         }
         else if (cpu->decode_SUB_51(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SUB 51\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SUB_51(instruction);
             // other stuff
         }
         else if (cpu->decode_SUB_52(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SUB 52\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SUB_52(instruction);
             // other stuff
         }
         else if (cpu->decode_SUB_53(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SUB 53\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SUB_53(instruction);
             // other stuff
         }
         else if (cpu->decode_SBC_54(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SBC 54\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SBC_54(instruction);
             // other stuff
         }
         else if (cpu->decode_SBC_55(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SBC 55\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SBC_55(instruction);
             // other stuff
         }
         else if (cpu->decode_SBC_56(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SBC 56\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SBC_56(instruction);
             // other stuff
         }
         else if (cpu->decode_CP_57(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CP 57\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CP_57(instruction);
             // other stuff
         }
         else if (cpu->decode_CP_58(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CP 58\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CP_58(instruction);
             // other stuff
         }
         else if (cpu->decode_CP_59(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CP 59\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CP_59(instruction);
             // other stuff
         }
         else if (cpu->decode_INC_60(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "INC 60\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_INC_60(instruction);
             // other stuff
         }
         else if (cpu->decode_INC_61(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "INC 61\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_INC_61(instruction);
             // other stuff
         }
         else if (cpu->decode_DEC_62(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "DEC 62\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_DEC_62(instruction);
             // other stuff
         }
         else if (cpu->decode_DEC_63(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "DEC 63\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_DEC_63(instruction);
             // other stuff
         }
         else if (cpu->decode_AND_64(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "AND 64\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_AND_64(instruction);
             // other stuff
         }
         else if (cpu->decode_AND_65(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "AND 65\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_AND_65(instruction);
             // other stuff
         }
         else if (cpu->decode_AND_66(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "AND 66\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_AND_66(instruction);
             // other stuff
         }
         else if (cpu->decode_OR_67(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "OR 67\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_OR_67(instruction);
             // other stuff
         }
         else if (cpu->decode_OR_68(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "OR 68\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_OR_68(instruction);
             // other stuff
         }
         else if (cpu->decode_OR_69(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "OR 69\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_OR_69(instruction);
             // other stuff
         }
         else if (cpu->decode_XOR_70(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "XOR 70\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_XOR_70(instruction);
             // other stuff
         }
         else if (cpu->decode_XOR_71(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "XOR 71\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_XOR_71(instruction);
             // other stuff
         }
         else if (cpu->decode_XOR_72(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "XOR 72\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_XOR_72(instruction);
         }
         else if (cpu->decode_CCF_73(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CCF 73\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CCF_73(instruction);
         }
         else if (cpu->decode_SCF_74(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SCF 74\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SCF_74(instruction);
         }
         else if (cpu->decode_DAA_75(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "DAA 75\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_DAA_75(instruction);
         }
         else if (cpu->decode_CPL_76(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CPL 76\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CPL_76(instruction);
         }
         else if (cpu->decode_INC_77(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "INC 77\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_INC_77(instruction);
         }
         else if (cpu->decode_DEC_78(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "DEC 78\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_DEC_78(instruction);
         }
         else if (cpu->decode_ADD_79(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 79\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADD_79(instruction);
         }
         else if (cpu->decode_ADD_80(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "ADD 80\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_ADD_80(instruction);
         }
         else if (cpu->decode_RLCA_82(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RLCA 82\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RLCA_82(instruction);
         }
         else if (cpu->decode_RRCA_83(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RRCA 83\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RRCA_83(instruction);
         }
         else if (cpu->decode_RLA_84(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RLA 84\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RLA_84(instruction);
         }
         else if (cpu->decode_RRA_85(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RRA 85\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RRA_85(instruction);
         }
         else if (cpu->decode_RLC_86(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RLC 86\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RLC_86(instruction);
         }
         else if (cpu->decode_RLC_87(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RLC 87\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RLC_87(instruction);
         }
         else if (cpu->decode_RRC_88(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RRC 88\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RRC_88(instruction);
         }
         else if (cpu->decode_RRC_89(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RRC 89\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RRC_89(instruction);
         }
         else if (cpu->decode_RL_90(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RL 90\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RL_90(instruction);
         }
         else if (cpu->decode_RL_91(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RL 91\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RL_91(instruction);
         }
         else if (cpu->decode_RR_92(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RR 92\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RR_92(instruction);
         }
         else if (cpu->decode_RR_93(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RR 93\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RR_93(instruction);
         }
         else if (cpu->decode_SLA_94(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SLA 94\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SLA_94(instruction);
         }
         else if (cpu->decode_SLA_95(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SLA 95\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SLA_95(instruction);
         }
         else if (cpu->decode_SRA_96(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SRA 96\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SRA_96(instruction);
         }
         else if (cpu->decode_SRA_97(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SRA 97\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SRA_97(instruction);
         }
         else if (cpu->decode_SWAP_98(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SWAP 98\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SWAP_98(instruction);
         }
         else if (cpu->decode_SWAP_99(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SWAP 99\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SWAP_99(instruction);
         }
         else if (cpu->decode_SRL_100(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SRL 100\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SRL_100(instruction);
         }
         else if (cpu->decode_SRL_101(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SRL 101\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SRL_101(instruction);
         }
         else if (cpu->decode_BIT_102(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "BIT 102\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_BIT_102(instruction);
         }
         else if (cpu->decode_BIT_103(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "BIT 103\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_BIT_103(instruction);
         }
         else if (cpu->decode_RES_104(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RES 104\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RES_104(instruction);
         }
         else if (cpu->decode_RES_105(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RES 105\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RES_105(instruction);
         }
         else if (cpu->decode_SET_106(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SET 106\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SET_106(instruction);
         }
         else if (cpu->decode_SET_107(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "SET 107\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_SET_107(instruction);
         }
         else if (cpu->decode_JP_109(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "JP 109\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_JP_109(instruction);
         }
         else if (cpu->decode_JP_110(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "JP 110\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_JP_110(instruction);
         }
         else if (cpu->decode_JP_111(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "JP 111\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_JP_111(instruction);
         }
         else if (cpu->decode_JR_113(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "JR 113\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_JR_113(instruction);
         }
         else if (cpu->decode_JR_114(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "JR 114\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_JR_114(instruction);
         }
         else if (cpu->decode_CALL_116(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CALL 116\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CALL_116(instruction);
         }
         else if (cpu->decode_CALL_117(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "CALL 117\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_CALL_117(instruction);
         }
         else if (cpu->decode_RET_119(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RET 119\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RET_119(instruction);
             // other stuff
         }
         else if (cpu->decode_RET_120(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RET 120\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RET_120(instruction);
             // other stuff
         }
         else if (cpu->decode_RETI_121(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RETI 121\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RETI_121(instruction);
             // other stuff
         }
         else if (cpu->decode_RST_122(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "RST 122\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_RST_122(instruction);
             // other stuff
         }
