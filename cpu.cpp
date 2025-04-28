@@ -856,7 +856,7 @@ void CPU::execute_LD_22(uint32_t instruction) {
 void CPU::execute_LD_23(uint32_t instruction) {
     // LD (HL), r
     uint8_t operation = static_cast<uint8_t>((instruction >> 16) & 0xFF);
-    uint8_t reg = (operation & 0b00111000) >> 3;
+    uint8_t reg = operation & 0b00000111;
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[reg]; 
 
