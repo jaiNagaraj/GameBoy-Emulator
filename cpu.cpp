@@ -734,7 +734,7 @@ bool CPU::decode_JP_110(uint32_t instruction) { // 1-byte instruction
 }
 
 bool CPU::decode_JP_111(uint32_t instruction) { // 3-byte instruction
-    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 11000010; // opcode
+    bool outcome = (((instruction >> 16) & 0xFF) & 0b11100111) == 0b11000010; // opcode
 
     return outcome;
 }
