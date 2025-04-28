@@ -17,7 +17,6 @@ private:
 
 public:
     MMU();
-    bool dma_transfer;
 
     void connect_ram(RAM *ram);
     void connect_mmap(MMAP *mmap);
@@ -30,4 +29,5 @@ public:
     uint16_t pop_stack(uint16_t sp);
 
     MMAP* get_mmap();
+    void dma_transfer(uint16_t addr);
 };
