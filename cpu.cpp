@@ -1035,10 +1035,11 @@ void CPU::execute_LD_37(uint32_t instruction) {
 
 void CPU::execute_LD_38(uint32_t instruction)
 {
-    std::cout << "HELLO! In LD 38\n" << "PC is: " << std::hex << pc << '\n';
     // LD (HL+), A
     uint16_t addr = get_hl(); // Get the HL register value
     uint8_t data = regs[A_REGISTER]; 
+    //std::cout << "HELLO! In LD 38\n" << "PC is: " << std::hex << pc << '\n';
+	//std::cout << "Storing data " << std::hex << (int)data << " at address: " << std::hex << addr << "\n\n";
 
     mmu->write_mem(addr, data);
 

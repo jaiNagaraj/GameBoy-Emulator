@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 
+//#define ENABLE_INSTR_LOG
+
 // Constructor
 GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
 
@@ -19,7 +21,7 @@ GheithBoy::~GheithBoy()
 
 bool GheithBoy::load_boot(MMAP *mmap)
 {
-    std::string boot_path = "cpu_instrs.gb";
+    std::string boot_path = "boot.bin";
     if (!mmap)
     {
         std::cerr << "Error: MMAP object is null in load_boot." << std::endl;
@@ -187,12 +189,12 @@ void GheithBoy::run_gb(const std::string &rom_path)
         return;
     }
 
-    if (!load_boot(mmap))
-    {
-        std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
-        // Destructor will handle cleanup
-        return;
-    }
+    //if (!load_boot(mmap))
+    //{
+    //    std::cerr << "ROM path incorrect or it didn't load properly >:( \nI give up!" << std::endl;
+    //    // Destructor will handle cleanup
+    //    return;
+    //}
 
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
@@ -1006,27 +1008,39 @@ void GheithBoy::run_gb(const std::string &rom_path)
         }
         else if (cpu->decode_HALT_123(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
+            std::cout << "HALT 123\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_HALT_123(instruction);
         }
         else if (cpu->decode_STOP_123(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
+            std::cout << "STOP 123\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_STOP_123(instruction);
         }
         else if (cpu->decode_DI_123(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "DI 123\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_DI_123(instruction);
             // other stuff
         }
         else if (cpu->decode_EI_124(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "EI 124\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_EI_124(instruction);
             // other stuff
         }
         else if (cpu->decode_NOP_125(instruction))
         {
+#ifdef ENABLE_INSTR_LOG
             std::cout << "NOP 125\n";
+#endif // ENABLE_INSTR_LOG
             cpu->execute_NOP_125(instruction);
         }
         else
