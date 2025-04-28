@@ -438,116 +438,151 @@ void PPU::updateWindow(uint8_t row)
 
 void PPU::updateSprites(uint8_t row)
 {
-	//if (spriteBuffer.size() > 1)
-	//	std::sort(spriteBuffer.begin(), spriteBuffer.end(), [](const Sprite* sp1, const Sprite* sp2)
-	//					  { return sp1->x < sp2->x; });
+    // Clear the sprite pixel data for the current row
+    for (int i = 0; i < SCREEN_WIDTH; i++)
+    {
+        spriteData[row][i] = WHITE_OR_TRANSPARENT;
+    }
 
-	for (int i = 0; i < SCREEN_WIDTH; i++)
-	{
-		spriteData[row][i] = WHITE_OR_TRANSPARENT;
-	}
+    // Check if sprites are enabled globally
+    if (!(LCDC_reg & 0b10)) {
+        return; // Sprites disabled
+    }
 
-	COLOR obp0_palette[4];
-	obp0_palette[0] = static_cast<COLOR>(OBP0_reg & 0b11);
-	obp0_palette[1] = static_cast<COLOR>((OBP0_reg >> 2) & 0b11);
-	obp0_palette[2] = static_cast<COLOR>((OBP0_reg >> 4) & 0b11);
-	obp0_palette[3] = static_cast<COLOR>((OBP0_reg >> 6) & 0b11);
-	COLOR obp1_palette[4];
-	obp1_palette[0] = static_cast<COLOR>(OBP1_reg & 0b11);
-	obp1_palette[1] = static_cast<COLOR>((OBP1_reg >> 2) & 0b11);
-	obp1_palette[2] = static_cast<COLOR>((OBP1_reg >> 4) & 0b11);
-	obp1_palette[3] = static_cast<COLOR>((OBP1_reg >> 6) & 0b11);
+    // Sort sprites: lower X first, then lower OAM index first
+    std::sort(spriteBuffer.begin(), spriteBuffer.end()); // <<< Sort the vector
 
-	bool tall_sprites = LCDC_reg & 0b100;
-	int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
+    // Palettes (Color 0 is always transparent for sprites)
+    COLOR obp0_palette[4];
+    obp0_palette[0] = WHITE_OR_TRANSPARENT; // <<< Explicitly transparent
+    obp0_palette[1] = static_cast<COLOR>((OBP0_reg >> 2) & 0b11);
+    obp0_palette[2] = static_cast<COLOR>((OBP0_reg >> 4) & 0b11);
+    obp0_palette[3] = static_cast<COLOR>((OBP0_reg >> 6) & 0b11);
+    COLOR obp1_palette[4];
+    obp1_palette[0] = WHITE_OR_TRANSPARENT; // <<< Explicitly transparent
+    obp1_palette[1] = static_cast<COLOR>((OBP1_reg >> 2) & 0b11);
+    obp1_palette[2] = static_cast<COLOR>((OBP1_reg >> 4) & 0b11);
+    obp1_palette[3] = static_cast<COLOR>((OBP1_reg >> 6) & 0b11);
 
-	while (!spriteBuffer.empty())
-	{
-		Sprite* sprite = spriteBuffer.top();
-		//std::cout << "Sprite address: " <<  sprite << '\n';
-		//std::cout << "Sprite X: " << (int)(sprite->x) << '\n';
-		//std::cout << "Sprite Y" << (int)(sprite->y) << '\n';
-		spriteBuffer.pop();
+    bool tall_sprites = LCDC_reg & 0b100;
+    int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
 
-		int16_t y = sprite->y - SPRITE_Y_OFFSET;
-		int16_t x = sprite->x - SPRITE_X_OFFSET;
-		uint8_t tileIndex = sprite->tileIndex;
-		uint8_t flags = sprite->flags;
+    // Iterate through sorted sprites (lower X first = higher priority)
+    for (const auto& sprite : spriteBuffer) // <<< Iterate through sorted vector
+    {
+        int16_t screen_y = sprite.y - SPRITE_Y_OFFSET; // Top Y coordinate on screen
+        int16_t screen_x = sprite.x - SPRITE_X_OFFSET; // Left X coordinate on screen
+        uint8_t tileIndex = sprite.tileIndex;
+        uint8_t flags = sprite.flags;
 
-		uint16_t tileAddr = TILE_DATA_1 + tileIndex * TILE_DATA_SIZE;
-		if (tall_sprites)
-		{
-			tileAddr &= 0xFE;
-		}
+        // Adjust tile index for 8x16 sprites
+        uint16_t tileAddrBase = TILE_DATA_1; // Base address for tile data
+        if (tall_sprites) {
+            tileIndex &= 0xFE; // Ignore lowest bit
+        }
+        uint16_t tileAddr = tileAddrBase + tileIndex * TILE_DATA_SIZE;
 
-		bool background_priority = (flags >> 7) & 1;
-		bool flip_y = (flags >> 6) & 1;
-		bool flip_x = (flags >> 5) & 1;
 
-		int sprite_row = flip_y ? sprite_height - (static_cast<uint16_t>(row) - y) - 1 : static_cast<uint16_t>(row) - y;
+        bool background_priority = (flags >> 7) & 1; // Bit 7: BG/Win over OBJ
+        bool flip_y = (flags >> 6) & 1;
+        bool flip_x = (flags >> 5) & 1;
+        bool use_obp1 = (flags >> 4) & 1;
 
-		COLOR palette[4];
-		for (int i = 0; i < 4; i++)
-		{
-			palette[i] = ((flags >> 4) & 1) ? obp1_palette[i] : obp0_palette[i];
-		}
+        // Row within the sprite (0-7 or 0-15)
+        int sprite_row = row - screen_y;
+        if (flip_y) {
+            sprite_row = (sprite_height - 1) - sprite_row;
+        }
 
-		uint8_t lsbs = read_mem(tileAddr + sprite_row * 2);
-		uint8_t msbs = read_mem(tileAddr + sprite_row * 2 + 1);
+        // Calculate address of the specific row data within the tile(s)
+        // For 8x16 sprites, the correct tile (top or bottom) is implicitly handled
+        // by adding sprite_row * 2 to the base address of the first tile (tileIndex & 0xFE)
+        uint16_t tile_row_data_addr = tileAddr + (sprite_row * 2);
 
-		for (int i = 0; i < TILE_WIDTH; i++)
-		{
-			int index_x = flip_x ? x + TILE_WIDTH - i - 1 : x + i;
-			if (index_x >= SCREEN_WIDTH || index_x < 0)
-			{
-				continue;
-			}
-			if (spriteData[row][index_x] != WHITE_OR_TRANSPARENT)
-			{
-				continue;
-			}
-			// this tile column of pixels is not visible
-			if (index_x >= SCREEN_WIDTH || index_x < 0)
-			{
-				continue;
-			}
-			// sprite does not have priority
-			if (background_priority && pixelData[row][index_x] != WHITE_OR_TRANSPARENT)
-			{
-				continue;
-			}
-			uint8_t color_index = ((lsbs >> (7 - index_x)) & 1) | (((msbs >> (7 - index_x)) & 1) << 1);
-			COLOR color = palette[color_index];
-			spriteData[row][index_x] = color;
-		}
-	}
+        uint8_t lsbs = read_mem(tile_row_data_addr);
+        uint8_t msbs = read_mem(tile_row_data_addr + 1);
+
+        // Select the correct palette
+        COLOR* palette = use_obp1 ? obp1_palette : obp0_palette;
+
+        // Draw the 8 pixels of the sprite row
+        for (int tile_col = 0; tile_col < TILE_WIDTH; ++tile_col) // tile_col is 0-7
+        {
+            // Calculate the actual screen X coordinate for this pixel
+            int current_screen_x = screen_x + tile_col;
+
+            // Skip if pixel is off-screen horizontally
+            if (current_screen_x < 0 || current_screen_x >= SCREEN_WIDTH) {
+                continue;
+            }
+
+            // Determine the bit position within the tile data bytes based on X flip
+            int bit_pos = flip_x ? tile_col : (7 - tile_col); // <<< Correct bit position (0-7)
+
+            // Get the 2-bit color index for the pixel
+            uint8_t color_index = ((lsbs >> bit_pos) & 1) | (((msbs >> bit_pos) & 1) << 1); // <<< Use bit_pos
+
+            // --- Priority Checks ---
+
+            // 1. Check if sprite pixel is transparent (color index 0)
+            if (color_index == 0) { // <<< Explicit transparency check
+                continue;
+            }
+
+            // 2. Check if a higher-priority sprite pixel has already been drawn here
+            // Since sprites are sorted, we only draw if the current spot is empty (transparent).
+            if (spriteData[row][current_screen_x] != WHITE_OR_TRANSPARENT) {
+                continue; // Higher priority sprite (lower X or OAM index) already drew here
+            }
+
+            // 3. Check Background/Window priority (if sprite's bit 7 is set)
+            // Sprite pixel is hidden if bg_priority is set AND Background/Window pixel is not color 0 (WHITE/Transparent)
+            // Check the already rendered BG/Window data for this pixel on the *current* row.
+            bool bg_win_pixel_is_visible = (backgroundData[row][current_screen_x] != WHITE_OR_TRANSPARENT) || // Check BG data
+                                           (windowData[row][current_screen_x] != WINDOW_TRANSPARENT); // Check Window data
+
+            if (background_priority && bg_win_pixel_is_visible) { // <<< Check against BG/Window data
+                 continue; // Background/Window has priority over this sprite pixel
+            }
+
+            // --- Draw Pixel ---
+            // All checks passed, draw the sprite pixel using its palette color
+            spriteData[row][current_screen_x] = palette[color_index];
+        }
+    }
 }
 
 void PPU::scanOAM(uint8_t row)
 {
-	bool tall_sprites = LCDC_reg & 0b100;
-	int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
-	for (int i = 0; i < 40; i++)
-	{
-		if (spriteBuffer.size() >= 10)
-		{
-			return; // too many sprites, do nothing
-		}
+    spriteBuffer.clear(); // <<< Clear the vector
 
-		uint8_t y = read_mem(OAM_START + i * 4);
-		if (row + 16 < y || row + 16 >= y + sprite_height)
-		{
-			continue; // sprite is not visible
-		}
-		uint8_t x = read_mem(OAM_START + i * 4 + 1);
-		if (x <= 0 || x >= 168)
-		{
-			continue; // sprite is not visible
-		}
-		uint8_t tileIndex = read_mem(OAM_START + i * 4 + 2);
-		uint8_t flags = read_mem(OAM_START + i * 4 + 3);
-		spriteBuffer.push(new Sprite(y, x, tileIndex, flags));
-	}
+    bool tall_sprites = LCDC_reg & 0b100;
+    int sprite_height = tall_sprites ? TILE_HEIGHT * 2 : TILE_HEIGHT;
+
+    for (int i = 0; i < 40; i++) // OAM index 'i'
+    {
+        if (spriteBuffer.size() >= 10)
+        {
+            break; // Max 10 sprites per scanline
+        }
+
+        uint16_t oam_addr = OAM_START + i * 4;
+        uint8_t y = read_mem(oam_addr);     // Sprite Y position + 16
+        uint8_t x = read_mem(oam_addr + 1); // Sprite X position + 8
+
+        // Check vertical intersection first (more efficient)
+        int16_t screen_y = y - SPRITE_Y_OFFSET; // Top Y coordinate on screen
+        if (row >= screen_y && row < (screen_y + sprite_height))
+        {
+            // Check horizontal visibility (X=0 hides sprite)
+            if (x > 0) {
+                uint8_t tileIndex = read_mem(oam_addr + 2);
+                uint8_t flags = read_mem(oam_addr + 3);
+                // <<< Use emplace_back with OAM index 'i'
+                spriteBuffer.emplace_back(y, x, tileIndex, flags, i);
+            }
+        }
+    }
 }
 
 uint8_t PPU::read_mem(uint16_t addr)

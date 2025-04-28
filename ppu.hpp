@@ -50,7 +50,7 @@ private:
     COLOR windowData[SCREEN_HEIGHT][SCREEN_WIDTH];
     COLOR spriteData[SCREEN_HEIGHT][SCREEN_WIDTH];
 
-    std::priority_queue<Sprite*, std::vector<Sprite*>, Compare> spriteBuffer;
+    std::vector<Sprite> spriteBuffer;
 
 public:
     uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
