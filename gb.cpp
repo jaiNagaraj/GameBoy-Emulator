@@ -182,6 +182,8 @@ void GheithBoy::run_gb(const std::string &rom_path)
     ppu = new PPU();
     input = new Input();
     IH = new InterruptHandler();
+    timer = new Timer();
+
 
     if (!load_rom(mmap, rom_path))
     {
@@ -210,6 +212,8 @@ void GheithBoy::run_gb(const std::string &rom_path)
     cpu->connect_interrupt_handler(IH);
     cpu->connect_mmu(mmu);
     IH->connect_mmu(mmu);
+    timer->connect_mmu(mmu);
+    timer->connect_ram(ram);
 
     // Use this space to run graphics (will include the main loop)
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -1052,6 +1056,7 @@ void GheithBoy::run_gb(const std::string &rom_path)
         }
 
         // std::cout << "HL: " << std::hex << cpu->get_hl() << '\n';
+        timer->tick(cpu->get_cycles());
 
         // screen is updated, reflect that in SDL
         // Call PPU

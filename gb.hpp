@@ -8,6 +8,7 @@
 #include "RAM.hpp"
 #include "input.hpp"
 #include "InterruptHandler.hpp"
+#include "timer.hpp"
 
 class GheithBoy
 {
@@ -26,6 +27,7 @@ private:
     PPU *ppu;
     RAM *ram;
     InterruptHandler *IH;
+    Timer* timer;
     SDL_Window *window;
     SDL_Surface *window_surface;
     const int SCALE_FACTOR = 4;

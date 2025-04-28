@@ -19,5 +19,5 @@ void Timer::tick(uint64_t outsideClock) {
 		uint8_t current_div = ram->read_mem(DIVIDER_REG);
 		current_div++;
 		ram->write_mem(DIVIDER_REG, current_div);
-	}
+	}	
 }
