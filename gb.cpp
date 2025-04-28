@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 
+#define ENABLE_INSTR_LOG
 // Constructor
 GheithBoy::GheithBoy() : cpu(nullptr), window(nullptr), window_surface(nullptr) {}
 
