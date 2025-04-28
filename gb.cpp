@@ -206,11 +206,9 @@ void GheithBoy::run_gb(const std::string &rom_path)
     mmu->connect_input(input);
     ppu->connect_mmu(mmu);
     ppu->connect_interrupt_handler(IH);
-    ppu->connect_mmu(mmu);
     ppu->connect_ram(ram);
     cpu->connect_mmu(mmu);
     cpu->connect_interrupt_handler(IH);
-    cpu->connect_mmu(mmu);
     IH->connect_mmu(mmu);
     timer->connect_mmu(mmu);
     timer->connect_ram(ram);
@@ -245,6 +243,12 @@ void GheithBoy::run_gb(const std::string &rom_path)
     bool keep_window_open = true;
     while (keep_window_open)
     {
+        if (mmu->transfer_pending)
+        {
+            mmu->dma_transfer();
+            mmu->transfer_pending = false;
+        }
+
         // Event handling
         SDL_Event event;
         while (SDL_PollEvent(&event))
