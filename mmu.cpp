@@ -1,7 +1,7 @@
 #include "mmu.hpp"
 
 MMU::MMU() {
-
+    dma_transfer = false;
 }
 
 void MMU::connect_ram(RAM *ram) {
@@ -14,10 +14,6 @@ void MMU::connect_mmap(MMAP *mmap) {
 
 void MMU::connect_input(Input *input) {
     this->input = input; 
-}
-
-void MMU::connect_ppu(PPU *ppu) {
-    this->ppu = ppu;
 }
 
 uint8_t MMU::read_mem(uint16_t addr) {
@@ -292,7 +288,7 @@ void MMU::write_mem(uint16_t addr, uint8_t data) {
             }
 
             case 0xFF46: { // DMA - DMA Transfer Start Address
-                ppu->dma_transfer = true;
+                dma_transfer = true;
                 ram->write_mem(addr, data);
                 return;
             }
