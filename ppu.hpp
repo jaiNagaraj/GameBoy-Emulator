@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "mmu.hpp"
+#include "RAM.hpp"
 #include "InterruptHandler.hpp"
 #include <list>
 

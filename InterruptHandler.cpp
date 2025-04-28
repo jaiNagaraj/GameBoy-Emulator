@@ -1,4 +1,5 @@
 #include "InterruptHandler.hpp"
+#include "mmu.hpp"
 
 const int VBLANK_FLAG = 0x01;
 const int STAT_FLAG = 0x02;

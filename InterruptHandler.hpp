@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "mmu.hpp"
 
+class MMU;
 class InterruptHandler {
 private:
 	MMU* mmu;
