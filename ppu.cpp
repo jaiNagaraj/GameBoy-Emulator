@@ -79,19 +79,19 @@ bool PPU::tick(uint64_t outsideClock)
 	switch (mode)
 	{
 	case 2: // OAM
-		if (dma_transfer)
+		if (mmu->dma_transfer)
 		{
-			uint8_t dma_reg = ram->read_mem(0xFF46);
+			uint8_t dma_reg = read_mem(0xFF46);
 			uint16_t transfer_address = (static_cast<uint16_t>(dma_reg) << 8);
 			for (int i = 0; i < 160; i++)
 			{
-				ram->write_mem(OAM_START + i, ram->read_mem(transfer_address + i));
+				write_mem(OAM_START + i, read_mem(transfer_address + i));
 			}
-			dma_transfer = false;
+			mmu->dma_transfer = false;
 		}
-		scanOAM(scanLine);
 		if (outsideClock - clock >= 80)
 		{
+			scanOAM(scanLine);
 			// switch to VRAM mode
 			mode = 3;
 			clock = outsideClock;

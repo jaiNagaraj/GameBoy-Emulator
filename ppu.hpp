@@ -61,7 +61,6 @@ private:
 
 public:
     uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
-    bool dma_transfer = false;
 
     PPU();
     ~PPU();
