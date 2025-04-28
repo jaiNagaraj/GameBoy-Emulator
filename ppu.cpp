@@ -439,7 +439,7 @@ void PPU::updateWindow(uint8_t row)
 void PPU::updateSprites(uint8_t row)
 {
 	if (!spriteBuffer.empty())
-		spriteBuffer.sort([](const Sprite &sp1, const Sprite &sp2)
+		std::sort(spriteBuffer.begin(), spriteBuffer.end(), [](const Sprite &sp1, const Sprite &sp2)
 						  { return sp1.x < sp2.x; });
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
