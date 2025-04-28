@@ -199,16 +199,15 @@ void GheithBoy::run_gb(const std::string &rom_path)
     ram->connect_mmap(mmap);
     mmu->connect_mmap(mmap);
     mmu->connect_ram(ram);
-    ppu->connect_mmu(mmu);
-    IH->connect_mmu(mmu);
-    ppu->connect_interrupt_handler(IH);
-    cpu->connect_mmu(mmu);
-    cpu->connect_interrupt_handler(IH);
     mmu->connect_input(input);
-    mmu->connect_ppu(ppu);
-    cpu->connect_mmu(mmu);
+    ppu->connect_mmu(mmu);
+    ppu->connect_interrupt_handler(IH);
     ppu->connect_mmu(mmu);
     ppu->connect_ram(ram);
+    cpu->connect_mmu(mmu);
+    cpu->connect_interrupt_handler(IH);
+    cpu->connect_mmu(mmu);
+    IH->connect_mmu(mmu);
 
     // Use this space to run graphics (will include the main loop)
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
