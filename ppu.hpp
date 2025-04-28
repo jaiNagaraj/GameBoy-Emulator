@@ -23,7 +23,7 @@ public:
 
     Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags)
         : y(y), x(x), tileIndex(tileIndex), flags(flags) {}
-    bool comp_sprite(const Sprite& sp1, const Sprite& sp2) const
+    bool comp_sprite(const Sprite &sp1, const Sprite &sp2) const
     {
         return sp1.x < sp2.x;
     }
@@ -60,6 +60,7 @@ private:
 
 public:
     uint32_t pixelsToRender[SCREEN_HEIGHT][SCREEN_WIDTH];
+    bool dma_transfer = false;
 
     PPU();
     ~PPU();

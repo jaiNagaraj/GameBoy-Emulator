@@ -79,6 +79,16 @@ bool PPU::tick(uint64_t outsideClock)
 	switch (mode)
 	{
 	case 2: // OAM
+		if (dma_transfer)
+		{
+			uint8_t dma_reg = ram->read_mem(0xFF46);
+			uint16_t transfer_address = (static_cast<uint16_t>(dma_reg) << 8);
+			for (int i = 0; i < 160; i++)
+			{
+				ram->write_mem(OAM_START + i, ram->read_mem(transfer_address + i));
+			}
+			dma_transfer = false;
+		}
 		scanOAM(scanLine);
 		if (outsideClock - clock >= 80)
 		{
@@ -162,7 +172,7 @@ bool PPU::tick(uint64_t outsideClock)
 			}
 			else
 			{
-				//std::cout << "CHILLIN IN VBLANK\n";
+				// std::cout << "CHILLIN IN VBLANK\n";
 			}
 		}
 		break;
@@ -240,7 +250,7 @@ void PPU::updateRegs()
 {
 	// update the registers for graphics
 	LCDC_reg = read_mem(0xFF40);
-	//std::cout << "LCDC reg: " << std::bitset<8>(LCDC_reg) << '\n';
+	// std::cout << "LCDC reg: " << std::bitset<8>(LCDC_reg) << '\n';
 	SCY_reg = read_mem(0xFF42);
 	SCX_reg = read_mem(0xFF43);
 	WY_reg = read_mem(0xFF4A);
@@ -344,7 +354,8 @@ void PPU::updateWindow(uint8_t row)
 		windowData[row][i] = WINDOW_TRANSPARENT;
 	}
 
-	if (!(LCDC_reg & 0b00100000)) {
+	if (!(LCDC_reg & 0b00100000))
+	{
 		// window disabled
 		return;
 	}
