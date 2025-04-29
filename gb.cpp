@@ -273,7 +273,10 @@ void GheithBoy::run_gb(const std::string &rom_path)
         cpu->handle_interrupts();
 
         // fetch instruction
-        //std::cout << "PC: " << std::hex << cpu->get_pc() << std::dec << '\n';
+#ifdef ENABLE_INSTR_LOG
+        std::cout << "PC: " << std::hex << cpu->get_pc() << std::dec << '\n';
+#endif // ENABLE_INSTR_LOG
+
         uint32_t instruction = cpu->fetch_instruction();
 
         // decode switch! (i hate ts </3)
@@ -1063,7 +1066,6 @@ void GheithBoy::run_gb(const std::string &rom_path)
             keep_window_open = false;
         }
 
-        // std::cout << "HL: " << std::hex << cpu->get_hl() << '\n';
         timer->tick(cpu->get_cycles());
 
         // screen is updated, reflect that in SDL
