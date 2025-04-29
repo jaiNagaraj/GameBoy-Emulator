@@ -1,6 +1,9 @@
 # Compiler
 CXX = g++
 
+# ROM Path Variable (default can be anything or empty, ?= allows override)
+ROM ?= tetris.gb
+
 # Compiler flags: Use C++17 standard, enable warnings, add debug info
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
 
@@ -39,10 +42,15 @@ $(OBJDIR)/%.o: %.cpp *.hpp # Added *.hpp dependency to recompile if headers chan
 	@mkdir -p $(OBJDIR) # Ensure the object directory exists
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
+# Target to run the executable with a specified ROM
+run: $(TARGET)
+	@echo "Running $(TARGET) with ROM: $(ROM)..."
+	./$(TARGET) $(ROM)
+
 # Rule to clean up build artifacts (object files and the executable)
 clean:
 	@echo "Cleaning build files..."
 	rm -rf $(OBJDIR) $(TARGET) # Remove the object directory and the target
 
-# Declare 'all' and 'clean' as phony targets, meaning they aren't actual files
-.PHONY: all clean
+# Declare 'all', 'clean', and 'run' as phony targets, meaning they aren't actual files
+.PHONY: all clean run
