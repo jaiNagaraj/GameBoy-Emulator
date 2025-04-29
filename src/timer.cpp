@@ -1,4 +1,4 @@
-#include "timer.hpp"
+#include "../include/timer.hpp"
 
 Timer::Timer() {
 	this->mmu = nullptr;
