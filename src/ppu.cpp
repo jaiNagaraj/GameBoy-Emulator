@@ -1,8 +1,8 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
-#include "ppu.hpp"
 #include <bitset>
+#include "../include/ppu.hpp"
 
 const int LCDC_MAP_CHOICE_MASK = 0x08;
 const int LCDC_ADDRESSING_MODE_MASK = 0x10;

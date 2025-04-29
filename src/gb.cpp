@@ -1,4 +1,4 @@
-#include "gb.hpp"
+#include "../include/gb.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>

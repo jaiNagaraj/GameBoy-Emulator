@@ -1,4 +1,4 @@
-#include "mmu.hpp"
+#include "../include/mmu.hpp"
 
 MMU::MMU() {
     transfer_pending = false;

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "include/mmu.hpp"
-#include "include/InterruptHandler.hpp"
+#include "mmu.hpp"
+#include "InterruptHandler.hpp"
 
 const int A_REGISTER = 7;
 const int B_REGISTER = 0;

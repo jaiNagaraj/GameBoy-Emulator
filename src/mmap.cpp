@@ -1,4 +1,4 @@
-#include "mmap.hpp"
+#include "../include/mmap.hpp"
 
 MMAP::MMAP() {
     // Memory initialization
