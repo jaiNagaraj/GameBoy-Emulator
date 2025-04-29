@@ -14,14 +14,17 @@ A Game Boy emulator written in C++ utilizing SDL2 library for graphics.
 
 ## Dependencies
 
-*   **C++ Compiler:**
-*   **Make:**
-*   **SDL2:**
+*   **C++ Compiler**
+*   **Make**
+*   **SDL2**
 
-# Install SDL2
-brew install sdl2
+## Install SDL2
+* For Mac: brew install sdl2
+* For Windows, Visual Studio Community (very complicated, sorry): Follow the guide at [Lazy Foo Productions](https://lazyfoo.net/tutorials/SDL/01_hello_SDL/windows/index.php)
+* For Windows, VS Code (also complicated, sorry): Follow the instructions in [this video](https://youtu.be/9Ca-RVPwnBE)
 
-# To run game: make run ROM=[game_file].gb
-#              make run (will run tetris.gb) by default
-# To compile:  make
-# To clean:    make clean
+## How to run game (not using VS Code)
+* `make run` will run with tetris.gb by default
+* To compile:  make
+* To clean:    make clean
+* To run with specific ROM: `make run <game_file>.gb`
