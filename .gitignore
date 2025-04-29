@@ -7,3 +7,5 @@ GheithBoy/
 x64/
 gheithboy
 .o
+obj/
+.DS_Store
