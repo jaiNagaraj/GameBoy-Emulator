@@ -1,6 +1,6 @@
 # GheithBoy Emulator
 
-A Game Boy emulator written in C++ utilizing SDL2 library for graphics.
+A Game Boy emulator written in C++ utilizing SDL2 library for graphics. Watch a gameplay video using GheithBoy [here.](https://www.youtube.com/watch?v=aIkUDhCVxCc)
 
 ## Features
 
