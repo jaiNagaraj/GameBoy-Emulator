@@ -4,7 +4,7 @@
 #include "gb.hpp"
 
 int main() {
-	std::string rom_path = "tetris.gb";
+	std::string rom_path = ".gb";
 	GheithBoy gb;
 	gb.run_gb(rom_path);
 }
