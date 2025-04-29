@@ -241,6 +241,10 @@ void GheithBoy::run_gb(const std::string &rom_path)
     }
 
     bool keep_window_open = true;
+    uint32_t frame_start_ticks = 0;
+    uint32_t frame_end_ticks = 0;
+    float frame_duration_ms = 0;
+
     while (keep_window_open)
     {
         if (mmu->transfer_pending)
@@ -1081,6 +1085,17 @@ void GheithBoy::run_gb(const std::string &rom_path)
             SDL_UpdateWindowSurface(window);
         }
     }
+
+    // Frame Limiting 
+    frame_end_ticks = SDL_GetTicks(); // <<< Get time at frame end
+    frame_duration_ms = (float)(frame_end_ticks - frame_start_ticks);
+
+    if (frame_duration_ms < TARGET_FRAME_TIME_MS)
+    {
+        // Wait for the remaining time to reach the target frame time
+        SDL_Delay((uint32_t)(TARGET_FRAME_TIME_MS - frame_duration_ms));
+    }
+
 
     // Destroyer
     // SDL_DestroyTexture(texture);

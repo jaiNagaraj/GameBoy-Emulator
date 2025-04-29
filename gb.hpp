@@ -10,6 +10,8 @@
 #include "InterruptHandler.hpp"
 #include "timer.hpp"
 
+const int TARGET_FPS = 60;
+const float TARGET_FRAME_TIME_MS = 1000.0f / TARGET_FPS;
 class GheithBoy
 {
 public:
